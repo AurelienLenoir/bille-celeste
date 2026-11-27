@@ -36,9 +36,15 @@ export const followSun = (sun: THREE.DirectionalLight, target: THREE.Vector3): v
   sun.target.position.copy(target);
 };
 
-/** Low quality mode: render at 1 device pixel per CSS pixel (the biggest win on phones). */
-export const setLowQuality = (renderer: THREE.WebGLRenderer): void => {
-  renderer.setPixelRatio(1);
+/**
+ * One step down in quality: fewer pixels rendered (the biggest win on phones). The first step goes
+ * from 2 to 1.5, which stays sharp on a phone; only a second step goes down to 1 pixel per CSS
+ * pixel, which looks pixelated on a high-density screen.
+ */
+export const lowerQuality = (renderer: THREE.WebGLRenderer): number => {
+  const ratio = renderer.getPixelRatio() > 1.5 ? 1.5 : 1;
+  renderer.setPixelRatio(ratio);
+  return ratio;
 };
 
 export const bindResize = (renderer: THREE.WebGLRenderer, camera: THREE.PerspectiveCamera): void => {

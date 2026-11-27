@@ -4,6 +4,7 @@ Journal des choix structurants (le plus récent en haut).
 
 ## 2026-11-27 — Phase 4 : retours du premier test sur téléphone
 
+- **Qualité automatique adoucie** (après un rendu pixelisé sur iPhone) : le passage en qualité basse ne compte plus que les images d'une partie en cours. Les menus, les chargements de niveau, la pause et la rotation de l'écran ne comptent plus. La baisse se fait par paliers : ratio de pixels 2 → 1,5 (encore net sur téléphone), puis 1 seulement si le jeu reste lent 3 s de plus. Avant, n'importe quel passage lent de 3 s, même dans un menu, mettait tout le jeu au ratio 1 jusqu'au rechargement de la page.
 - **Checkpoints** : un drapeau se déclenche dès que la bille roule n'importe où sur sa plateforme 3 × 3 (avant : à moins de 2,6 unités du centre, si bien qu'on le ratait en coupant le virage et que le drapeau restait gris).
 - **Cristaux remis en place** : les cristaux (et la gemme) ramassés depuis le dernier checkpoint reviennent quand la bille tombe, et le compteur redescend (événement `crystalsPutBack`). Le bouclier, qui évite la chute, ne les remet pas. Le replay e2e a été mis à jour pour ça (le premier cristal revient après la première chute), la physique ne change pas.
 - **Chrono** : il démarre au premier mouvement du joueur (première entrée non nulle), pas à l'apparition de la bille.
