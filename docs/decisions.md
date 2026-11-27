@@ -2,6 +2,12 @@
 
 Journal des choix structurants (le plus récent en haut).
 
+## 2026-11-27 — Phase 1 : validation sur téléphone
+
+- **60 fps stables sur iPhone** (build GitHub Pages, mesuré par l'utilisateur).
+- **Ressenti validé** par l'utilisateur au doigt et au gyroscope, avec les réglages par défaut. Phase 1 terminée.
+- **Test Android reporté à la phase 7** (décision de l'utilisateur) : pas d'Android moyen de gamme sous la main. Les tests internes Google Play fourniront de vrais appareils ; d'ici là, le compteur `?debug` et la qualité basse automatique limitent le risque. Le critère est ajouté à la validation de la phase 7.
+
 ## 2026-11-27 — Phase 1 : entrées, caméra, pause, réglages
 
 - **Gyroscope** : filtre passe-bas sur les mesures brutes (constante de temps 50 ms, en plus du lissage existant à chaque pas), zone morte **radiale et progressive** (6 %, la sortie repart de zéro au lieu de sauter à 6 %), puis courbe expo (35 % cubique) : plus précis au centre, aussi rapide à fond. Le plafond est radial, comme le joystick : une diagonale ne penche plus plus fort qu'un axe seul. Tourner le téléphone (portrait ↔ paysage) recalibre à la mesure suivante.
