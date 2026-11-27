@@ -10,7 +10,7 @@ import { createKeyboard } from './engine/input/keyboard';
 import { createTilt } from './engine/input/tilt';
 import { createJoystick } from './engine/input/touch';
 import { startLoop } from './engine/loop';
-import { createPhysicsWorld } from './engine/physics';
+import { createPhysicsWorld, initPhysics } from './engine/physics';
 import { bindResize, createRenderContext, followSun } from './engine/renderer';
 import { createBall } from './game/ball';
 import { createEventBus, type GameEvents } from './game/events';
@@ -38,6 +38,7 @@ const { renderer, scene, sun } = createRenderContext(canvas, {
 const follow = createFollowCamera();
 bindResize(renderer, follow.camera);
 
+await initPhysics();
 const physics = createPhysicsWorld();
 const events = createEventBus<GameEvents>();
 const world = buildLevel({ world: physics, scene, materials: createSurfaceMaterials() }, level);
@@ -73,7 +74,7 @@ bindScreens(events, toast, {
 });
 
 startLoop((dt) => {
-  const gravity = session.update(dt, readInput());
+  const gravity = session.update(dt, readInput);
   decor.update(session.clock(), dt);
   follow.update(ball.mesh.position, gravity, dt);
   followSun(sun, ball.mesh.position);
