@@ -253,6 +253,8 @@ await mount(directLevel ?? resumeLevel(progress()));
 
 const frames = createFrameStats();
 const quality = createQualityGovernor();
+/** Pixel ratio before the last drop, to undo it if it did not help. */
+let ratioBefore = renderer.getPixelRatio();
 const updatePerf = bindPerfOverlay(
   () =>
     `${frames.fps().toFixed(0)} fps · pire ${frames.worstMs().toFixed(1)} ms\n` +
@@ -291,7 +293,13 @@ startLoop((dt) => {
   // Only frames of a run in progress tell how the game runs: menus, level loads and the pause
   // that a screen rotation triggers are not counted.
   const running = screen() === 'play' && current?.session.state() === 'play';
-  if (!running) quality.restart();
-  else if (quality.update(dt))
-    console.info(`[perf] stayed under 50 fps for 3 s: pixel ratio down to ${lowerQuality(renderer)}`);
+  if (!running) return quality.restart();
+  const change = quality.update(dt);
+  if (change === 'lower') {
+    ratioBefore = renderer.getPixelRatio();
+    console.info(`[perf] under 50 fps for 3 s: trying pixel ratio ${lowerQuality(renderer)}`);
+  } else if (change === 'restore') {
+    renderer.setPixelRatio(ratioBefore);
+    console.info(`[perf] a lower pixel ratio did not help (frame rate capped?): back to ${ratioBefore}`);
+  }
 });
