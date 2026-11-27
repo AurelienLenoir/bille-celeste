@@ -1,508 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Bille Céleste</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-/* VOICE: jouet coloré, doux, joueur
-   IDEA: un parcours de bille suspendu dans le ciel
-   PICTURE: la scène 3D plein écran, rien par-dessus sauf un HUD discret
-   COLOUR and TYPE: ciel bleu pastel, pistes crème/menthe/rose, bille framboise ; Fredoka
-   LAYOUT: jeu plein écran, HUD en haut, boutons en bas à droite, cartes centrées */
-:root{color-scheme:light;--ink:#22304a;--blue:#2b55b0;--pink:#ff5d86}
-*{box-sizing:border-box;min-width:0}
-html,body{margin:0;height:100%;overflow:hidden;background:#bfe3ff;font-family:Fredoka,system-ui,sans-serif;color:var(--ink);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-#c{position:fixed;inset:0;width:100%;height:100%;display:block}
-.hud{position:fixed;top:0;left:0;right:0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:calc(env(safe-area-inset-top) + 10px) 10px 0;pointer-events:none}
-.pill{background:rgba(255,255,255,.88);border-radius:999px;padding:6px 14px;font-weight:600;font-size:16px;box-shadow:0 3px 10px rgba(30,60,110,.15);font-variant-numeric:tabular-nums;white-space:nowrap}
-.pill b{color:var(--blue)}
-.dock{position:fixed;right:10px;bottom:calc(env(safe-area-inset-bottom) + 12px);display:flex;gap:8px}
-button{font:inherit;font-weight:600;font-size:16px;min-height:44px;padding:0 18px;border:0;border-radius:999px;cursor:pointer;color:var(--ink);background:rgba(255,255,255,.9);box-shadow:0 3px 10px rgba(30,60,110,.18);transition:transform .12s}
-button:active{transform:scale(.96)}
-button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
-button.main{background:var(--pink);color:#fff;font-size:18px;min-height:52px;width:100%;margin-top:10px}
-button.alt{width:100%;margin-top:10px;background:#eef4ff}
-.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(25,45,90,.35);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);padding:20px}
-.overlay[hidden],.dock[hidden]{display:none}
-.card{background:#fffaf2;border-radius:28px;padding:28px 22px 22px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(20,40,90,.3)}
-h1{font-size:42px;line-height:1.05;margin:0 0 6px;color:var(--blue);text-wrap:balance}
-h2{font-size:32px;line-height:1.05;margin:0 0 8px;color:var(--blue)}
-.card p{margin:6px 0 4px;font-size:16px;line-height:1.45}
-.small{font-size:13px;opacity:.75}
-.stats{display:flex;justify-content:center;gap:18px;margin:14px 0 4px;font-variant-numeric:tabular-nums}
-.stats div{font-size:13px}.stats strong{display:block;font-size:26px;color:var(--ink)}
-.joy{position:fixed;width:130px;height:130px;margin:-65px 0 0 -65px;border-radius:50%;border:3px solid rgba(255,255,255,.85);background:rgba(255,255,255,.18);pointer-events:none;display:none}
-.knob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 3px 10px rgba(0,0,0,.2)}
-.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 64px);transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:14px;font-size:15px;max-width:min(92vw,420px);text-align:center;opacity:0;transition:opacity .25s;pointer-events:none}
-.toast.on{opacity:1}
-#err{position:fixed;inset:auto 12px 12px;background:#fff;color:#a01c3c;padding:12px;border-radius:12px;font-size:14px}
-@media (prefers-reduced-motion:reduce){button{transition:none}.toast{transition:none}}
-</style>
-<script>
-window.addEventListener('error',function(e){var d=document.getElementById('err');if(d){d.hidden=false;d.textContent='Erreur : '+(e.message||'chargement impossible');}});
-setTimeout(function(){if(!window.__ok){var d=document.getElementById('err');if(d){d.hidden=false;d.textContent='Le moteur 3D ne s’est pas chargé. Vérifie ta connexion puis recharge la page.';}}},12000);
-</script>
-</head>
-<body>
-<canvas id="c"></canvas>
-
-<div class="hud">
-  <div class="pill">Cristaux <b id="cr">0/7</b></div>
-  <div class="pill" id="tm">0:00.0</div>
-  <div class="pill">Chutes <b id="fl">0</b></div>
-</div>
-<div class="dock" id="dock" hidden>
-  <button id="calib" hidden>Recalibrer</button>
-  <button id="restart">Recommencer</button>
-</div>
-
-<div class="joy" id="joy"><div class="knob" id="knob"></div></div>
-<div class="toast" id="toast"></div>
-
-<div class="overlay" id="start">
-  <div class="card">
-    <h1>Bille Céleste</h1>
-    <p>Penche le parcours pour guider la bille, ramasse les <b>7 cristaux</b> puis traverse l’anneau d’arrivée.</p>
-    <p class="small">Tiens ton téléphone en portrait, dans une position confortable : elle servira de position neutre.</p>
-    <button class="main" id="playGyro">Jouer en inclinant</button>
-    <button class="alt" id="playTouch">Jouer au doigt</button>
-    <p class="small">Au doigt : pose ton pouce n’importe où et glisse. Sur ordinateur : flèches ou ZQSD.</p>
-  </div>
-</div>
-
-<div class="overlay" id="win" hidden>
-  <div class="card">
-    <h2>Niveau terminé !</h2>
-    <div class="stats">
-      <div><strong id="wTime">0:00</strong>temps</div>
-      <div><strong id="wFalls">0</strong>chutes</div>
-      <div><strong>7/7</strong>cristaux</div>
-    </div>
-    <button class="main" id="again">Rejouer</button>
-  </div>
-</div>
-
-<div id="err" hidden></div>
-
-<script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
-{
-const $ = id => document.getElementById(id);
-window.__ok = true;
-
-// ---------- Rendu ----------
-const renderer = new THREE.WebGLRenderer({ canvas: $('c'), antialias: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-const scene = new THREE.Scene();
-
-const sky = document.createElement('canvas'); sky.width = 2; sky.height = 256;
-const sg = sky.getContext('2d'), grad = sg.createLinearGradient(0, 0, 0, 256);
-grad.addColorStop(0, '#6fbcff'); grad.addColorStop(.55, '#cde9ff'); grad.addColorStop(1, '#ffe6cc');
-sg.fillStyle = grad; sg.fillRect(0, 0, 2, 256);
-const skyTex = new THREE.CanvasTexture(sky); skyTex.colorSpace = THREE.SRGBColorSpace;
-scene.background = skyTex;
-scene.fog = new THREE.Fog(0xd6ebff, 28, 90);
-
-const camera = new THREE.PerspectiveCamera(55, 1, .1, 200);
-scene.add(new THREE.HemisphereLight(0xffffff, 0x9cb3d8, 1.15));
-const sun = new THREE.DirectionalLight(0xfff1dc, 1.7);
-sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
-Object.assign(sun.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14, near: 1, far: 60 });
-sun.shadow.bias = -0.0005;
-scene.add(sun, sun.target);
-
-const resize = () => {
-  const w = innerWidth, h = innerHeight;
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h;
-  camera.fov = w < h ? 62 : 50;
-  camera.updateProjectionMatrix();
-};
-addEventListener('resize', resize); resize();
-
-// ---------- Textures procédurales ----------
-const tileTex = (a, b) => {
-  const c = document.createElement('canvas'); c.width = c.height = 128;
-  const g = c.getContext('2d');
-  g.fillStyle = a; g.fillRect(0, 0, 128, 128);
-  g.fillStyle = b; g.fillRect(0, 0, 64, 64); g.fillRect(64, 64, 64, 64);
-  g.strokeStyle = 'rgba(255,255,255,.45)'; g.lineWidth = 3; g.strokeRect(1.5, 1.5, 125, 125);
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;
-  return t;
-};
-const TEX = {
-  cream: tileTex('#fbeed6', '#f0d9b2'), mint: tileTex('#d9f5e6', '#bce8d1'),
-  rose: tileTex('#ffe2e8', '#ffc6d3'), lav: tileTex('#e8e2ff', '#d2c7ff')
-};
-const SIDE = { cream: 0x6fb3c8, mint: 0x5aa88a, rose: 0xe0889f, lav: 0x9586d8 };
-
-const ballTex = () => {
-  const c = document.createElement('canvas'); c.width = 256; c.height = 128;
-  const g = c.getContext('2d');
-  g.fillStyle = '#ff5d86'; g.fillRect(0, 0, 256, 128);
-  g.fillStyle = '#fff4f7'; g.fillRect(0, 54, 256, 20);
-  g.fillStyle = '#ffd25e';
-  for (let i = 0; i < 8; i++) { g.beginPath(); g.arc(16 + i * 32, 26 + (i % 2) * 76, 9, 0, 7); g.fill(); }
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
-};
-
-// ---------- Physique ----------
-const G = 22, MAXT = Math.tan(26 * Math.PI / 180);
-const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -G, 0) });
-world.allowSleep = false;
-world.solver.iterations = 12;
-world.defaultContactMaterial.friction = .5;
-world.defaultContactMaterial.restitution = .05;
-
-const addBox = (p, s, o = {}) => {
-  const tex = o.tex || 'cream';
-  const body = new CANNON.Body({
-    mass: 0, type: o.kin ? CANNON.Body.KINEMATIC : CANNON.Body.STATIC,
-    shape: new CANNON.Box(new CANNON.Vec3(s[0] / 2, s[1] / 2, s[2] / 2)),
-    position: new CANNON.Vec3(p[0], p[1], p[2])
-  });
-  if (o.rx) body.quaternion.setFromEuler(o.rx, 0, 0);
-  world.addBody(body);
-  const top = TEX[tex].clone(); top.needsUpdate = true; top.repeat.set(s[0] / 2, s[2] / 2);
-  const side = new THREE.MeshStandardMaterial({ color: SIDE[tex], roughness: .8 });
-  const mats = [side, side, new THREE.MeshStandardMaterial({ map: top, roughness: .7 }), side, side, side];
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(s[0], s[1], s[2]), mats);
-  mesh.castShadow = mesh.receiveShadow = true;
-  mesh.position.copy(body.position); mesh.quaternion.copy(body.quaternion);
-  scene.add(mesh);
-  return { body, mesh };
-};
-// Dalle dont le dessus est à la hauteur y
-const slab = (x, y, z, w, d, tex) => addBox([x, y - .25, z], [w, .5, d], { tex });
-const wall = (x, y, z, w, d) => addBox([x, y + .3, z], [w, .6, d], { tex: 'lav' });
-// Rampe qui descend vers -z
-const ramp = (x, y0, z0, len, drop, w, tex) => {
-  const a = Math.atan2(drop, len), L = Math.hypot(len, drop) + .3;
-  const n = [0, Math.cos(a), -Math.sin(a)];
-  const t = [x, y0 - drop / 2, z0 - len / 2];
-  addBox([t[0], t[1] - .25 * n[1], t[2] - .25 * n[2]], [w, .5, L], { rx: -a, tex });
-  for (const sx of [-1, 1]) addBox([x + sx * (w / 2 + .15), t[1] + .4 * n[1], t[2] + .4 * n[2]], [.3, .8, L], { rx: -a, tex: 'lav' });
-};
-
-// ---------- Niveau 1 ----------
-slab(0, 0, 0, 6, 6, 'mint');                 // départ
-slab(0, 0, -8, 2, 10.2, 'cream');            // couloir
-slab(0, 0, -16, 6, 6, 'mint');               // plateforme B (checkpoint 1)
-wall(0, 0, -19.15, 6.6, .3); wall(-3.15, 0, -16, .3, 6);
-slab(7, 0, -16, 8.2, 2, 'cream');            // virage à droite
-slab(14, 0, -16, 6, 6, 'rose');              // plateforme D
-wall(17.15, 0, -16, .3, 6.6);
-slab(14, 0, -24, 1.4, 10.2, 'cream');        // pont étroit
-slab(14, 0, -32, 6, 6, 'mint');              // plateforme E (checkpoint 2)
-ramp(14, 0, -35, 10, 3, 3, 'cream');         // grande descente
-slab(14, -3, -48, 6, 6, 'rose');             // plateforme F
-const mover = addBox([14, -3.25, -52.5], [3, .5, 3], { kin: true, tex: 'lav' }); // plateforme mobile
-slab(14, -3, -67, 6, 6, 'mint');             // plateforme G (checkpoint 3)
-slab(14, -3, -74, 2, 8.2, 'cream');          // dernier couloir
-slab(14, -3, -81, 5, 6, 'lav');              // arrivée
-wall(14, -3, -84.15, 5.6, .3);
-
-// ---------- Bille ----------
-const R = .42;
-const ballBody = new CANNON.Body({ mass: 1, shape: new CANNON.Sphere(R), linearDamping: .12, angularDamping: .25 });
-world.addBody(ballBody);
-const ball = new THREE.Mesh(new THREE.SphereGeometry(R, 40, 24),
-  new THREE.MeshPhysicalMaterial({ map: ballTex(), roughness: .18, clearcoat: 1, clearcoatRoughness: .08 }));
-ball.castShadow = true; scene.add(ball);
-
-// ---------- Cristaux ----------
-const CRYSTALS = [[0, 0, -8], [2, 0, -17], [7, 0, -16], [14, 0, -24], [12, -3, -48], [16, -3, -67], [14, -3, -74]];
-const HUES = [0x4fd8ff, 0xff6fae, 0xffd04f];
-const cGeo = new THREE.OctahedronGeometry(.3, 0); cGeo.scale(1, 1.6, 1);
-const crystals = CRYSTALS.map((p, i) => {
-  const col = HUES[i % 3];
-  const m = new THREE.Mesh(cGeo, new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: .45, flatShading: true, roughness: .15 }));
-  m.castShadow = true; scene.add(m);
-  return { m, p, taken: false, out: 0 };
-});
-
-// ---------- Checkpoints ----------
-const flagGeo = new THREE.BufferGeometry();
-flagGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 0, -.5, 0, .75, -.25, 0], 3));
-flagGeo.computeVertexNormals();
-const START = { x: 0, y: 0, z: 1 };
-const CHECKS = [[0, 0, -16], [14, 0, -32], [14, -3, -67]].map(p => {
-  const g = new THREE.Group();
-  const pole = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 1.6, 8), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-  pole.position.y = .8;
-  const mat = new THREE.MeshStandardMaterial({ color: 0xb8c3d6, side: THREE.DoubleSide });
-  const flag = new THREE.Mesh(flagGeo, mat); flag.position.set(.05, 1.55, 0);
-  g.add(pole, flag); g.position.set(p[0] - 2.4, p[1], p[2]);
-  g.traverse(o => { o.castShadow = true; }); scene.add(g);
-  return { x: p[0], y: p[1], z: p[2], mat, on: false };
-});
-
-// ---------- Arrivée ----------
-const GOAL = { x: 14, y: -3, z: -82 };
-const ringMat = new THREE.MeshStandardMaterial({ color: 0xb8c3d6, emissive: 0x000000, metalness: .3, roughness: .3 });
-const ring = new THREE.Mesh(new THREE.TorusGeometry(1.15, .16, 14, 40), ringMat);
-ring.position.set(GOAL.x, GOAL.y + 1.3, GOAL.z); ring.castShadow = true; scene.add(ring);
-
-// ---------- Décor : îles et nuages ----------
-let seed = 7; const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
-const rock = new THREE.MeshStandardMaterial({ color: 0xc9a98a, flatShading: true });
-const grass = new THREE.MeshStandardMaterial({ color: 0x8fd68a, flatShading: true });
-const leaf = new THREE.MeshStandardMaterial({ color: 0x4fae6e, flatShading: true });
-const cloudM = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: .25, flatShading: true });
-for (let i = 0; i < 16; i++) {
-  const side = i % 2 ? 1 : -1, r = 1.8 + rnd() * 2.5;
-  const g = new THREE.Group();
-  const base = new THREE.Mesh(new THREE.ConeGeometry(r, r * 1.8, 7), rock); base.rotation.x = Math.PI; base.position.y = -r * .9;
-  const top = new THREE.Mesh(new THREE.CylinderGeometry(r, r, .35, 7), grass);
-  g.add(base, top);
-  for (let t = 0; t < 1 + rnd() * 3; t++) {
-    const tr = new THREE.Mesh(new THREE.ConeGeometry(.5, 1.6, 6), leaf);
-    tr.position.set((rnd() - .5) * r, 1, (rnd() - .5) * r); g.add(tr);
-  }
-  g.position.set(7 + side * (16 + rnd() * 14), -12 + rnd() * 9, 8 - rnd() * 100);
-  scene.add(g);
-}
-const clouds = [];
-for (let i = 0; i < 12; i++) {
-  const g = new THREE.Group();
-  for (let k = 0; k < 4; k++) {
-    const s = new THREE.Mesh(new THREE.IcosahedronGeometry(1 + rnd() * 1.2, 1), cloudM);
-    s.position.set(k * 1.4, rnd() * .6, rnd() * .8); g.add(s);
-  }
-  const side = i % 2 ? 1 : -1;
-  g.position.set(7 + side * (22 + rnd() * 16), -2 + rnd() * 10, 10 - rnd() * 100);
-  scene.add(g); clouds.push(g);
-}
-
-// ---------- Sons ----------
-let ac = null;
-const beep = (f, d = .18, v = .12, type = 'sine') => {
-  if (!ac) return;
-  const o = ac.createOscillator(), g = ac.createGain();
-  o.type = type; o.frequency.value = f;
-  g.gain.setValueAtTime(v, ac.currentTime);
-  g.gain.exponentialRampToValueAtTime(.001, ac.currentTime + d);
-  o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime + d);
-};
-
-// ---------- Interface ----------
-let toastT = 0;
-const toast = (msg, ms = 1800) => {
-  const t = $('toast'); t.textContent = msg; t.classList.add('on');
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), ms);
-};
-const fmt = s => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
-
-// ---------- Contrôles ----------
-const inp = { x: 0, y: 0 }, smooth = { x: 0, y: 0 };
-const keys = new Set();
-addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
-addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
-
-const joy = { on: false, id: null, ox: 0, oy: 0, x: 0, y: 0 };
-const canvas = $('c');
-canvas.addEventListener('pointerdown', e => {
-  if (joy.on) return;
-  Object.assign(joy, { on: true, id: e.pointerId, ox: e.clientX, oy: e.clientY, x: 0, y: 0 });
-  const j = $('joy'); j.style.left = e.clientX + 'px'; j.style.top = e.clientY + 'px'; j.style.display = 'block';
-  $('knob').style.transform = '';
-});
-addEventListener('pointermove', e => {
-  if (!joy.on || e.pointerId !== joy.id) return;
-  let dx = e.clientX - joy.ox, dy = e.clientY - joy.oy;
-  const len = Math.hypot(dx, dy), max = 55;
-  if (len > max) { dx *= max / len; dy *= max / len; }
-  joy.x = dx / max; joy.y = -dy / max;
-  $('knob').style.transform = `translate(${dx}px,${dy}px)`;
-});
-const joyEnd = e => { if (e.pointerId !== joy.id) return; joy.on = false; joy.x = joy.y = 0; $('joy').style.display = 'none'; };
-addEventListener('pointerup', joyEnd); addEventListener('pointercancel', joyEnd);
-
-let gyro = null, cal = null, gotMotion = false;
-const onOri = e => {
-  if (e.beta == null || e.gamma == null) return;
-  gotMotion = true;
-  const a = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
-  let x, y;
-  if (a === 90) { x = e.beta; y = -e.gamma; }
-  else if (a === -90 || a === 270) { x = -e.beta; y = e.gamma; }
-  else { x = e.gamma; y = e.beta; }
-  gyro = { x, y };
-  if (!cal) cal = { x, y };
-};
-const clamp = (v, a = -1, b = 1) => Math.max(a, Math.min(b, v));
-const dz = v => Math.abs(v) < .06 ? 0 : v;
-const readInput = () => {
-  if (joy.on) { inp.x = joy.x; inp.y = joy.y; return; }
-  let kx = 0, ky = 0;
-  if (keys.has('arrowleft') || keys.has('q') || keys.has('a')) kx -= 1;
-  if (keys.has('arrowright') || keys.has('d')) kx += 1;
-  if (keys.has('arrowup') || keys.has('z') || keys.has('w')) ky += 1;
-  if (keys.has('arrowdown') || keys.has('s')) ky -= 1;
-  if (kx || ky) { inp.x = kx; inp.y = ky; return; }
-  if (gyro && cal) {
-    inp.x = dz(clamp((gyro.x - cal.x) / 20));
-    inp.y = dz(clamp((cal.y - gyro.y) / 20));
-    return;
-  }
-  inp.x = inp.y = 0;
-};
-
-// ---------- État du jeu ----------
-let state = 'menu', time = 0, falls = 0, spawn = START, goalHint = 0;
-const MOVER = { a: -52.5, b: -62.5, dir: -1, wait: 1.2 };
-const collected = () => crystals.filter(c => c.taken).length;
-const updateHud = () => { $('cr').textContent = `${collected()}/${crystals.length}`; $('fl').textContent = falls; };
-
-const respawn = () => {
-  ballBody.position.set(spawn.x, spawn.y + 1, spawn.z);
-  ballBody.velocity.setZero(); ballBody.angularVelocity.setZero();
-  smooth.x = smooth.y = 0;
-  camPos.set(spawn.x, spawn.y + 6, spawn.z + 9);
-};
-const camPos = new THREE.Vector3();
-const reset = () => {
-  time = 0; falls = 0; spawn = START;
-  crystals.forEach(c => { c.taken = false; c.out = 0; c.m.visible = true; c.m.scale.setScalar(1); });
-  CHECKS.forEach(c => { c.on = false; c.mat.color.set(0xb8c3d6); });
-  ringMat.color.set(0xb8c3d6); ringMat.emissive.set(0x000000);
-  Object.assign(MOVER, { dir: -1, wait: 1.2 }); mover.body.position.z = MOVER.a;
-  respawn(); updateHud();
-};
-
-const begin = () => {
-  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); } catch (e) { ac = null; }
-  $('start').hidden = true; $('win').hidden = true; $('dock').hidden = false;
-  reset(); state = 'play';
-};
-$('playTouch').addEventListener('click', () => { begin(); toast('Pose ton pouce et glisse pour pencher le parcours', 2600); });
-$('playGyro').addEventListener('click', async () => {
-  const DOE = window.DeviceOrientationEvent;
-  if (DOE && typeof DOE.requestPermission === 'function') {
-    try { await DOE.requestPermission(); } catch (e) { /* refus géré plus bas */ }
-  }
-  addEventListener('deviceorientation', onOri);
-  cal = null; begin();
-  $('calib').hidden = false;
-  setTimeout(() => {
-    if (!gotMotion) {
-      $('calib').hidden = true;
-      toast('Le capteur d’inclinaison n’est pas accessible depuis cette page. Contrôle au doigt activé : pose ton pouce et glisse.', 4500);
-    } else toast('Penche ton téléphone !', 1500);
-  }, 1200);
-});
-$('calib').addEventListener('click', () => { if (gyro) { cal = { ...gyro }; toast('Position neutre enregistrée', 1200); } });
-$('restart').addEventListener('click', () => { reset(); state = 'play'; $('win').hidden = true; });
-$('again').addEventListener('click', () => { reset(); state = 'play'; $('win').hidden = true; });
-
-// ---------- Boucle ----------
-const Y = new THREE.Vector3(0, 1, 0), up = new THREE.Vector3(), gdir = new THREE.Vector3();
-const q = new THREE.Quaternion(), off = new THREE.Vector3(), look = new THREE.Vector3(), tmp = new THREE.Vector3();
-const CAM_OFF = new THREE.Vector3(0, 5.6, 8.6);
-let last = performance.now(), clock = 0;
-camPos.set(0, 6, 10);
-
-const updMover = dt => {
-  const b = mover.body;
-  if (MOVER.wait > 0) { MOVER.wait -= dt; b.velocity.setZero(); }
-  else {
-    b.velocity.set(0, 0, MOVER.dir * 2.2);
-    if (MOVER.dir < 0 && b.position.z <= MOVER.b) { b.position.z = MOVER.b; MOVER.dir = 1; MOVER.wait = 1.2; b.velocity.setZero(); }
-    else if (MOVER.dir > 0 && b.position.z >= MOVER.a) { b.position.z = MOVER.a; MOVER.dir = -1; MOVER.wait = 1.2; b.velocity.setZero(); }
-  }
-};
-
-const frame = now => {
-  const dt = Math.min(.05, (now - last) / 1000); last = now; clock += dt;
-  readInput();
-  const k = 1 - Math.exp(-dt * 9);
-  smooth.x += (inp.x - smooth.x) * k; smooth.y += (inp.y - smooth.y) * k;
-
-  gdir.set(smooth.x * MAXT, -1, -smooth.y * MAXT).normalize();
-  world.gravity.set(gdir.x * G, gdir.y * G, gdir.z * G);
-
-  if (state === 'play') {
-    updMover(dt);
-    world.step(1 / 120, dt, 8);
-    time += dt;
-    const v = ballBody.velocity, sp = v.length();
-    if (sp > 13) v.scale(13 / sp, v);
-    const p = ballBody.position;
-
-    crystals.forEach(c => {
-      if (c.taken) return;
-      if (Math.hypot(p.x - c.p[0], p.y - (c.p[1] + .4), p.z - c.p[2]) < .85) {
-        c.taken = true; c.out = 1;
-        beep(988, .15); setTimeout(() => beep(1480, .22), 70);
-        updateHud();
-        if (collected() === crystals.length) {
-          ringMat.color.set(0xffc93c); ringMat.emissive.set(0x8a5a00);
-          toast('Tous les cristaux ! Fonce vers l’anneau doré', 2200);
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
+    />
+    <title>Bille Céleste</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script>
+      window.addEventListener('error', function (e) {
+        var d = document.getElementById('err');
+        if (d) {
+          d.hidden = false;
+          d.textContent = 'Erreur : ' + (e.message || 'chargement impossible');
         }
-      }
-    });
-    CHECKS.forEach(c => {
-      if (c.on) return;
-      if (Math.hypot(p.x - c.x, p.z - c.z) < 2.6 && Math.abs(p.y - c.y - R) < 1.2) {
-        c.on = true; spawn = c; c.mat.color.set(0x3fcf8e);
-        beep(660, .12, .1, 'triangle'); setTimeout(() => beep(880, .18, .1, 'triangle'), 90);
-        toast('Checkpoint !', 1200);
-      }
-    });
-    if (Math.hypot(p.x - GOAL.x, p.z - GOAL.z) < 1.25 && p.y > GOAL.y - .5) {
-      const left = crystals.length - collected();
-      if (!left) {
-        state = 'win'; beep(784, .2); setTimeout(() => beep(988, .2), 120); setTimeout(() => beep(1318, .35), 240);
-        $('wTime').textContent = fmt(time).replace(/\.\d$/, ''); $('wFalls').textContent = falls;
-        $('win').hidden = false;
-      } else if (clock - goalHint > 2.5) { goalHint = clock; toast(`Il manque encore ${left} cristal${left > 1 ? 'x' : ''} !`); }
-    }
-    if (p.y < spawn.y - 9) { falls++; updateHud(); beep(220, .3, .1, 'sawtooth'); toast('Oups !', 900); respawn(); }
-    $('tm').textContent = fmt(time);
-  }
+      });
+      setTimeout(function () {
+        if (!window.__ok) {
+          var d = document.getElementById('err');
+          if (d) {
+            d.hidden = false;
+            d.textContent = 'Le moteur 3D ne s’est pas chargé. Vérifie ta connexion puis recharge la page.';
+          }
+        }
+      }, 12000);
+    </script>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
 
-  // Visuels
-  ball.position.copy(ballBody.position); ball.quaternion.copy(ballBody.quaternion);
-  mover.mesh.position.copy(mover.body.position);
-  crystals.forEach((c, i) => {
-    if (c.taken) {
-      if (c.out > 0) { c.out = Math.max(0, c.out - dt * 4); c.m.scale.setScalar(c.out * 1.6); c.m.position.y += dt * 3; }
-      c.m.visible = c.out > 0; return;
-    }
-    c.m.position.set(c.p[0], c.p[1] + .75 + Math.sin(clock * 2.4 + i) * .12, c.p[2]);
-    c.m.rotation.y = clock * 1.8 + i;
-  });
-  ring.rotation.y = collected() === crystals.length ? clock * 1.5 : Math.sin(clock) * .2;
-  clouds.forEach((c, i) => { c.position.x += Math.sin(clock * .2 + i) * dt * .3; });
+    <div class="hud">
+      <div class="pill">Cristaux <b id="cr">0/7</b></div>
+      <div class="pill" id="tm">0:00.0</div>
+      <div class="pill">Chutes <b id="fl">0</b></div>
+    </div>
+    <div class="dock" id="dock" hidden>
+      <button id="calib" hidden>Recalibrer</button>
+      <button id="restart">Recommencer</button>
+    </div>
 
-  // Caméra : le "haut" suit l'inverse de la gravité -> le monde semble pencher
-  up.copy(gdir).negate();
-  q.setFromUnitVectors(Y, up);
-  off.copy(CAM_OFF).applyQuaternion(q);
-  tmp.copy(ball.position).add(off);
-  camPos.lerp(tmp, 1 - Math.exp(-dt * 6));
-  camera.position.copy(camPos);
-  camera.up.copy(up);
-  look.copy(ball.position); look.z -= 1.8;
-  camera.lookAt(look);
+    <div class="joy" id="joy"><div class="knob" id="knob"></div></div>
+    <div class="toast" id="toast"></div>
 
-  sun.position.set(ball.position.x + 8, ball.position.y + 16, ball.position.z + 6);
-  sun.target.position.copy(ball.position);
+    <div class="overlay" id="start">
+      <div class="card">
+        <h1>Bille Céleste</h1>
+        <p>Penche le parcours pour guider la bille, ramasse les <b>7 cristaux</b> puis traverse l’anneau d’arrivée.</p>
+        <p class="small">
+          Tiens ton téléphone en portrait, dans une position confortable : elle servira de position neutre.
+        </p>
+        <button class="main" id="playGyro">Jouer en inclinant</button>
+        <button class="alt" id="playTouch">Jouer au doigt</button>
+        <p class="small">Au doigt : pose ton pouce n’importe où et glisse. Sur ordinateur : flèches ou ZQSD.</p>
+      </div>
+    </div>
 
-  renderer.render(scene, camera);
-  requestAnimationFrame(frame);
-};
-reset(); state = 'menu';
-requestAnimationFrame(frame);
-}
-</script>
-</body>
+    <div class="overlay" id="win" hidden>
+      <div class="card">
+        <h2>Niveau terminé !</h2>
+        <div class="stats">
+          <div><strong id="wTime">0:00</strong>temps</div>
+          <div><strong id="wFalls">0</strong>chutes</div>
+          <div><strong>7/7</strong>cristaux</div>
+        </div>
+        <button class="main" id="again">Rejouer</button>
+      </div>
+    </div>
+
+    <div id="err" hidden></div>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
 </html>
