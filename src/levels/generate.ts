@@ -198,7 +198,7 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
         );
       if (type === 'conveyor')
         return add(
-          { type, ...zone, rot: rnd() < 0.5 ? t.rot : side, speed: 1.5 + difficulty * 1.5 },
+          { type, ...zone, rot: rnd() < 0.5 ? t.rot : side, speed: 2.5 + difficulty * 2 },
           { rails: 'both', width: 'wide' },
         );
       if (type === 'pusher') {

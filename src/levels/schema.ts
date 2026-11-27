@@ -234,7 +234,7 @@ export const malusSchemas = [
     size: zoneSize,
     rot: rotSchema,
     /** Belt speed (units/s). */
-    speed: z.number().min(1).max(6).default(3),
+    speed: z.number().min(1).max(6).default(4),
   }),
   z.object({
     type: z.literal('pusher'),

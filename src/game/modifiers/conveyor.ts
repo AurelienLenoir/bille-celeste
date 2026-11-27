@@ -6,8 +6,8 @@ import { cellsOf, createDecal, direction, groundAt, mergeGeometries, zoneTrigger
 type Conveyor = ModifierOf<'conveyor'>;
 
 /** How hard the belt drags the ball towards its own speed (1/s), and the cap on that pull. */
-const DRAG = 3;
-const MAX_PULL = 4.5;
+const DRAG = 5;
+const MAX_PULL = 7;
 const CHEVRONS_PER_CELL = 2;
 
 /** Acceleration along the belt for a ball moving at `along` units/s in the belt's direction. */
