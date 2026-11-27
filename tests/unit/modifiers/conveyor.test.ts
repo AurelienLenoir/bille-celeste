@@ -9,7 +9,7 @@ describe('conveyor', () => {
   it('pulls towards the belt speed, gently enough to be fought', () => {
     expect(beltPull(3, 3)).toBe(0);
     expect(beltPull(3, 0)).toBeGreaterThan(0);
-    expect(beltPull(3, -10)).toBe(4.5);
+    expect(beltPull(3, -10)).toBe(7);
   });
 
   it('carries a ball at rest along at about its speed', () => {

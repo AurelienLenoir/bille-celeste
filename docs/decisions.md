@@ -2,6 +2,11 @@
 
 Journal des choix structurants (le plus récent en haut).
 
+## 2026-11-27 — Phase 3 : validation sur téléphone
+
+- **Phase 3 validée** par l'utilisateur sur iPhone avec le niveau `sandbox`.
+- **Tapis roulant renforcé**, jugé trop faible : il rattrape sa vitesse plus vite (5/s au lieu de 3/s) et tire plus fort (7 au lieu de 4,5 unités/s², toujours sous l'inclinaison maximale, donc on peut encore lutter contre). Vitesse par défaut 4 au lieu de 3, 4 dans le `sandbox` (au lieu de 2,5), 2,5 à 4,5 dans le générateur selon la difficulté. Le replay du `sandbox` est réenregistré ; le bot gagne les 30 niveaux générés testés qui ont un tapis.
+
 ## 2026-11-27 — Phase 3 : bonus et malus
 
 - **Format de niveau v2** : champ `modifiers` (au plus 60), une union Zod discriminée par `type` avec les réglages propres à chaque modificateur et des valeurs par défaut. La migration v1 → v2 ajoute une liste vide ; elle est testée.
