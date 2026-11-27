@@ -20,7 +20,7 @@ import { bindHapticFeedback } from './game/hapticFeedback';
 import { createSession } from './game/session';
 import { bindSoundEffects } from './game/sfx';
 import { buildLevel } from './game/world';
-import { DEFAULT_LEVEL, fetchLevel } from './levels/catalog';
+import { DEFAULT_LEVEL, EDITOR_LEVEL_KEY, fetchLevel } from './levels/catalog';
 import { loadLevel } from './levels/loader';
 import type { Level } from './levels/schema';
 import { createRecorder } from './game/replay';
@@ -38,9 +38,6 @@ import { createToast } from './ui/toast';
 
 // Tells the inline watchdog in index.html that the bundle loaded.
 Object.assign(window, { __ok: true });
-
-/** Key under which the level editor hands its level to the game (`?level=editor`). */
-export const EDITOR_LEVEL_KEY = 'bille-celeste.editor-level';
 
 const params = new URLSearchParams(location.search);
 const chooseLevel = async (): Promise<Level> => {

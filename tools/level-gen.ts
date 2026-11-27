@@ -19,7 +19,8 @@ if (!(world >= 1 && world <= 4) || !(difficulty >= 0 && difficulty <= 1) || !Num
 }
 
 await initPhysics();
-const level = generateLevel({ world, difficulty, seed, ...(arg('id') ? { id: arg('id') } : {}) });
+const id = arg('id');
+const level = generateLevel({ world, difficulty, seed, ...(id ? { id } : {}) });
 const warnings = validateLevel(level);
 const bot = runBot(level);
 const counts = level.entities.reduce<Record<string, number>>((c, e) => ({ ...c, [e.type]: (c[e.type] ?? 0) + 1 }), {});
