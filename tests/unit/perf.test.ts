@@ -23,12 +23,21 @@ describe('quality governor', () => {
     expect(run(governor, 60, 10)).toBe(0);
     expect(governor.isLow()).toBe(false);
   });
-  it('drops once after 3 s under 50 fps', () => {
+  it('drops one step after 3 s under 50 fps, and a second one 3 s later at most', () => {
     const governor = createQualityGovernor();
     expect(run(governor, 40, 2.5)).toBe(0);
     expect(run(governor, 40, 1)).toBe(1);
-    expect(run(governor, 40, 10)).toBe(0);
     expect(governor.isLow()).toBe(true);
+    expect(run(governor, 40, 2)).toBe(0);
+    expect(run(governor, 40, 2)).toBe(1);
+    expect(run(governor, 40, 10)).toBe(0);
+  });
+  it('forgets the frames counted before a restart (menus, loading, pause)', () => {
+    const governor = createQualityGovernor();
+    run(governor, 40, 2.5);
+    governor.restart();
+    expect(run(governor, 40, 2.5)).toBe(0);
+    expect(governor.isLow()).toBe(false);
   });
   it('forgives a short slowdown', () => {
     const governor = createQualityGovernor();

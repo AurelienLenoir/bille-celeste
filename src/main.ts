@@ -13,7 +13,7 @@ import { startLoop } from './engine/loop';
 import type { Vec2 } from './engine/math';
 import { createFrameStats, createQualityGovernor } from './engine/perf';
 import { initPhysics, type GravityDirection } from './engine/physics';
-import { bindResize, createRenderContext, followSun, setLowQuality } from './engine/renderer';
+import { bindResize, createRenderContext, followSun, lowerQuality } from './engine/renderer';
 import { createEffectAura } from './game/effectAura';
 import { createEventBus, type GameEvents } from './game/events';
 import { bindHapticFeedback } from './game/hapticFeedback';
@@ -288,8 +288,10 @@ startLoop((dt) => {
   renderer.render(scene, follow.camera);
   frames.push(dt);
   updatePerf(dt);
-  if (quality.update(dt)) {
-    setLowQuality(renderer);
-    console.info('[perf] stayed under 50 fps for 3 s: switching to low quality');
-  }
+  // Only frames of a run in progress tell how the game runs: menus, level loads and the pause
+  // that a screen rotation triggers are not counted.
+  const running = screen() === 'play' && current?.session.state() === 'play';
+  if (!running) quality.restart();
+  else if (quality.update(dt))
+    console.info(`[perf] stayed under 50 fps for 3 s: pixel ratio down to ${lowerQuality(renderer)}`);
 });
