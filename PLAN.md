@@ -312,7 +312,7 @@ Direction artistique : low-poly pastel, couleurs franches par monde, ciel en dé
 ### Phase 0 — Mise en place (½ à 1 jour)
 - Migrer le POC vers Vite + TypeScript strict + l'arborescence du § 2.
 - ESLint + Prettier, Vitest, Playwright, scripts npm.
-- CI GitHub Actions : lint + typecheck + tests + build, puis déploiement sur GitHub Pages à chaque push sur `main`, pour tester sur téléphone.
+- CI GitHub Actions : lint + typecheck + tests + build, puis déploiement sur GitHub Pages à chaque push sur `master`, pour tester sur téléphone.
 - **Validation** : le niveau du POC tourne à l'identique, la CI est verte et la page GitHub Pages est jouable.
 
 ### Phase 1 — Cœur du jeu et sensation (3 à 5 jours)
@@ -431,7 +431,7 @@ Un jeu de bille coloré attire les enfants. Si le jeu est déclaré comme destin
 ## 12. Façon de travailler avec Claude Code
 
 1. **Une phase à la fois.** Demander : « Lis PLAN.md et CLAUDE.md, puis réalise la phase N. Propose d'abord un découpage en tâches. »
-2. **Une branche par phase** (`phase-1-core`, …), une PR, la CI doit être verte, puis on fusionne dans `main`. GitHub Pages se met à jour et on teste sur téléphone.
+2. **Une branche par phase** (`phase-1-core`, …), une PR, la CI doit être verte, puis on fusionne dans `master`. GitHub Pages se met à jour et on teste sur téléphone.
 3. **Après chaque phase**, Claude Code met à jour la section « État d'avancement » ci-dessous et note les décisions prises dans `docs/decisions.md`.
 4. **Pour un nouveau niveau** : « Crée le niveau w3-04 : [description]. Fais-le passer au validateur et au bot. »
 5. **Pour un nouveau modificateur** : « Ajoute le malus X dans modifiers/, avec visuel, son, haptique, test, et un niveau bac à sable. »
