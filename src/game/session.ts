@@ -15,7 +15,7 @@ import type { EventBus, GameEvents } from './events';
 import { GOAL_HINT_COOLDOWN, hasFallen, isInGoal, reachesCheckpoint, touchesCrystal } from './rules';
 import type { LevelWorld } from './world';
 
-export type SessionState = 'menu' | 'play' | 'win';
+export type SessionState = 'menu' | 'play' | 'paused' | 'win';
 
 type Point = { x: number; y: number; z: number };
 
@@ -25,6 +25,9 @@ export type Session = {
   clock: () => number;
   /** Resets the level and starts playing. */
   start: () => void;
+  /** Freezes the run (physics, timer, movers). Does nothing outside of play. */
+  pause: () => void;
+  resume: () => void;
   /**
    * Advances one rendered frame: runs as many fixed physics steps as `dt` allows, reading the input
    * once per step, then blends the visuals. Returns the gravity direction the camera should follow.
@@ -138,6 +141,7 @@ export const createSession = ({ physics, level, world, ball, events }: SessionDe
   };
 
   const update = (dt: number, readInput: () => Vec2) => {
+    if (state === 'paused') return gravity;
     clock += dt;
     const alpha = stepper.advance(dt, () => step(readInput));
     if (state === 'play') events.emit('tick', { time });
@@ -157,6 +161,16 @@ export const createSession = ({ physics, level, world, ball, events }: SessionDe
     start: () => {
       reset();
       state = 'play';
+    },
+    pause: () => {
+      if (state !== 'play') return;
+      state = 'paused';
+      events.emit('paused');
+    },
+    resume: () => {
+      if (state !== 'paused') return;
+      state = 'play';
+      events.emit('resumed');
     },
     update,
   };

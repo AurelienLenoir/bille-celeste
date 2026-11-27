@@ -2,6 +2,18 @@
 
 Journal des choix structurants (le plus récent en haut).
 
+## 2026-11-27 — Phase 1 : entrées, caméra, pause, réglages
+
+- **Gyroscope** : filtre passe-bas sur les mesures brutes (constante de temps 50 ms, en plus du lissage existant à chaque pas), zone morte **radiale et progressive** (6 %, la sortie repart de zéro au lieu de sauter à 6 %), puis courbe expo (35 % cubique) : plus précis au centre, aussi rapide à fond. Le plafond est radial, comme le joystick : une diagonale ne penche plus plus fort qu'un axe seul. Tourner le téléphone (portrait ↔ paysage) recalibre à la mesure suivante.
+- **Le contrôle au doigt et le clavier ne changent pas** avec les réglages par défaut (sensibilité ×1). C'est ce contrôle qui a été validé sur téléphone, et le replay e2e (au clavier) passe sans réenregistrement : la physique est identique.
+- **Réglages** : mode de contrôle, angle pour pencher à fond (10–35°, 20° par défaut), sensibilité du doigt (×0,5–×2), inversion de chaque axe, vibrations, sons. La musique est déjà dans le format sauvegardé mais sans interrupteur tant qu'il n'y a pas de musique (phase 5).
+- **Zod et Zustand arrivent dès maintenant** pour les réglages (`meta/settings.ts`, `meta/store.ts`). Format **version 1**, avec une fonction de migration testée : champ invalide → valeur par défaut, sauvegarde illisible ou plus récente → réglages par défaut. Stockage via `platform/storage.ts` (localStorage, interface asynchrone pour passer à `@capacitor/preferences` en phase 6).
+- **Pause** : bouton en haut à droite, Échap ou P sur ordinateur, et pause automatique quand la page est cachée (`platform/lifecycle.ts`, appStateChange de Capacitor en phase 6). La session arrête complètement les pas physiques, le chrono et les plateformes. Le menu propose Reprendre, Recalibrer (en mode inclinaison), Recommencer et Réglages. L'ancien dock « Recalibrer / Recommencer » disparaît de l'écran de jeu, ce qui évite les touches accidentelles sous le pouce.
+- **Caméra** : le suivi vertical est plus doux (3,5/s contre 6/s à l'horizontale) et le point visé est lissé (14/s), pour que les petits sauts et jointures ne secouent pas la vue.
+- **Vibrations** : API Web Vibration (Android ; iOS Safari n'en a pas), une par événement (§ 5.4). Les vibrations natives arrivent en phase 6.
+- **Performance** : compteur fps / pire image / draw calls avec `?debug`. Qualité basse automatique (ratio de pixels 1) après 3 s sous 50 fps. Draw calls de la vue de départ ramenés de 150 à 47 : les îles du décor partagent un seul maillage (couleurs par sommet), chaque nuage en est un, et les boîtes du parcours ont 2 groupes de faces (côtés, dessus) au lieu de 6. Aucun changement visuel.
+- **Textes** toujours en français seulement, comme décidé en phase 0 ; l'anglais arrive avec l'i18n de la phase 4.
+
 ## 2026-11-27 — Phase 1 : passage à Rapier
 
 - **Rapier `@dimforge/rapier3d-compat` 0.21.0** remplace cannon-es. Version figée : c'est celle sur laquelle la sensation a été validée sur téléphone.

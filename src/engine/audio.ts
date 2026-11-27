@@ -8,7 +8,8 @@ export type Audio = {
   beep: Beep;
 };
 
-export const createAudio = (): Audio => {
+/** `enabled` is checked on every sound so the setting applies at once. */
+export const createAudio = (enabled: () => boolean = () => true): Audio => {
   let context: AudioContext | null = null;
 
   const unlock = () => {
@@ -23,7 +24,7 @@ export const createAudio = (): Audio => {
   };
 
   const beep: Beep = (frequency, duration = 0.18, volume = 0.12, type = 'sine') => {
-    if (!context) return;
+    if (!context || !enabled()) return;
     const osc = context.createOscillator();
     const gain = context.createGain();
     osc.type = type;

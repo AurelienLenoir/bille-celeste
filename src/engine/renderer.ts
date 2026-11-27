@@ -36,6 +36,11 @@ export const followSun = (sun: THREE.DirectionalLight, target: THREE.Vector3): v
   sun.target.position.copy(target);
 };
 
+/** Low quality mode: render at 1 device pixel per CSS pixel (the biggest win on phones). */
+export const setLowQuality = (renderer: THREE.WebGLRenderer): void => {
+  renderer.setPixelRatio(1);
+};
+
 export const bindResize = (renderer: THREE.WebGLRenderer, camera: THREE.PerspectiveCamera): void => {
   const resize = () => {
     const w = innerWidth;
