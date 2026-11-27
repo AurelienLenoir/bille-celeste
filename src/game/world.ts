@@ -1,58 +1,63 @@
 import { addTrackCollider } from '../engine/physics';
-import { buildTrackMesh } from '../engine/trackCollider';
-import type { LevelData, PieceData } from '../levels/types';
-import { buildBoxMesh, type BoxSpec, type BuildContext } from './pieces/box';
-import { createMovingPlatform, movingPlatformBox, type MovingPlatform } from './pieces/movingPlatform';
-import { ramp, rampCollision } from './pieces/ramp';
-import type { PieceCollision } from './pieces/shape';
-import { slab, slabCollision } from './pieces/slab';
-import { wall, wallCollision } from './pieces/wall';
+import { buildTrackMesh, emptyShape, mergeShape, type TrackMesh } from '../engine/trackCollider';
+import { cellToWorld } from '../levels/grid';
+import type { Level } from '../levels/schema';
 import { createCheckpoint, type Checkpoint } from './entities/checkpoint';
 import { createCrystal, type Crystal } from './entities/crystal';
 import { createGoal, type Goal } from './entities/goal';
+import { buildPiece, createPieceMover } from './pieces';
+import { COURSE_GROUPS } from './pieces/body';
+import type { BuildContext, Mover } from './pieces/kit';
+import { createTrackMeshes } from './trackView';
+
+export type Point = { x: number; y: number; z: number };
 
 export type LevelWorld = {
-  movers: MovingPlatform[];
+  spawn: Point;
+  movers: Mover[];
+  /** The mover built for each piece, by piece index (undefined for static pieces). */
+  moverByPiece: (Mover | undefined)[];
   crystals: Crystal[];
   checkpoints: Checkpoint[];
   goal: Goal;
+  track: TrackMesh;
 };
 
-type StaticPiece = Exclude<PieceData, { type: 'movingPlatform' }>;
+const point = ([x, y, z]: readonly [number, number, number]): Point => ({ x, y, z });
 
-const staticPiece = (piece: StaticPiece): { boxes: BoxSpec[]; collision: PieceCollision } => {
-  switch (piece.type) {
-    case 'slab':
-      return { boxes: slab(piece), collision: slabCollision(piece) };
-    case 'wall':
-      return { boxes: wall(piece), collision: wallCollision(piece) };
-    case 'ramp':
-      return { boxes: ramp(piece), collision: rampCollision(piece) };
-  }
+/** Merged static geometry of a level (every non-moving piece). */
+export const levelTrackMesh = (level: Level): TrackMesh => {
+  const shape = emptyShape();
+  level.pieces.forEach((piece) => mergeShape(shape, buildPiece(piece).shape));
+  return buildTrackMesh(shape);
 };
 
 /**
- * Builds the course, collectibles and goal of a level into the physics world and scene.
- * Every static piece goes into one merged trimesh collider so joints between pieces are seamless.
+ * Builds the course, collectibles and goal of a level into the physics world and scene. Every
+ * static piece goes into one merged trimesh collider so joints between pieces are seamless, and
+ * into one mesh per material so the whole course costs a handful of draw calls.
  */
-export const buildLevel = (ctx: BuildContext, level: LevelData): LevelWorld => {
-  const movers: MovingPlatform[] = [];
-  const track: PieceCollision = { floors: [], solids: [] };
-  for (const piece of level.pieces) {
-    if (piece.type === 'movingPlatform') {
-      movers.push(createMovingPlatform(ctx.world, piece, buildBoxMesh(ctx, movingPlatformBox(piece))));
-      continue;
-    }
-    const { boxes, collision } = staticPiece(piece);
-    boxes.forEach((spec) => buildBoxMesh(ctx, spec));
-    track.floors.push(...collision.floors);
-    track.solids.push(...collision.solids);
-  }
-  addTrackCollider(ctx.world, buildTrackMesh(track.floors, track.solids));
+export const buildLevel = (ctx: BuildContext, level: Level): LevelWorld => {
+  const track = levelTrackMesh(level);
+  addTrackCollider(ctx.world, track, COURSE_GROUPS);
+  createTrackMeshes(track, ctx.materials).forEach((mesh) => ctx.scene.add(mesh));
+
+  const moverByPiece = level.pieces.map((piece) => createPieceMover(ctx, piece));
+  const movers = moverByPiece.flatMap((m) => m ?? []);
+  movers.forEach((mover) => {
+    mover.reset();
+    mover.syncMesh(1);
+  });
+
+  const cells = (type: string) => level.entities.filter((e) => e.type === type).map((e) => cellToWorld(e.cell));
+  const [goal] = cells('goal');
   return {
+    spawn: point(cellToWorld(level.spawn.cell)),
     movers,
-    crystals: level.crystals.map((p, i) => createCrystal(ctx.scene, p, i)),
-    checkpoints: level.checkpoints.map((p) => createCheckpoint(ctx.scene, p)),
-    goal: createGoal(ctx.scene, level.goal),
+    moverByPiece,
+    crystals: cells('crystal').map((p, i) => createCrystal(ctx.scene, p, i)),
+    checkpoints: cells('checkpoint').map((p) => createCheckpoint(ctx.scene, p)),
+    goal: createGoal(ctx.scene, goal ?? [0, 0, 0]),
+    track,
   };
 };

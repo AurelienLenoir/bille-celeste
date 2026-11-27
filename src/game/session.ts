@@ -8,16 +8,13 @@ import {
   type GravityDirection,
   type PhysicsWorld,
 } from '../engine/physics';
-import { smoothInput } from '../engine/input';
-import type { LevelData } from '../levels/types';
+import { quantizeInput, smoothInput } from '../engine/input';
 import { BALL_RADIUS, type Ball } from './ball';
 import type { EventBus, GameEvents } from './events';
 import { GOAL_HINT_COOLDOWN, hasFallen, isInGoal, reachesCheckpoint, touchesCrystal } from './rules';
-import type { LevelWorld } from './world';
+import type { LevelWorld, Point } from './world';
 
 export type SessionState = 'menu' | 'play' | 'paused' | 'win';
-
-type Point = { x: number; y: number; z: number };
 
 export type Session = {
   state: () => SessionState;
@@ -37,17 +34,15 @@ export type Session = {
 
 type SessionDeps = {
   physics: PhysicsWorld;
-  level: LevelData;
   world: LevelWorld;
   ball: Ball;
   events: EventBus<GameEvents>;
 };
 
 /** One play-through of a level: timer, falls, crystals, checkpoints and the win condition. */
-export const createSession = ({ physics, level, world, ball, events }: SessionDeps): Session => {
+export const createSession = ({ physics, world, ball, events }: SessionDeps): Session => {
   const { crystals, checkpoints, goal, movers } = world;
-  const [sx, sy, sz] = level.start;
-  const start: Point = { x: sx, y: sy, z: sz };
+  const start: Point = world.spawn;
   const smoothed: Vec2 = { x: 0, y: 0 };
   const stepper = createFixedStepper(PHYSICS_STEP);
   let gravity = gravityDirection(smoothed);
@@ -63,6 +58,7 @@ export const createSession = ({ physics, level, world, ball, events }: SessionDe
   const allCollected = () => collected() === crystals.length;
 
   const respawn = () => {
+    movers.forEach((m) => m.onRespawn?.());
     ball.placeAt(spawn.x, spawn.y + 1, spawn.z);
     smoothed.x = smoothed.y = 0;
     events.emit('respawned', { x: spawn.x, y: spawn.y, z: spawn.z });
@@ -121,7 +117,8 @@ export const createSession = ({ physics, level, world, ball, events }: SessionDe
   };
 
   const play = () => {
-    movers.forEach((m) => m.step(PHYSICS_STEP));
+    const probe = { position: ball.position(), radius: BALL_RADIUS };
+    movers.forEach((m) => m.step(PHYSICS_STEP, probe));
     stepPhysics(physics);
     time += PHYSICS_STEP;
     ball.limitSpeed();
@@ -134,7 +131,7 @@ export const createSession = ({ physics, level, world, ball, events }: SessionDe
   };
 
   const step = (readInput: () => Vec2) => {
-    smoothInput(smoothed, readInput(), PHYSICS_STEP);
+    smoothInput(smoothed, quantizeInput(readInput()), PHYSICS_STEP);
     gravity = gravityDirection(smoothed);
     applyGravity(physics, gravity);
     if (state === 'play') play();

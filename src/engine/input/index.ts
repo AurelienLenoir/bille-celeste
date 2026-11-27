@@ -21,3 +21,11 @@ export const smoothInput = (smoothed: Vec2, target: Vec2, dt: number): void => {
   smoothed.x += (target.x - smoothed.x) * k;
   smoothed.y += (target.y - smoothed.y) * k;
 };
+
+/** Input resolution: 1/256 of full tilt. Quantized input makes recorded replays small and exact. */
+const INPUT_LEVELS = 256;
+
+export const quantizeInput = ({ x, y }: Vec2): Vec2 => ({
+  x: Math.round(x * INPUT_LEVELS) / INPUT_LEVELS,
+  y: Math.round(y * INPUT_LEVELS) / INPUT_LEVELS,
+});
