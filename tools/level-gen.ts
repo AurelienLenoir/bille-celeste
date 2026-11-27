@@ -5,7 +5,7 @@
  */
 import { writeFileSync } from 'node:fs';
 import { initPhysics } from '../src/engine/physics';
-import { runBot } from '../src/game/bot';
+import { parTimeFrom, runBot } from '../src/game/bot';
 import { generateLevel } from '../src/levels/generate';
 import { validateLevel } from '../src/levels/validate';
 import { arg, LEVEL_DIR } from './levels';
@@ -32,7 +32,7 @@ if (!bot.won) {
   console.log(`✗ Le bot ne termine pas ce brouillon (${bot.falls} chutes). Essaie une autre graine.`);
   process.exit(1);
 }
-level.parTimeSec = Math.ceil((bot.time * 1.3) / 5) * 5;
+level.parTimeSec = parTimeFrom(bot.time);
 const out = arg('out') ?? `${LEVEL_DIR}/${level.id}.json`;
 writeFileSync(out, `${JSON.stringify(level, null, 2)}\n`);
 console.log(

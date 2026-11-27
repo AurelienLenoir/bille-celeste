@@ -37,3 +37,17 @@ test('the editor creates a level, tests it with the bot, plays it and exports it
   expect(exported.entities.filter((e: { type: string }) => e.type === 'crystal')).toHaveLength(2);
   expect(errors).toEqual([]);
 });
+
+test('the editor generates a level and calibrates its par time with the bot', async ({ page }) => {
+  await page.goto('./editor/');
+  await page.getByRole('button', { name: 'Générer un niveau…' }).click();
+  const panel = page.getByRole('group', { name: 'Générer un niveau' });
+  await panel.getByLabel('Monde').selectOption('2');
+  await panel.getByRole('spinbutton', { name: 'Graine' }).fill('42');
+  await panel.getByRole('spinbutton', { name: 'Graine' }).press('Tab');
+  await panel.getByRole('button', { name: 'Générer', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('gen-w2-42', { timeout: 30_000 });
+  await expect(page.getByRole('status')).toContainText('temps de référence');
+  await expect(page.getByLabel('Identifiant')).toHaveValue('gen-w2-42');
+  await expect(page.getByText('✓ Niveau valide')).toBeVisible();
+});

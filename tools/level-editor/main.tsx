@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { useSyncExternalStore } from 'preact/compat';
 import { createStore } from 'zustand/vanilla';
 import { initPhysics } from '../../src/engine/physics';
-import { runBot } from '../../src/game/bot';
+import { parTimeFrom, runBot } from '../../src/game/bot';
 import { DEFAULT_LEVEL, EDITOR_LEVEL_KEY, fetchLevel, LEVEL_IDS } from '../../src/levels/catalog';
 import { generateLevel } from '../../src/levels/generate';
 import { parseLevel } from '../../src/levels/loader';
@@ -59,6 +59,87 @@ store.subscribe(({ level }, previous) => {
 
 const openLevel = (level: Level) => store.setState(initialState(level, store.getState().opened + 1), true);
 
+// ——— Generator ———
+
+const randomSeed = () => 1 + Math.floor(Math.random() * 999_999);
+
+/** Runs the procedural generator (same as `npm run level:gen`) and opens its level, par time set by the bot. */
+const GeneratePanel = ({ notify, close }: { notify: (message: string) => void; close: () => void }) => {
+  const [options, setOptions] = useState({ world: 1, difficulty: 0.3, seed: randomSeed() });
+  const [busy, setBusy] = useState(false);
+
+  const generate = () => {
+    setBusy(true);
+    // Lets the button show its busy state before the generator and the bot take the main thread.
+    setTimeout(() => {
+      try {
+        const level = generateLevel(options);
+        const run = runBot(level);
+        if (run.won) level.parTimeSec = parTimeFrom(run.time);
+        openLevel(level);
+        notify(
+          run.won
+            ? `${level.id} : ${level.pieces.length} pièces, bot en ${run.time.toFixed(1)} s, temps de référence ${level.parTimeSec} s`
+            : `${level.id} généré, mais le bot ne le termine pas : essaie une autre graine`,
+        );
+        close();
+      } catch (error) {
+        notify(error instanceof Error ? error.message : String(error));
+      } finally {
+        setBusy(false);
+      }
+    }, 30);
+  };
+
+  return (
+    <div class="gen" role="group" aria-label="Générer un niveau">
+      <label>
+        Monde
+        <select
+          value={options.world}
+          onChange={(e) => setOptions({ ...options, world: Number(e.currentTarget.value) })}
+        >
+          {[1, 2, 3, 4].map((w) => (
+            <option value={w}>{w}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Difficulté <b>{Math.round(options.difficulty * 100)} %</b>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.05}
+          value={options.difficulty}
+          onInput={(e) => setOptions({ ...options, difficulty: Number(e.currentTarget.value) })}
+        />
+      </label>
+      <label>
+        Graine
+        <input
+          type="number"
+          min={1}
+          value={options.seed}
+          onChange={(e) =>
+            setOptions({ ...options, seed: Math.max(1, Math.round(Number(e.currentTarget.value)) || 1) })
+          }
+        />
+      </label>
+      <button
+        aria-label="Graine au hasard"
+        title="Graine au hasard"
+        onClick={() => setOptions({ ...options, seed: randomSeed() })}
+      >
+        🎲
+      </button>
+      <button class="primary" disabled={busy} onClick={generate}>
+        {busy ? 'Génération…' : 'Générer'}
+      </button>
+    </div>
+  );
+};
+
 // ——— Toolbar ———
 
 const Toolbar = ({ notify }: { notify: (message: string) => void }) => {
@@ -67,7 +148,7 @@ const Toolbar = ({ notify }: { notify: (message: string) => void }) => {
   const rot = useEditor((s) => s.rot);
   const canUndo = useEditor((s) => s.past.length > 0);
   const canRedo = useEditor((s) => s.future.length > 0);
-  const [gen, setGen] = useState({ open: false, world: 1, difficulty: 0.3, seed: 1 });
+  const [generating, setGenerating] = useState(false);
   const file = useRef<HTMLInputElement>(null);
 
   const play = () => {
@@ -142,48 +223,9 @@ const Toolbar = ({ notify }: { notify: (message: string) => void }) => {
         hidden
         onChange={(e) => importFile(e.currentTarget)}
       />
-      <button onClick={() => setGen({ ...gen, open: !gen.open })}>Générer…</button>
-      {gen.open && (
-        <span class="gen">
-          <label>
-            Monde
-            <input
-              type="number"
-              min={1}
-              max={4}
-              value={gen.world}
-              onInput={(e) => setGen({ ...gen, world: +e.currentTarget.value })}
-            />
-          </label>
-          <label>
-            Difficulté
-            <input
-              type="number"
-              min={0}
-              max={1}
-              step={0.1}
-              value={gen.difficulty}
-              onInput={(e) => setGen({ ...gen, difficulty: +e.currentTarget.value })}
-            />
-          </label>
-          <label>
-            Graine
-            <input type="number" value={gen.seed} onInput={(e) => setGen({ ...gen, seed: +e.currentTarget.value })} />
-          </label>
-          <button
-            onClick={() => {
-              try {
-                openLevel(generateLevel({ world: gen.world, difficulty: gen.difficulty, seed: gen.seed }));
-                setGen({ ...gen, open: false });
-              } catch (error) {
-                notify(error instanceof Error ? error.message : String(error));
-              }
-            }}
-          >
-            OK
-          </button>
-        </span>
-      )}
+      <button class={generating ? 'on' : ''} onClick={() => setGenerating(!generating)}>
+        Générer un niveau…
+      </button>
       <span class="sep" />
       <button disabled={!canUndo} onClick={() => set(undo)} title="Ctrl+Z">
         Annuler
@@ -213,6 +255,7 @@ const Toolbar = ({ notify }: { notify: (message: string) => void }) => {
       <button class="primary" onClick={exportLevel}>
         Exporter
       </button>
+      {generating && <GeneratePanel notify={notify} close={() => setGenerating(false)} />}
     </header>
   );
 };
