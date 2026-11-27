@@ -19,106 +19,18 @@
       "surface": "mint"
     },
     {
-      "type": "stairs",
+      "type": "bridge",
       "cell": [0, 0, -2],
       "rot": 0,
-      "steps": 3,
-      "width": "normal",
-      "surface": "cream"
+      "length": 4,
+      "width": "narrow",
+      "surface": "wood"
     },
     {
       "type": "ramp",
-      "cell": [0, -3, -5],
+      "cell": [0, 0, -6],
       "rot": 0,
       "length": 4,
-      "drop": 2,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "stairs",
-      "cell": [0, -5, -9],
-      "rot": 0,
-      "steps": 3,
-      "width": "normal",
-      "surface": "cream"
-    },
-    {
-      "type": "curve",
-      "cell": [0, -8, -12],
-      "rot": 0,
-      "radius": 2,
-      "angle": 90,
-      "dir": "right",
-      "width": "wide",
-      "rails": "both",
-      "surface": "cream"
-    },
-    {
-      "type": "platform",
-      "cell": [3, -8, -13],
-      "size": [3, 3],
-      "rot": 0,
-      "surface": "lav"
-    },
-    {
-      "type": "straight",
-      "cell": [3, -8, -11],
-      "rot": 180,
-      "length": 2,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "stairs",
-      "cell": [5, -8, -13],
-      "rot": 90,
-      "steps": 3,
-      "width": "normal",
-      "surface": "cream"
-    },
-    {
-      "type": "ramp",
-      "cell": [8, -11, -13],
-      "rot": 90,
-      "length": 2,
-      "drop": 3,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "straight",
-      "cell": [10, -14, -13],
-      "rot": 90,
-      "length": 4,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "platform",
-      "cell": [15, -14, -13],
-      "size": [3, 3],
-      "rot": 0,
-      "surface": "lav"
-    },
-    {
-      "type": "straight",
-      "cell": [15, -14, -15],
-      "rot": 0,
-      "length": 2,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "ramp",
-      "cell": [17, -14, -13],
-      "rot": 90,
-      "length": 3,
       "drop": 4,
       "width": "normal",
       "rails": "none",
@@ -126,35 +38,134 @@
     },
     {
       "type": "ramp",
-      "cell": [20, -18, -13],
-      "rot": 90,
+      "cell": [0, -4, -10],
+      "rot": 0,
       "length": 2,
-      "drop": 2,
+      "drop": 3,
       "width": "normal",
       "rails": "both",
       "surface": "cream"
     },
     {
-      "type": "platform",
-      "cell": [23, -20, -13],
-      "size": [3, 3],
+      "type": "ramp",
+      "cell": [0, -7, -12],
       "rot": 0,
-      "surface": "lav"
-    },
-    {
-      "type": "straight",
-      "cell": [23, -20, -11],
-      "rot": 180,
       "length": 2,
+      "drop": 2,
       "width": "normal",
       "rails": "none",
       "surface": "cream"
     },
     {
       "type": "ramp",
-      "cell": [25, -20, -13],
+      "cell": [0, -9, -14],
+      "rot": 0,
+      "length": 2,
+      "drop": 3,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [0, -12, -17],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [2, -12, -17],
       "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "bridge",
+      "cell": [0, -12, -19],
+      "rot": 0,
       "length": 4,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "ramp",
+      "cell": [0, -12, -23],
+      "rot": 0,
+      "length": 2,
+      "drop": 3,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [0, -15, -25],
+      "rot": 0,
+      "length": 4,
+      "drop": 5,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [0, -20, -29],
+      "rot": 0,
+      "radius": 1,
+      "angle": 90,
+      "dir": "left",
+      "width": "wide",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "stairs",
+      "cell": [-1, -20, -29],
+      "rot": 270,
+      "steps": 3,
+      "width": "normal",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-4, -23, -29],
+      "rot": 270,
+      "length": 2,
+      "width": "wide",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-6, -23, -29],
+      "rot": 270,
+      "length": 2,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "halfPipe",
+      "cell": [-8, -23, -29],
+      "rot": 270,
+      "length": 5,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [-14, -23, -29],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "ramp",
+      "cell": [-16, -23, -29],
+      "rot": 270,
+      "length": 2,
       "drop": 2,
       "width": "normal",
       "rails": "both",
@@ -162,15 +173,15 @@
     },
     {
       "type": "platform",
-      "cell": [30, -22, -13],
+      "cell": [-19, -25, -29],
       "size": [3, 3],
       "rot": 0,
       "surface": "lav"
     },
     {
       "type": "wall",
-      "cell": [31, -22, -14],
-      "rot": 90,
+      "cell": [-20, -25, -28],
+      "rot": 270,
       "length": 3,
       "height": 0.6
     }
@@ -178,46 +189,50 @@
   "entities": [
     {
       "type": "checkpoint",
-      "cell": [3, -8, -13]
+      "cell": [0, -12, -17]
     },
     {
       "type": "hiddenGem",
-      "cell": [3, -8, -10]
+      "cell": [3, -12, -17]
     },
     {
       "type": "checkpoint",
-      "cell": [15, -14, -13]
+      "cell": [-14, -23, -29]
     },
     {
       "type": "crystal",
-      "cell": [15, -14, -16]
-    },
-    {
-      "type": "checkpoint",
-      "cell": [23, -20, -13]
+      "cell": [0, 0, -4]
     },
     {
       "type": "crystal",
-      "cell": [23, -20, -10]
+      "cell": [0, -12, -21]
     },
     {
       "type": "crystal",
-      "cell": [12, -14, -13]
+      "cell": [-5, -23, -29]
+    },
+    {
+      "type": "crystal",
+      "cell": [-7, -23, -29]
+    },
+    {
+      "type": "crystal",
+      "cell": [-9, -23, -29]
     },
     {
       "type": "goal",
-      "cell": [30, -22, -13]
+      "cell": [-19, -25, -29]
     }
   ],
   "modifiers": [
     {
       "type": "shield",
-      "cell": [10, -14, -13]
+      "cell": [-4, -23, -29]
     }
   ],
   "signs": [],
   "decor": {
     "theme": "garden",
-    "seed": 3233
+    "seed": 304
   }
 }

@@ -6,7 +6,7 @@
     "en": "Magnetic Field"
   },
   "world": 4,
-  "parTimeSec": 65,
+  "parTimeSec": 75,
   "spawn": {
     "cell": [0, 0, 0]
   },
@@ -19,8 +19,141 @@
       "surface": "mint"
     },
     {
+      "type": "rotatingPlatform",
+      "cell": [0, 0, -3],
+      "diameter": 3,
+      "speed": 35.5,
+      "surface": "rose"
+    },
+    {
+      "type": "curve",
+      "cell": [0, 0, -5],
+      "rot": 0,
+      "radius": 3,
+      "angle": 90,
+      "dir": "right",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "bridge",
+      "cell": [3, 0, -7],
+      "rot": 90,
+      "length": 4,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "curve",
+      "cell": [7, 0, -7],
+      "rot": 90,
+      "radius": 2,
+      "angle": 90,
+      "dir": "left",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
       "type": "straight",
-      "cell": [0, 0, -2],
+      "cell": [8, 0, -9],
+      "rot": 0,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "stairs",
+      "cell": [8, 0, -13],
+      "rot": 0,
+      "steps": 3,
+      "width": "normal",
+      "surface": "cream"
+    },
+    {
+      "type": "seesaw",
+      "cell": [8, -3, -16],
+      "rot": 0,
+      "length": 3,
+      "width": "wide",
+      "surface": "wood"
+    },
+    {
+      "type": "platform",
+      "cell": [8, -3, -20],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [6, -3, -20],
+      "rot": 270,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [8, -3, -22],
+      "rot": 0,
+      "length": 5,
+      "width": "narrow",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "bridge",
+      "cell": [8, -3, -27],
+      "rot": 0,
+      "length": 3,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "rotatingPlatform",
+      "cell": [8, -3, -31],
+      "diameter": 3,
+      "speed": 35.5,
+      "surface": "rose"
+    },
+    {
+      "type": "rotatingPlatform",
+      "cell": [8, -3, -34],
+      "diameter": 3,
+      "speed": 35.5,
+      "surface": "rose"
+    },
+    {
+      "type": "rotatingPlatform",
+      "cell": [8, -3, -37],
+      "diameter": 3,
+      "speed": -35.5,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [8, -3, -40],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "ramp",
+      "cell": [8, -3, -42],
+      "rot": 0,
+      "length": 2,
+      "drop": 3,
+      "width": "narrow",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [8, -6, -44],
       "rot": 0,
       "length": 2,
       "width": "normal",
@@ -28,8 +161,35 @@
       "surface": "cream"
     },
     {
+      "type": "bridge",
+      "cell": [8, -6, -46],
+      "rot": 0,
+      "length": 3,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "ramp",
+      "cell": [8, -6, -49],
+      "rot": 0,
+      "length": 3,
+      "drop": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [8, -8, -52],
+      "rot": 0,
+      "length": 4,
+      "width": "rail",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
       "type": "curve",
-      "cell": [0, 0, -4],
+      "cell": [8, -8, -56],
       "rot": 0,
       "radius": 1,
       "angle": 90,
@@ -39,240 +199,51 @@
       "surface": "cream"
     },
     {
-      "type": "rotatingPlatform",
-      "cell": [-2, 0, -4],
-      "diameter": 3,
-      "speed": 30,
-      "surface": "rose"
-    },
-    {
-      "type": "straight",
-      "cell": [-4, 0, -4],
+      "type": "seesaw",
+      "cell": [7, -8, -56],
       "rot": 270,
-      "length": 5,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "straight",
-      "cell": [-9, 0, -4],
-      "rot": 270,
-      "length": 2,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "ramp",
-      "cell": [-11, 0, -4],
-      "rot": 270,
-      "length": 2,
-      "drop": 2,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "straight",
-      "cell": [-13, -2, -4],
-      "rot": 270,
-      "length": 2,
-      "width": "normal",
-      "rails": "both",
-      "surface": "cream"
-    },
-    {
-      "type": "straight",
-      "cell": [-15, -2, -4],
-      "rot": 270,
-      "length": 2,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "straight",
-      "cell": [-17, -2, -4],
-      "rot": 270,
-      "length": 4,
-      "width": "normal",
-      "rails": "both",
-      "surface": "cream"
-    },
-    {
-      "type": "platform",
-      "cell": [-22, -2, -4],
-      "size": [3, 3],
-      "rot": 0,
-      "surface": "lav"
-    },
-    {
-      "type": "straight",
-      "cell": [-22, -2, -2],
-      "rot": 180,
-      "length": 2,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "halfPipe",
-      "cell": [-24, -2, -4],
-      "rot": 270,
-      "length": 3,
-      "surface": "lav"
-    },
-    {
-      "type": "rotatingPlatform",
-      "cell": [-28, -2, -4],
-      "diameter": 3,
-      "speed": 30,
-      "surface": "rose"
-    },
-    {
-      "type": "straight",
-      "cell": [-30, -2, -4],
-      "rot": 270,
-      "length": 4,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "curve",
-      "cell": [-34, -2, -4],
-      "rot": 270,
-      "radius": 3,
-      "angle": 90,
-      "dir": "right",
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "platform",
-      "cell": [-36, -2, -8],
-      "size": [3, 3],
-      "rot": 0,
-      "surface": "lav"
-    },
-    {
-      "type": "straight",
-      "cell": [-34, -2, -8],
-      "rot": 90,
-      "length": 2,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "fallingTile",
-      "cell": [-36, -2, -10],
-      "delay": 0.66,
-      "surface": "rose"
-    },
-    {
-      "type": "fallingTile",
-      "cell": [-36, -2, -11],
-      "delay": 0.66,
-      "surface": "rose"
-    },
-    {
-      "type": "fallingTile",
-      "cell": [-36, -2, -12],
-      "delay": 0.66,
-      "surface": "rose"
-    },
-    {
-      "type": "curve",
-      "cell": [-36, -2, -13],
-      "rot": 0,
-      "radius": 1,
-      "angle": 90,
-      "dir": "right",
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "ramp",
-      "cell": [-35, -2, -13],
-      "rot": 90,
-      "length": 2,
-      "drop": 2,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "straight",
-      "cell": [-33, -4, -13],
-      "rot": 90,
-      "length": 2,
-      "width": "normal",
-      "rails": "both",
-      "surface": "cream"
-    },
-    {
-      "type": "rotatingPlatform",
-      "cell": [-30, -4, -13],
-      "diameter": 3,
-      "speed": -30,
-      "surface": "rose"
-    },
-    {
-      "type": "straight",
-      "cell": [-28, -4, -13],
-      "rot": 90,
-      "length": 5,
-      "width": "normal",
-      "rails": "both",
-      "surface": "cream"
-    },
-    {
-      "type": "platform",
-      "cell": [-22, -4, -13],
-      "size": [3, 3],
-      "rot": 0,
-      "surface": "lav"
-    },
-    {
-      "type": "straight",
-      "cell": [-22, -4, -11],
-      "rot": 180,
-      "length": 2,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "straight",
-      "cell": [-20, -4, -13],
-      "rot": 90,
       "length": 3,
       "width": "wide",
-      "rails": "both",
-      "surface": "cream"
-    },
-    {
-      "type": "rotatingPlatform",
-      "cell": [-16, -4, -13],
-      "diameter": 3,
-      "speed": 30,
-      "surface": "rose"
+      "surface": "wood"
     },
     {
       "type": "platform",
-      "cell": [-13, -4, -13],
+      "cell": [3, -8, -56],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [1, -8, -56],
+      "rot": 270,
+      "length": 3,
+      "width": "rail",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [-2, -8, -56],
+      "rot": 270,
+      "radius": 2,
+      "angle": 90,
+      "dir": "right",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-3, -8, -59],
       "size": [3, 3],
       "rot": 0,
       "surface": "lav"
     },
     {
       "type": "wall",
-      "cell": [-12, -4, -14],
-      "rot": 90,
+      "cell": [-4, -8, -60],
+      "rot": 0,
       "length": 3,
       "height": 0.6
     }
@@ -280,27 +251,19 @@
   "entities": [
     {
       "type": "checkpoint",
-      "cell": [-22, -2, -4]
+      "cell": [8, -3, -20]
     },
     {
       "type": "hiddenGem",
-      "cell": [-22, -2, -1]
+      "cell": [5, -3, -20]
     },
     {
       "type": "checkpoint",
-      "cell": [-36, -2, -8]
-    },
-    {
-      "type": "crystal",
-      "cell": [-33, -2, -8]
+      "cell": [8, -3, -40]
     },
     {
       "type": "checkpoint",
-      "cell": [-22, -4, -13]
-    },
-    {
-      "type": "crystal",
-      "cell": [-22, -4, -10]
+      "cell": [3, -8, -56]
     },
     {
       "type": "crystal",
@@ -308,57 +271,58 @@
     },
     {
       "type": "crystal",
-      "cell": [-6, 0, -4]
+      "cell": [8, 0, -11]
     },
     {
       "type": "crystal",
-      "cell": [-14, -2, -4]
+      "cell": [8, -3, -24]
     },
     {
       "type": "crystal",
-      "cell": [-19, -2, -4]
+      "cell": [8, -3, -31]
     },
     {
       "type": "crystal",
-      "cell": [-28, -2, -4]
+      "cell": [8, -3, -37]
     },
     {
       "type": "crystal",
-      "cell": [-32, -4, -13]
+      "cell": [8, -6, -47]
+    },
+    {
+      "type": "crystal",
+      "cell": [6, -8, -56]
     },
     {
       "type": "goal",
-      "cell": [-13, -4, -13]
+      "cell": [-3, -8, -59]
     }
   ],
   "modifiers": [
     {
-      "type": "magnet",
-      "cell": [0, 0, -2]
+      "type": "heavy",
+      "cell": [8, 0, -12]
     },
     {
       "type": "magnet",
-      "cell": [-4, 0, -4]
+      "cell": [8, -3, -22]
+    },
+    {
+      "type": "magnet",
+      "cell": [8, -6, -44]
     },
     {
       "type": "heavy",
-      "cell": [-33, -2, -4]
+      "cell": [8, -8, -55]
     },
     {
       "type": "heavy",
-      "cell": [-24, -4, -13]
-    },
-    {
-      "type": "conveyor",
-      "cell": [-19, -4, -13],
-      "size": [3, 1],
-      "rot": 90,
-      "speed": 3.7
+      "cell": [-1, -8, -56]
     }
   ],
   "signs": [],
   "decor": {
     "theme": "factory",
-    "seed": 10347
+    "seed": 16549
   }
 }

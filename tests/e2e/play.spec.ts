@@ -50,7 +50,12 @@ test('restart resets the counters', async ({ page }) => {
 test('pause freezes the timer and resume continues it', async ({ page }) => {
   await page.goto('./?level=poc');
   await page.getByRole('button', { name: 'Jouer au doigt' }).click();
+  // The chrono waits for the ball to move.
+  await page.waitForTimeout(400);
+  await expect(page.locator('#tm')).toHaveText('0:00.0');
+  await page.keyboard.down('ArrowUp');
   await expect(page.locator('#tm')).not.toHaveText('0:00.0');
+  await page.keyboard.up('ArrowUp');
   await page.getByRole('button', { name: 'Pause' }).click();
   await expect(page.getByRole('heading', { name: 'Pause' })).toBeVisible();
   const frozen = await page.locator('#tm').textContent();

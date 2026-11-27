@@ -4,7 +4,8 @@ type Point = { x: number; y: number; z: number };
 
 const CRYSTAL_PICKUP_RADIUS = 0.85;
 const CRYSTAL_CENTRE_HEIGHT = 0.4;
-const CHECKPOINT_RADIUS = 2.6;
+/** Half-size of the zone that triggers a checkpoint: its whole 3 × 3 cell platform (6 × 6 units). */
+const CHECKPOINT_HALF_SIZE = 3;
 const CHECKPOINT_HEIGHT_TOLERANCE = 1.2;
 const GOAL_RADIUS = 1.25;
 const GOAL_FLOOR_TOLERANCE = 0.5;
@@ -14,8 +15,10 @@ export const GOAL_HINT_COOLDOWN = 2.5;
 export const touchesCrystal = (ball: Point, [x, y, z]: Vec3Tuple): boolean =>
   Math.hypot(ball.x - x, ball.y - (y + CRYSTAL_CENTRE_HEIGHT), ball.z - z) < CRYSTAL_PICKUP_RADIUS;
 
+/** Anywhere on the checkpoint's platform counts, so cutting across a corner still saves it. */
 export const reachesCheckpoint = (ball: Point, checkpoint: Point, ballRadius: number): boolean =>
-  Math.hypot(ball.x - checkpoint.x, ball.z - checkpoint.z) < CHECKPOINT_RADIUS &&
+  Math.abs(ball.x - checkpoint.x) < CHECKPOINT_HALF_SIZE &&
+  Math.abs(ball.z - checkpoint.z) < CHECKPOINT_HALF_SIZE &&
   Math.abs(ball.y - checkpoint.y - ballRadius) < CHECKPOINT_HEIGHT_TOLERANCE;
 
 export const isInGoal = (ball: Point, goal: Point): boolean =>

@@ -1,6 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { initPhysics } from '../../src/engine/physics';
 import { runBot } from '../../src/game/bot';
+import { buildNav, entityNode, nodeAt, pathTo, shortestPaths } from '../../src/game/nav';
+import { cellToWorld } from '../../src/levels/grid';
 import { generateLevel, GENERATED_MODIFIERS } from '../../src/levels/generate';
 import { hasErrors, validateLevel } from '../../src/levels/validate';
 
@@ -40,6 +42,36 @@ describe('generateLevel', () => {
     expect(generateLevel({ world: 2, difficulty: 0.4, seed: 9 }).entities.some((e) => e.type === 'hiddenGem')).toBe(
       true,
     );
+  });
+
+  it('never puts two checkpoints in a row, nor crystals off the course', () => {
+    for (const [world, seed] of [
+      [1, 1],
+      [2, 2],
+      [2, 9],
+      [3, 4],
+      [4, 6],
+    ] as const) {
+      const level = generateLevel({ world, difficulty: 0.6, seed });
+      const { graph } = buildNav(level);
+      const start = nodeAt(graph, cellToWorld(level.spawn.cell)) ?? -1;
+      const goal = entityNode(graph, level.entities.find((e) => e.type === 'goal') ?? { cell: [0, 0, 0] }) ?? -1;
+      const { dist, prev } = shortestPaths(graph, start);
+      const spine = pathTo(prev, goal);
+      const along = new Map(spine.map((node, n) => [node, n]));
+      // Checkpoints in course order, then how far apart they are along the way to the goal.
+      const checkpoints = level.entities
+        .filter((e) => e.type === 'checkpoint')
+        .map((e) => dist[entityNode(graph, e) ?? -1] ?? Infinity)
+        .sort((a, b) => a - b);
+      checkpoints.slice(1).forEach((d, n) => expect(d - (checkpoints[n] ?? 0)).toBeGreaterThan(10));
+      // Every crystal is on the way from the spawn to the goal: no side trips.
+      const spinePieces = new Set(spine.map((node) => graph.nodes[node]?.piece));
+      for (const crystal of level.entities.filter((e) => e.type === 'crystal')) {
+        const node = entityNode(graph, crystal) ?? -1;
+        expect(along.has(node) || spinePieces.has(graph.nodes[node]?.piece)).toBe(true);
+      }
+    }
   });
 
   it('introduces mechanics by world', () => {

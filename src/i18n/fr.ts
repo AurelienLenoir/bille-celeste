@@ -63,6 +63,7 @@ export const fr = {
     back: 'Retour',
   },
   loading: 'Chargement…',
+  rotate: 'Tourne ton téléphone en portrait pour jouer',
   touchHint: 'Pose ton pouce et glisse pour pencher le parcours',
   tiltUnavailable:
     'Le capteur d’inclinaison n’est pas accessible depuis cette page. Contrôle au doigt activé : pose ton pouce et glisse.',

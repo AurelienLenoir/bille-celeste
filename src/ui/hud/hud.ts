@@ -55,6 +55,9 @@ export const bindHud = (events: EventBus<GameEvents>, toast: Toast): void => {
   });
   events.on('shieldSaved', () => toast(t().shieldSaved, 1400));
   events.on('hiddenGemFound', () => toast(t().hiddenGem, 1800));
+  events.on('crystalsPutBack', ({ collected, total }) => {
+    crystals.textContent = `${collected}/${total}`;
+  });
   events.on('crystalCollected', ({ collected, total }) => {
     crystals.textContent = `${collected}/${total}`;
   });
