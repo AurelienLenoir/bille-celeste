@@ -58,11 +58,15 @@ export type Tilt = {
 
 /**
  * Gyroscope input. `options` is read on every call so settings apply immediately.
- * Turning the phone between portrait and landscape recalibrates on the next reading.
+ * The neutral pose is kept per screen rotation: if the page flips to landscape for a moment and
+ * back, the portrait neutral comes back as it was instead of being replaced by whatever pose the
+ * phone had when it flipped back (which felt like a drift that needed recalibrating).
  */
 export const createTilt = (options: () => TiltOptions = () => DEFAULT_TILT_OPTIONS): Tilt => {
   let current: Vec2 | null = null;
   let neutral: Vec2 | null = null;
+  /** Neutral pose of each screen rotation seen so far. */
+  const neutrals = new Map<number, Vec2>();
   let received = false;
   let lastAngle = screenAngle();
   let lastStamp = 0;
@@ -74,12 +78,15 @@ export const createTilt = (options: () => TiltOptions = () => DEFAULT_TILT_OPTIO
     if (angle !== lastAngle) {
       lastAngle = angle;
       current = null;
-      neutral = null;
+      neutral = neutrals.get(angle) ?? null;
     }
     received = true;
     current = current ? lowPass(current, reading, (e.timeStamp - lastStamp) / 1000) : reading;
     lastStamp = e.timeStamp;
-    if (!neutral) neutral = current;
+    if (!neutral) {
+      neutral = current;
+      neutrals.set(angle, neutral);
+    }
   };
 
   const enable = async () => {
@@ -99,10 +106,12 @@ export const createTilt = (options: () => TiltOptions = () => DEFAULT_TILT_OPTIO
     calibrate: () => {
       if (!current) return false;
       neutral = { ...current };
+      neutrals.set(lastAngle, neutral);
       return true;
     },
     resetCalibration: () => {
       neutral = null;
+      neutrals.clear();
     },
     hasReading: () => received,
     read: () => (current && neutral ? tiltToInput(current, neutral, options()) : null),

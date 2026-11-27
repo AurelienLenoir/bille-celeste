@@ -6,7 +6,7 @@
     "en": "Brittle Tiles"
   },
   "world": 3,
-  "parTimeSec": 65,
+  "parTimeSec": 60,
   "spawn": {
     "cell": [0, 0, 0]
   },
@@ -19,98 +19,90 @@
       "surface": "mint"
     },
     {
-      "type": "straight",
+      "type": "fallingTile",
       "cell": [0, 0, -2],
+      "delay": 0.6200000000000001,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [0, 0, -3],
+      "delay": 0.6200000000000001,
+      "surface": "rose"
+    },
+    {
+      "type": "bridge",
+      "cell": [0, 0, -4],
       "rot": 0,
-      "length": 2,
+      "length": 4,
       "width": "narrow",
-      "rails": "both",
+      "surface": "wood"
+    },
+    {
+      "type": "stairs",
+      "cell": [0, 0, -8],
+      "rot": 0,
+      "steps": 2,
+      "width": "normal",
       "surface": "cream"
     },
     {
       "type": "straight",
-      "cell": [0, 0, -4],
+      "cell": [0, -2, -10],
       "rot": 0,
       "length": 5,
-      "width": "normal",
-      "rails": "both",
+      "width": "narrow",
+      "rails": "none",
       "surface": "cream"
+    },
+    {
+      "type": "halfPipe",
+      "cell": [0, -2, -15],
+      "rot": 0,
+      "length": 3,
+      "surface": "lav"
     },
     {
       "type": "ramp",
-      "cell": [0, 0, -9],
+      "cell": [0, -2, -18],
       "rot": 0,
-      "length": 3,
+      "length": 4,
       "drop": 4,
       "width": "normal",
       "rails": "none",
       "surface": "cream"
     },
     {
-      "type": "curve",
-      "cell": [0, -4, -12],
-      "rot": 0,
-      "radius": 3,
-      "angle": 90,
-      "dir": "left",
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "bridge",
-      "cell": [-3, -4, -14],
-      "rot": 270,
-      "length": 3,
-      "width": "narrow",
-      "surface": "wood"
-    },
-    {
       "type": "platform",
-      "cell": [-7, -4, -14],
+      "cell": [0, -6, -23],
       "size": [3, 3],
       "rot": 0,
       "surface": "lav"
     },
     {
       "type": "straight",
-      "cell": [-7, -4, -16],
-      "rot": 0,
+      "cell": [-2, -6, -23],
+      "rot": 270,
       "length": 2,
       "width": "normal",
       "rails": "none",
       "surface": "cream"
     },
     {
-      "type": "platform",
-      "cell": [-10, -4, -14],
-      "size": [3, 3],
+      "type": "ramp",
+      "cell": [0, -6, -25],
       "rot": 0,
-      "surface": "rose"
-    },
-    {
-      "type": "movingPlatform",
-      "path": [
-        [-12.5, -4, -14],
-        [-16.5, -4, -14]
-      ],
-      "size": [2, 1.5],
-      "speed": 2.4000000000000004,
-      "pause": 0.95,
-      "surface": "lav"
-    },
-    {
-      "type": "platform",
-      "cell": [-19, -4, -14],
-      "size": [3, 3],
-      "rot": 0,
-      "surface": "mint"
+      "length": 4,
+      "drop": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
     },
     {
       "type": "curve",
-      "cell": [-21, -4, -14],
-      "rot": 270,
-      "radius": 3,
+      "cell": [0, -10, -29],
+      "rot": 0,
+      "radius": 1,
       "angle": 90,
       "dir": "right",
       "width": "normal",
@@ -118,101 +110,143 @@
       "surface": "cream"
     },
     {
+      "type": "bridge",
+      "cell": [1, -10, -29],
+      "rot": 90,
+      "length": 2,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
       "type": "platform",
-      "cell": [-23, -4, -18],
+      "cell": [4, -10, -29],
       "size": [3, 3],
       "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "movingPlatform",
+      "path": [
+        [6.5, -10, -29],
+        [10.5, -10, -29]
+      ],
+      "size": [2, 1.5],
+      "speed": 2.7199999999999998,
+      "pause": 0.85,
       "surface": "lav"
     },
     {
-      "type": "fallingTile",
-      "cell": [-23, -4, -20],
-      "delay": 0.7,
-      "surface": "rose"
+      "type": "platform",
+      "cell": [13, -10, -29],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
     },
     {
-      "type": "fallingTile",
-      "cell": [-23, -4, -21],
-      "delay": 0.7,
-      "surface": "rose"
-    },
-    {
-      "type": "fallingTile",
-      "cell": [-23, -4, -22],
-      "delay": 0.7,
-      "surface": "rose"
-    },
-    {
-      "type": "fallingTile",
-      "cell": [-23, -4, -23],
-      "delay": 0.7,
-      "surface": "rose"
-    },
-    {
-      "type": "fallingTile",
-      "cell": [-23, -4, -24],
-      "delay": 0.7,
-      "surface": "rose"
+      "type": "ramp",
+      "cell": [15, -10, -29],
+      "rot": 90,
+      "length": 2,
+      "drop": 2,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
     },
     {
       "type": "straight",
-      "cell": [-23, -4, -25],
-      "rot": 0,
+      "cell": [17, -12, -29],
+      "rot": 90,
       "length": 4,
       "width": "normal",
       "rails": "none",
       "surface": "cream"
     },
     {
-      "type": "straight",
-      "cell": [-23, -4, -29],
-      "rot": 0,
-      "length": 3,
-      "width": "normal",
-      "rails": "none",
-      "surface": "cream"
-    },
-    {
-      "type": "platform",
-      "cell": [-23, -4, -33],
-      "size": [3, 3],
-      "rot": 0,
-      "surface": "lav"
-    },
-    {
-      "type": "straight",
-      "cell": [-21, -4, -33],
+      "type": "bridge",
+      "cell": [21, -12, -29],
       "rot": 90,
       "length": 2,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "stairs",
+      "cell": [23, -12, -29],
+      "rot": 90,
+      "steps": 2,
+      "width": "normal",
+      "surface": "cream"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [25, -14, -29],
+      "delay": 0.6200000000000001,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [26, -14, -29],
+      "delay": 0.6200000000000001,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [27, -14, -29],
+      "delay": 0.6200000000000001,
+      "surface": "rose"
+    },
+    {
+      "type": "curve",
+      "cell": [28, -14, -29],
+      "rot": 90,
+      "radius": 1,
+      "angle": 90,
+      "dir": "left",
       "width": "normal",
       "rails": "none",
       "surface": "cream"
     },
     {
-      "type": "platform",
-      "cell": [-23, -4, -36],
-      "size": [3, 3],
+      "type": "ramp",
+      "cell": [28, -14, -30],
       "rot": 0,
-      "surface": "mint"
+      "length": 3,
+      "drop": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
     },
     {
-      "type": "funnel",
-      "cell": [-23, -4, -38],
+      "type": "curve",
+      "cell": [28, -16, -33],
       "rot": 0,
-      "diameter": 3,
+      "radius": 2,
+      "angle": 90,
+      "dir": "right",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [30, -16, -34],
+      "rot": 90,
+      "length": 3,
+      "width": "wide",
+      "rails": "both",
       "surface": "cream"
     },
     {
       "type": "platform",
-      "cell": [-23, -4, -41],
+      "cell": [34, -16, -34],
       "size": [3, 3],
       "rot": 0,
       "surface": "lav"
     },
     {
       "type": "wall",
-      "cell": [-24, -4, -42],
-      "rot": 0,
+      "cell": [35, -16, -35],
+      "rot": 90,
       "length": 3,
       "height": 0.6
     }
@@ -220,31 +254,15 @@
   "entities": [
     {
       "type": "checkpoint",
-      "cell": [-7, -4, -14]
+      "cell": [0, -6, -23]
     },
     {
       "type": "hiddenGem",
-      "cell": [-7, -4, -17]
+      "cell": [-3, -6, -23]
     },
     {
       "type": "checkpoint",
-      "cell": [-19, -4, -14]
-    },
-    {
-      "type": "checkpoint",
-      "cell": [-23, -4, -18]
-    },
-    {
-      "type": "checkpoint",
-      "cell": [-23, -4, -33]
-    },
-    {
-      "type": "crystal",
-      "cell": [-20, -4, -33]
-    },
-    {
-      "type": "crystal",
-      "cell": [0, 0, -3]
+      "cell": [13, -10, -29]
     },
     {
       "type": "crystal",
@@ -252,42 +270,54 @@
     },
     {
       "type": "crystal",
-      "cell": [-4, -4, -14]
+      "cell": [0, -2, -12]
     },
     {
       "type": "crystal",
-      "cell": [-23, -4, -27]
+      "cell": [0, -2, -16]
     },
     {
       "type": "crystal",
-      "cell": [-23, -4, -30]
+      "cell": [2, -10, -29]
     },
     {
       "type": "crystal",
-      "cell": [-23, -4, -36]
+      "cell": [4, -10, -29]
+    },
+    {
+      "type": "crystal",
+      "cell": [19, -12, -29]
+    },
+    {
+      "type": "crystal",
+      "cell": [22, -12, -29]
     },
     {
       "type": "goal",
-      "cell": [-23, -4, -41]
+      "cell": [34, -16, -34]
     }
   ],
   "modifiers": [
     {
-      "type": "slowMo",
-      "cell": [0, 0, -4]
+      "type": "feather",
+      "cell": [0, -2, -10]
     },
     {
       "type": "slowMo",
-      "cell": [-23, -4, -25]
+      "cell": [17, -12, -29]
     },
     {
-      "type": "shield",
-      "cell": [-23, -4, -29]
+      "type": "wind",
+      "cell": [31, -16, -34],
+      "size": [3, 1],
+      "rot": 0,
+      "strength": 4.1,
+      "gusts": 3
     }
   ],
   "signs": [],
   "decor": {
     "theme": "glacier",
-    "seed": 32083
+    "seed": 18366
   }
 }

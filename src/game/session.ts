@@ -16,6 +16,7 @@ import type { EventBus, GameEvents } from './events';
 import { createGroundTrail } from './groundTrail';
 import { neutralEffects, type ModifierRun, type StepEffects } from './modifiers/kit';
 import { GOAL_HINT_COOLDOWN, hasFallen, isInGoal, reachesCheckpoint, starsFor, touchesCrystal } from './rules';
+import type { Crystal } from './entities/crystal';
 import type { LevelWorld, LiveModifier, Point } from './world';
 
 export type SessionState = 'menu' | 'play' | 'paused' | 'win';
@@ -89,6 +90,11 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
   let spawn: Point = start;
   let clock = 0;
   let lastGoalHint = 0;
+  /** Crystals (and gem) picked up since the last checkpoint: a fall puts them back (PLAN.md § 5.3). */
+  let sinceCheckpoint: Crystal[] = [];
+  let gemSinceCheckpoint = false;
+  /** The timer waits for the player's first move. */
+  let started = false;
 
   const runOf = ({ data }: LiveModifier): ModifierRun => ({
     ball,
@@ -114,6 +120,9 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     time = 0;
     falls = 0;
     spawn = start;
+    sinceCheckpoint = [];
+    gemSinceCheckpoint = false;
+    started = false;
     crystals.forEach((c) => c.reset());
     checkpoints.forEach((c) => c.reset());
     gem?.reset();
@@ -142,6 +151,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
       }
       if (!touchesCrystal(p, crystal.position)) continue;
       crystal.collect();
+      sinceCheckpoint.push(crystal);
       events.emit('crystalCollected', { collected: collected(), total: crystals.length });
       if (allCollected()) {
         goal.open();
@@ -150,6 +160,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     }
     if (gem && !gem.taken && touchesCrystal(p, gem.position)) {
       gem.collect();
+      gemSinceCheckpoint = true;
       events.emit('hiddenGemFound');
     }
   };
@@ -159,6 +170,8 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
       if (checkpoint.active || !reachesCheckpoint(p, checkpoint, BALL_RADIUS)) continue;
       checkpoint.activate();
       spawn = checkpoint;
+      sinceCheckpoint = [];
+      gemSinceCheckpoint = false;
       events.emit('checkpointReached');
     }
   };
@@ -175,6 +188,16 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     }
   };
 
+  const putBackSinceCheckpoint = () => {
+    if (gemSinceCheckpoint) gem?.reset();
+    gemSinceCheckpoint = false;
+    if (!sinceCheckpoint.length) return;
+    sinceCheckpoint.forEach((c) => c.reset());
+    sinceCheckpoint = [];
+    goal.reset();
+    events.emit('crystalsPutBack', { collected: collected(), total: crystals.length });
+  };
+
   const checkFall = (p: Point) => {
     if (!hasFallen(p, spawn)) return;
     const safe = trail.safePoint();
@@ -186,6 +209,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     }
     falls++;
     events.emit('fell', { falls });
+    putBackSinceCheckpoint();
     respawn();
   };
 
@@ -242,7 +266,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     movers.forEach((m) => m.step(dt, probe));
     modifiers.forEach((m, i) => m.instance.step?.(dt, runs[i] as ModifierRun));
     stepPhysics(physics, timeScale);
-    time += PHYSICS_STEP;
+    if (started) time += PHYSICS_STEP;
     timers.step(PHYSICS_STEP).forEach((type) => events.emit('effectEnded', { type }));
     ball.limitSpeed();
     ball.capture();
@@ -264,6 +288,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
 
   const step = (readInput: () => Vec2) => {
     const raw = quantizeInput(readInput());
+    if (state === 'play' && (raw.x || raw.y)) started = true;
     const input = status.invert && state === 'play' ? { x: -raw.x, y: -raw.y } : raw;
     smoothInput(smoothed, input, PHYSICS_STEP);
     gravity = gravityDirection(smoothed);

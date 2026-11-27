@@ -3,7 +3,9 @@ import { expect, test } from '@playwright/test';
 /**
  * Replays a fixed input script with a fake 60 Hz clock and checks the HUD after each step.
  * The expected values were re-recorded on 2026-11-27 when the physics moved to Rapier (phase 1):
- * the run now picks up the first crystal earlier. Any later physics change that alters them must
+ * the run now picks up the first crystal earlier. Since the fix of 2026-11-27, a crystal taken
+ * since the last checkpoint comes back when the ball falls: the first fall puts it back, and the
+ * run picks it up again later (the physics is unchanged). Any later physics change that alters them must
  * re-record them on purpose and say why in docs/decisions.md.
  */
 const SCRIPT: [string | null, number, string][] = [
@@ -11,11 +13,11 @@ const SCRIPT: [string | null, number, string][] = [
   [null, 20, '0/7 0:01.5 0'],
   ['ArrowRight', 45, '1/7 0:02.2 0'],
   ['ArrowUp', 15, '1/7 0:02.5 0'],
-  ['ArrowRight', 60, '1/7 0:03.5 1'],
-  [null, 30, '1/7 0:04.0 1'],
-  ['ArrowUp', 80, '1/7 0:05.3 1'],
-  ['ArrowLeft', 25, '1/7 0:05.8 1'],
-  ['ArrowUp', 120, '1/7 0:07.8 2'],
+  ['ArrowRight', 60, '0/7 0:03.5 1'],
+  [null, 30, '0/7 0:04.0 1'],
+  ['ArrowUp', 80, '0/7 0:05.3 1'],
+  ['ArrowLeft', 25, '0/7 0:05.8 1'],
+  ['ArrowUp', 120, '0/7 0:07.8 2'],
   ['ArrowDown', 40, '1/7 0:08.4 2'],
   [null, 60, '1/7 0:09.4 2'],
   ['ArrowUp', 200, '1/7 0:12.7 2'],

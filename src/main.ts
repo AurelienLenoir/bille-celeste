@@ -33,6 +33,7 @@ import { mountUi } from './ui/app';
 import { byId } from './ui/dom';
 import { downloadJson } from './ui/download';
 import { bindHud } from './ui/hud/hud';
+import { createMinimap } from './ui/hud/minimap';
 import { bindPerfOverlay } from './ui/hud/perf';
 import { createUiStore } from './ui/state';
 import { createToast } from './ui/toast';
@@ -124,6 +125,22 @@ events.on('paused', () => {
 events.on('resumed', () => ui.getState().go({ name: 'play' }));
 events.on('reset', recorder.clear);
 
+const minimap = createMinimap(byId<HTMLCanvasElement>('minimap'));
+/** Redraws the minimap about 20 times a second: it does not need every frame. */
+let mapClock = 0;
+const updateMinimap = ({ world, ball }: Stage, dt: number) => {
+  mapClock += dt;
+  if (mapClock < 0.05) return;
+  mapClock = 0;
+  const { x, z } = ball.mesh.position;
+  minimap.draw({
+    ball: { x, z },
+    crystals: world.crystals.map((c) => ({ x: c.position[0], z: c.position[2], taken: c.taken })),
+    checkpoints: world.checkpoints.map((c) => ({ x: c.x, z: c.z, active: c.active })),
+    goal: { x: world.goal.x, z: world.goal.z, open: world.crystals.every((c) => c.taken) },
+  });
+};
+
 /** Builds a level in place of the current one. The last request wins when several overlap. */
 let loading = 0;
 const mount = async (id: string): Promise<Stage | undefined> => {
@@ -133,6 +150,7 @@ const mount = async (id: string): Promise<Stage | undefined> => {
   if (ticket !== loading) return undefined;
   stage?.dispose();
   stage = createStage(level, { scene, events, text: pick, bot: params.has('bot') });
+  minimap.setLevel(level);
   const { x, y, z } = stage.world.spawn;
   follow.snapTo(x, y, z);
   return stage;
@@ -226,6 +244,11 @@ mountUi(byId('ui'), {
   },
 });
 onBackground(() => stage?.session.pause());
+// Sideways on a phone, the rotate screen covers the game: pause the run underneath it.
+const sideways = matchMedia('(orientation: landscape) and (pointer: coarse) and (max-height: 540px)');
+sideways.addEventListener('change', () => {
+  if (sideways.matches) stage?.session.pause();
+});
 await mount(directLevel ?? resumeLevel(progress()));
 
 const frames = createFrameStats();
@@ -258,6 +281,7 @@ startLoop((dt) => {
     aura.update(ball.mesh.position, playing ? status.effects : [], session.clock());
     decor.update(session.clock(), dt);
     signs.update(ball.mesh.position);
+    if (screen() === 'play') updateMinimap(current, dt);
     follow.update(ball.mesh.position, gravity, dt);
     followSun(sun, ball.mesh.position);
   }

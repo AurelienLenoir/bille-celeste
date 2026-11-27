@@ -70,6 +70,10 @@ const App = ({ deps }: { deps: UiDeps }) => {
   return (
     <>
       {!settingsOpen && current}
+      <div class="rotate" aria-hidden="true">
+        <span class="phone" />
+        <p>{t().rotate}</p>
+      </div>
       {settingsOpen && <SettingsCard store={deps.settings} onBack={() => ui.getState().openSettings(false)} />}
     </>
   );

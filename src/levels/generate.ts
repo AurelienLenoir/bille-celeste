@@ -120,8 +120,9 @@ const between = (rnd: () => number, min: number, max: number) => min + Math.floo
 
 /**
  * Procedural level draft (PLAN.md § 4.2): a constrained random walk on the grid, dressed with
- * pieces chosen from the world's mechanics and the difficulty, with crystals along the way (some
- * on short side branches), a checkpoint about every quarter, and the goal at the end.
+ * pieces chosen from the world's mechanics and the difficulty, with crystals along the way (never
+ * off the course), checkpoints spaced out (never two in a row), the hidden gem on a short side
+ * branch, and the goal at the end.
  * The result always passes the validator; it is a draft to retouch in the editor.
  */
 export const generateLevel = ({ world, difficulty, seed, id, focus = [] }: GenerateOptions): Level => {
@@ -167,10 +168,10 @@ const tryGenerate = (
   };
 
   const widthFor = (): Width => {
-    const r = rnd() * 0.6 + difficulty * 0.7;
+    const r = rnd() * 0.6 + difficulty * 0.8;
     return r < 0.35 ? 'wide' : r < 0.85 ? 'normal' : r < 1.15 ? 'narrow' : 'rail';
   };
-  const railsFor = () => (rnd() > 0.35 + difficulty * 0.6 ? 'both' : 'none');
+  const railsFor = () => (rnd() > 0.3 + difficulty * 0.65 ? 'both' : 'none');
 
   const platformAt = (
     t: Turtle,
@@ -213,8 +214,8 @@ const tryGenerate = (
     const star = featured(list);
     return pick(rnd, star.length && rnd() < 0.75 ? star : list);
   };
-  let malusLeft = maluses.length ? Math.round(1 + difficulty * 4 + (world - 2)) + featured(maluses).length : 0;
-  let bonusLeft = 1 + Math.round(rnd() * 2) + featured(bonuses).length;
+  let malusLeft = maluses.length ? Math.round(2 + difficulty * 4 + (world - 2)) + featured(maluses).length : 0;
+  let bonusLeft = 1 + Math.round(rnd() * 1.5) + featured(bonuses).length;
   const malusChance = featured(maluses).length ? 0.6 : 0.45;
   const bonusChance = featured(bonuses).length ? 0.5 : 0.7;
   const decorate = (t: Turtle, piece: PieceInput & { type: 'straight' }, length: number, segment: Segment): Segment => {
@@ -320,7 +321,13 @@ const tryGenerate = (
     const after = exitOf(runUp);
     const kicker: PieceInput = { type: 'gap', cell: after.cell, rot: t.rot, length: difficulty > 0.7 ? 2 : 1 };
     const land = platformAt(exitOf(kicker), 'rose');
-    return { pieces: [runUp, kicker, land.piece], next: land.next, checkpoint: land.centre, cells: 10 };
+    return {
+      pieces: [runUp, kicker, land.piece],
+      next: land.next,
+      crystals: [step(t.cell, t.rot, 2)],
+      checkpoint: land.centre,
+      cells: 10,
+    };
   };
   const funnel = (t: Turtle): Segment => {
     const rest = platformAt(t, 'mint');
@@ -347,7 +354,14 @@ const tryGenerate = (
       const [i, j, k] = step(dock.centre, t.rot, 2 + n);
       lane.push({ i, k, yMin: j * STEP, yMax: j * STEP + HEADROOM });
     }
-    return { pieces: [dock.piece, travel, far.piece], next: far.next, checkpoint: far.centre, cells: 8 + span, lane };
+    return {
+      pieces: [dock.piece, travel, far.piece],
+      next: far.next,
+      crystals: [dock.centre],
+      checkpoint: far.centre,
+      cells: 8 + span,
+      lane,
+    };
   };
   const tiles = (t: Turtle): Segment => {
     const count = between(rnd, 2, 3);
@@ -424,6 +438,9 @@ const tryGenerate = (
   const target = Math.round(30 + difficulty * 35 + world * 4);
   let length = 0;
   const checkpointsAt = [0.3, 0.6, 0.85].map((f) => f * target);
+  /** Course length, in cells, under which two checkpoints are too close to be worth it. */
+  const checkpointGap = Math.max(12, target * 0.22);
+  let lastCheckpointAt = 0;
   let lastWasLinear = false;
   let gemPlaced = false;
 
@@ -434,7 +451,10 @@ const tryGenerate = (
     pieces.push(...segment.pieces);
     modifiers.push(...(segment.modifiers ?? []));
     crystalSpots.push(...(segment.crystals ?? []));
-    if (segment.checkpoint) entities.push({ type: 'checkpoint', cell: segment.checkpoint });
+    if (segment.checkpoint && length + segment.cells - lastCheckpointAt >= checkpointGap) {
+      entities.push({ type: 'checkpoint', cell: segment.checkpoint });
+      lastCheckpointAt = length + segment.cells;
+    }
     turtle = segment.next;
     length += segment.cells;
     return true;
@@ -443,9 +463,9 @@ const tryGenerate = (
   while (length < target) {
     if (checkpointsAt.length && length >= (checkpointsAt[0] ?? Infinity)) {
       checkpointsAt.shift();
+      // A jump or a ferry just gave a checkpoint: a second rest right after it would be useless.
+      if (length - lastCheckpointAt < checkpointGap) continue;
       const rest = platformAt(turtle, 'lav');
-      // The first side branch that fits holds the hidden gem; later ones hold optional crystals.
-      const branch = !gemPlaced || rnd() < 0.5 + difficulty * 0.3;
       const side = rnd() < 0.5 ? -1 : 1;
       const spur: PieceInput = {
         type: 'straight',
@@ -454,18 +474,15 @@ const tryGenerate = (
         length: 2,
         width: 'normal',
       };
-      if (addSegment({ pieces: [rest.piece], next: rest.next, checkpoint: rest.centre, cells: 3 })) {
-        if (branch && addSegment({ pieces: [spur], next: turtle, cells: 0 })) {
-          entities.push({
-            type: gemPlaced ? 'crystal' : 'hiddenGem',
-            cell: step(rest.centre, turtle.rot, 0, side * 3),
-          });
-          gemPlaced = true;
-        }
-        lastWasLinear = false;
-        continue;
+      if (!addSegment({ pieces: [rest.piece], next: rest.next, checkpoint: rest.centre, cells: 3 })) return undefined;
+      // The first side branch that fits hides the gem. There are no other side branches: every
+      // crystal is on the course itself.
+      if (!gemPlaced && addSegment({ pieces: [spur], next: turtle, cells: 0 })) {
+        entities.push({ type: 'hiddenGem', cell: step(rest.centre, turtle.rot, 0, side * 3) });
+        gemPlaced = true;
       }
-      return undefined;
+      lastWasLinear = false;
+      continue;
     }
     let placed = false;
     for (let i = 0; i < TRIES_PER_SEGMENT && !placed; i++) {

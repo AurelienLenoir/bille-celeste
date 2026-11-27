@@ -121,6 +121,17 @@ body {
 .gem:empty {
   display: none;
 }
+.minimap {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 58px);
+  left: calc(env(safe-area-inset-left) + 10px);
+  width: 104px;
+  height: 104px;
+  border-radius: 18px;
+  background: rgba(34, 48, 74, 0.42);
+  box-shadow: 0 3px 10px rgba(30, 60, 110, 0.18);
+  pointer-events: none;
+}
 .pause-btn {
   position: fixed;
   top: calc(env(safe-area-inset-top) + 58px);
@@ -137,7 +148,8 @@ body {
   height: 22px;
   fill: var(--ink);
 }
-body:not([data-screen='play']):not([data-screen='pause']) .hud {
+body:not([data-screen='play']):not([data-screen='pause']) .hud,
+body:not([data-screen='play']):not([data-screen='pause']) .minimap {
   display: none;
 }
 .perf {
@@ -574,6 +586,49 @@ button.back {
   font-weight: 600;
   color: #2f9a62;
 }
+.rotate {
+  display: none;
+}
+/* The game is portrait only: a phone held sideways gets a dark screen asking to turn it (the native
+   apps lock the orientation in phase 6). Desktop windows are never covered. */
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 540px) {
+  .rotate {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    background: #10182b;
+    color: #fff;
+    text-align: center;
+    padding: 24px;
+  }
+  .rotate p {
+    font-size: 20px;
+    font-weight: 600;
+    max-width: 320px;
+  }
+  .rotate .phone {
+    width: 44px;
+    height: 76px;
+    border: 4px solid #fff;
+    border-radius: 10px;
+    animation: turn 1.8s ease-in-out infinite;
+  }
+}
+@keyframes turn {
+  0%,
+  30% {
+    transform: rotate(-90deg);
+  }
+  60%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
 #err {
   position: fixed;
   inset: auto 12px 12px;
@@ -586,6 +641,9 @@ button.back {
 @media (prefers-reduced-motion: reduce) {
   button {
     transition: none;
+  }
+  .rotate .phone {
+    animation: none;
   }
   .toast,
   .row.toggle input,

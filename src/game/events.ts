@@ -9,6 +9,8 @@ export type GameEvents = {
   /** Once per rendered frame while playing, with the effects running and their seconds left. */
   tick: { time: number; effects: ActiveEffect[] };
   crystalCollected: { collected: number; total: number };
+  /** A fall put back the crystals picked up since the last checkpoint. */
+  crystalsPutBack: { collected: number; total: number };
   allCrystalsCollected: undefined;
   checkpointReached: undefined;
   fell: { falls: number };

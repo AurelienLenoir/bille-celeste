@@ -65,6 +65,7 @@ export const en: Strings = {
     back: 'Back',
   },
   loading: 'Loading…',
+  rotate: 'Turn your phone upright to play',
   touchHint: 'Put your thumb down and slide to tilt the course',
   tiltUnavailable: 'This page cannot reach the tilt sensor. Finger control is on: put your thumb down and slide.',
   tiltReady: 'Tilt your phone!',

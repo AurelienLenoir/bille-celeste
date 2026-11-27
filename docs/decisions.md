@@ -2,6 +2,17 @@
 
 Journal des choix structurants (le plus récent en haut).
 
+## 2026-11-27 — Phase 4 : retours du premier test sur téléphone
+
+- **Checkpoints** : un drapeau se déclenche dès que la bille roule n'importe où sur sa plateforme 3 × 3 (avant : à moins de 2,6 unités du centre, si bien qu'on le ratait en coupant le virage et que le drapeau restait gris).
+- **Cristaux remis en place** : les cristaux (et la gemme) ramassés depuis le dernier checkpoint reviennent quand la bille tombe, et le compteur redescend (événement `crystalsPutBack`). Le bouclier, qui évite la chute, ne les remet pas. Le replay e2e a été mis à jour pour ça (le premier cristal revient après la première chute), la physique ne change pas.
+- **Chrono** : il démarre au premier mouvement du joueur (première entrée non nulle), pas à l'apparition de la bille.
+- **Minimap** (`ui/hud/minimap.ts`) : ajoutée maintenant à la demande de l'utilisateur, elle n'était pas prévue dans le plan. Canvas 2D en haut à gauche, vue de dessus avec le fond du niveau en haut comme la caméra. Le parcours est dessiné une fois par niveau ; les cristaux restants, les checkpoints (verts une fois passés), l'arrivée (dorée une fois ouverte) et la bille sont redessinés environ 20 fois par seconde. La gemme cachée n'y est pas.
+- **Orientation** : sur un téléphone en paysage, un écran sombre demande de le remettre en portrait et met la partie en pause. Le verrouillage natif de l'orientation viendra avec Capacitor en phase 6.
+- **Gyroscope** : la position neutre est gardée pour chaque orientation de l'écran. Hypothèse sur la dérive vue sur iPhone : la page pivotait brièvement en paysage, ce qui remplaçait la position neutre par celle du téléphone au moment du retour en portrait.
+- **Générateur** : jamais deux checkpoints rapprochés (au moins 22 % de la longueur du niveau, 12 cases minimum, entre deux ; un saut ou un bac qui vient d'en donner un saute le repos prévu). Plus de branche latérale avec un cristal : la seule branche est celle de la gemme cachée, et tous les cristaux sont sur le parcours (un sur l'élan des sauts, un sur le quai des bacs). Pistes un peu plus étroites, moins de rambardes et un malus de plus par niveau.
+- **Campagne régénérée** (niveaux 3 à 20) avec une courbe plus dure : difficulté 0,28 à 0,5 dans le monde 1, 0,4 à 0,75 dans le 2, 0,55 à 0,86 dans le 3, 0,65 à 1 dans le 4. Le bot les termine tous sans chute et les temps de référence sont recalibrés. Les retouches manuelles de la première version (pads de `w2-03`, etc.) ne sont pas reprises : les nouveaux tirages tiennent dans le budget de draw calls sans retouche.
+
 ## 2026-11-27 — Phase 4 : contenu et progression
 
 - **Campagne** (`levels/worlds.ts`) : 4 mondes de 5 niveaux, `w1-01` à `w4-05`. Le monde 2 s'ouvre à 10 étoiles, le 3 à 22, le 4 à 35 (sur 15, 30 et 45 possibles avant chacun). Dans un monde, un niveau s'ouvre quand le précédent est terminé. `?unlock` ouvre tout, pour tester.
