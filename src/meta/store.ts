@@ -1,4 +1,5 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
+import { parseStoredProgress, recordWin, type Progress, type WinningRun, type WinOutcome } from './progress';
 import { DEFAULT_SETTINGS, parseStoredSettings, settingsSchema, type Settings } from './settings';
 
 export type KeyValueStorage = {
@@ -32,3 +33,30 @@ export const createSettingsStore = async (storage: KeyValueStorage): Promise<Set
 };
 
 export { DEFAULT_SETTINGS };
+
+export const PROGRESS_KEY = 'bille-celeste.progress';
+
+export type ProgressState = {
+  progress: Progress;
+  /** Stores a won run and returns what it changed (record, stars). */
+  win: (id: string, run: WinningRun) => WinOutcome;
+};
+
+export type ProgressStore = StoreApi<ProgressState>;
+
+/** Loads the saved progress (stars, records), then writes every win back to storage. */
+export const createProgressStore = async (storage: KeyValueStorage): Promise<ProgressStore> => {
+  const initial = parseStoredProgress(await storage.get(PROGRESS_KEY).catch(() => null));
+  const store = createStore<ProgressState>((set, get) => ({
+    progress: initial,
+    win: (id, run) => {
+      const outcome = recordWin(get().progress, id, run);
+      set({ progress: outcome.progress });
+      return outcome;
+    },
+  }));
+  store.subscribe(({ progress }) => {
+    void storage.set(PROGRESS_KEY, JSON.stringify(progress)).catch(() => undefined);
+  });
+  return store;
+};

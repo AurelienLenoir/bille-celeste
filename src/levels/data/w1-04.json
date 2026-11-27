@@ -1,0 +1,239 @@
+{
+  "id": "w1-04",
+  "version": 3,
+  "name": {
+    "fr": "Le jardin suspendu",
+    "en": "The Hanging Garden"
+  },
+  "world": 1,
+  "parTimeSec": 40,
+  "spawn": {
+    "cell": [0, 0, 0]
+  },
+  "pieces": [
+    {
+      "type": "platform",
+      "cell": [0, 0, 0],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "straight",
+      "cell": [0, 0, -2],
+      "rot": 0,
+      "length": 2,
+      "width": "wide",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "bridge",
+      "cell": [0, 0, -4],
+      "rot": 0,
+      "length": 3,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "straight",
+      "cell": [0, 0, -7],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "halfPipe",
+      "cell": [0, 0, -9],
+      "rot": 0,
+      "length": 4,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [0, 0, -14],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "funnel",
+      "cell": [0, 0, -16],
+      "rot": 0,
+      "diameter": 3,
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [0, 0, -19],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [2, 0, -19],
+      "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "halfPipe",
+      "cell": [0, 0, -21],
+      "rot": 0,
+      "length": 5,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [0, 0, -27],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "funnel",
+      "cell": [0, 0, -29],
+      "rot": 0,
+      "diameter": 3,
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [0, 0, -32],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-2, 0, -32],
+      "rot": 270,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [0, 0, -34],
+      "rot": 0,
+      "length": 2,
+      "drop": 3,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [0, -3, -36],
+      "rot": 0,
+      "length": 2,
+      "width": "wide",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "halfPipe",
+      "cell": [0, -3, -38],
+      "rot": 0,
+      "length": 4,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [0, -3, -43],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-2, -3, -43],
+      "rot": 270,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [0, -3, -46],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "wall",
+      "cell": [-1, -3, -47],
+      "rot": 0,
+      "length": 3,
+      "height": 0.6
+    }
+  ],
+  "entities": [
+    {
+      "type": "checkpoint",
+      "cell": [0, 0, -19]
+    },
+    {
+      "type": "hiddenGem",
+      "cell": [3, 0, -19]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [0, 0, -32]
+    },
+    {
+      "type": "crystal",
+      "cell": [-3, 0, -32]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [0, -3, -43]
+    },
+    {
+      "type": "crystal",
+      "cell": [-3, -3, -43]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -3]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -5]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -8]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -10]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -14]
+    },
+    {
+      "type": "goal",
+      "cell": [0, -3, -46]
+    }
+  ],
+  "modifiers": [
+    {
+      "type": "hourglass",
+      "cell": [0, 0, -2]
+    }
+  ],
+  "signs": [],
+  "decor": {
+    "theme": "garden",
+    "seed": 3940
+  }
+}

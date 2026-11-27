@@ -1,0 +1,53 @@
+{
+  "id": "w1-02",
+  "version": 3,
+  "name": { "fr": "La boucle verte", "en": "The Green Loop" },
+  "world": 1,
+  "parTimeSec": 25,
+  "spawn": { "cell": [0, 0, 0] },
+  "pieces": [
+    { "type": "platform", "cell": [0, 0, 0], "size": [3, 3], "surface": "mint" },
+    { "type": "straight", "cell": [0, 0, -2], "rot": 0, "length": 3, "width": "normal", "rails": "both" },
+    { "type": "curve", "cell": [0, 0, -5], "rot": 0, "radius": 2, "dir": "left", "width": "wide", "rails": "both" },
+    { "type": "straight", "cell": [-2, 0, -6], "rot": 270, "length": 2, "width": "normal", "rails": "both" },
+    { "type": "curve", "cell": [-4, 0, -6], "rot": 270, "radius": 2, "dir": "right", "width": "wide", "rails": "both" },
+    { "type": "stairs", "cell": [-5, 0, -8], "rot": 0, "steps": 3, "width": "normal" },
+    { "type": "platform", "cell": [-5, -3, -12], "size": [3, 3], "surface": "lav" },
+    { "type": "straight", "cell": [-7, -3, -12], "rot": 270, "length": 2, "width": "normal" },
+    { "type": "straight", "cell": [-5, -3, -14], "rot": 0, "length": 4, "width": "narrow" },
+    { "type": "curve", "cell": [-5, -3, -18], "rot": 0, "radius": 2, "dir": "right", "width": "wide", "rails": "both" },
+    { "type": "ramp", "cell": [-3, -3, -19], "rot": 90, "length": 3, "drop": 2, "width": "normal", "rails": "both" },
+    { "type": "platform", "cell": [1, -5, -19], "size": [3, 3], "surface": "lav" },
+    { "type": "wall", "cell": [2, -5, -20], "rot": 90, "length": 3 }
+  ],
+  "entities": [
+    { "type": "crystal", "cell": [0, 0, -3] },
+    { "type": "crystal", "cell": [-3, 0, -6] },
+    { "type": "checkpoint", "cell": [-5, -3, -12] },
+    { "type": "hiddenGem", "cell": [-8, -3, -12] },
+    { "type": "crystal", "cell": [-5, -3, -16] },
+    { "type": "crystal", "cell": [-2, -3, -19] },
+    { "type": "goal", "cell": [1, -5, -19] }
+  ],
+  "modifiers": [],
+  "signs": [
+    { "cell": [0, 0, -2], "text": { "fr": "Ralentis avant chaque virage", "en": "Slow down before each turn" } },
+    { "cell": [-5, 0, -8], "text": { "fr": "Des marches : laisse-toi descendre", "en": "Steps: just roll down" } },
+    {
+      "cell": [-5, -3, -12],
+      "text": { "fr": "Chaque niveau cache une gemme hors du chemin…", "en": "Every level hides a gem off the path…" }
+    },
+    {
+      "cell": [-5, -3, -15],
+      "text": {
+        "fr": "Piste étroite sans rambarde : reste au milieu",
+        "en": "Narrow track, no rails: stay in the middle"
+      }
+    },
+    {
+      "cell": [-1, -3, -19],
+      "text": { "fr": "Sans chute et sous le temps : 3 étoiles !", "en": "No fall and under par: 3 stars!" }
+    }
+  ],
+  "decor": { "theme": "garden", "seed": 202 }
+}

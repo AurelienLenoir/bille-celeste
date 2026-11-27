@@ -1,13 +1,14 @@
 import { z } from 'zod';
 
 /**
- * Level format, version 2 (PLAN.md § 3): version 1 plus the bonuses and maluses (`modifiers`). This file is the source of truth: the TypeScript types,
+ * Level format, version 3 (PLAN.md § 3): version 1, plus the bonuses and maluses (`modifiers`, v2),
+ * plus the tutorial signs (`signs`, v3). This file is the source of truth: the TypeScript types,
  * the loader, the editor, the generator and the validator all derive from it.
  *
  * Grid: a cell is 2 × 2 units, heights go by steps of 0.5. `cell` is [x, height, z] in cells and
  * steps. Rotation 0 faces -z (away from the camera), 90 turns right (+x).
  */
-export const LEVEL_VERSION = 2;
+export const LEVEL_VERSION = 3;
 
 const int = (min: number, max: number) => z.number().int().min(min).max(max);
 const half = (min: number, max: number) => z.number().multipleOf(0.5).min(min).max(max);
@@ -283,6 +284,16 @@ const textSchema = z.object({ fr: z.string().min(1).max(60), en: z.string().min(
 
 export const THEMES = ['garden', 'sunset', 'glacier', 'factory'] as const;
 
+/**
+ * Tutorial sign: a panel floating above `cell`, readable when looking along `rot` (PLAN.md § 8,
+ * phase 4: the tutorial lives in the scenery, not in pop-ups). Decoration only, no collision.
+ */
+export const signSchema = z.object({
+  cell: cellSchema,
+  rot: rotSchema,
+  text: z.object({ fr: z.string().min(1).max(80), en: z.string().min(1).max(80) }),
+});
+
 export const levelSchema = z
   .object({
     id: z.string().regex(/^[a-z0-9-]{1,32}$/, 'Identifiant : minuscules, chiffres et tirets'),
@@ -294,6 +305,7 @@ export const levelSchema = z
     pieces: z.array(pieceSchema).min(1).max(300),
     entities: z.array(entitySchema).max(120),
     modifiers: z.array(modifierSchema).max(60).default([]),
+    signs: z.array(signSchema).max(8).default([]),
     decor: z.object({ theme: z.enum(THEMES).default('garden'), seed: int(1, 2_000_000_000).default(7) }),
   })
   .superRefine((level, ctx) => {
@@ -312,6 +324,7 @@ export type Piece = z.output<typeof pieceSchema>;
 export type PieceType = Piece['type'];
 export type PieceOf<T extends PieceType> = Extract<Piece, { type: T }>;
 export type Entity = z.output<typeof entitySchema>;
+export type Sign = z.output<typeof signSchema>;
 export type Surface = (typeof SURFACE_NAMES)[number];
 export type Width = keyof typeof WIDTHS;
 export type Rails = z.output<typeof railsSchema>;

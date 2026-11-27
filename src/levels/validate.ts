@@ -239,8 +239,8 @@ const pieceChecks = (level: Level): Issue[] =>
 
 /**
  * Upper bound of the draw calls of a level in game, as if everything were in view at once: the
- * course materials and moving pieces twice (colour and shadow passes), the entities, the ball and
- * the decor. Measured with `?debug`, frustum culling keeps the real count well under it.
+ * course materials and moving pieces twice (colour and shadow passes), the entities, the ball,
+ * the tutorial signs and the decor. Measured with `?debug`, frustum culling keeps the real count well under it.
  */
 export const estimateDrawCalls = (level: Level, builds: PieceBuild[]): number => {
   const materials = new Set<string>();
@@ -254,7 +254,14 @@ export const estimateDrawCalls = (level: Level, builds: PieceBuild[]): number =>
   const course = materials.size + movers * 2 + 1;
   const modifiers = level.modifiers.reduce((sum, m) => sum + MODIFIER_DRAW_CALLS[m.type], 0);
   return (
-    course * 2 + count('crystal') + count('checkpoint') * 2 + count('goal') + count('hiddenGem') * 2 + modifiers + DECOR
+    course * 2 +
+    count('crystal') +
+    count('checkpoint') * 2 +
+    count('goal') +
+    count('hiddenGem') * 2 +
+    modifiers +
+    level.signs.length +
+    DECOR
   );
 };
 

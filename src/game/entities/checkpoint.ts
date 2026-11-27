@@ -21,7 +21,7 @@ export type Checkpoint = {
   reset: () => void;
 };
 
-export const createCheckpoint = (scene: THREE.Scene, [x, y, z]: Vec3Tuple): Checkpoint => {
+export const createCheckpoint = (scene: THREE.Object3D, [x, y, z]: Vec3Tuple): Checkpoint => {
   const group = new THREE.Group();
   const pole = new THREE.Mesh(
     new THREE.CylinderGeometry(0.05, 0.05, 1.6, 8),

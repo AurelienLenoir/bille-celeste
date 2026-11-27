@@ -1,0 +1,223 @@
+{
+  "id": "w1-03",
+  "version": 3,
+  "name": {
+    "fr": "Pentes douces",
+    "en": "Gentle Slopes"
+  },
+  "world": 1,
+  "parTimeSec": 35,
+  "spawn": {
+    "cell": [0, 0, 0]
+  },
+  "pieces": [
+    {
+      "type": "platform",
+      "cell": [0, 0, 0],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "stairs",
+      "cell": [0, 0, -2],
+      "rot": 0,
+      "steps": 3,
+      "width": "normal",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [0, -3, -5],
+      "rot": 0,
+      "length": 4,
+      "drop": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "stairs",
+      "cell": [0, -5, -9],
+      "rot": 0,
+      "steps": 3,
+      "width": "normal",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [0, -8, -12],
+      "rot": 0,
+      "radius": 2,
+      "angle": 90,
+      "dir": "right",
+      "width": "wide",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [3, -8, -13],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [3, -8, -11],
+      "rot": 180,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "stairs",
+      "cell": [5, -8, -13],
+      "rot": 90,
+      "steps": 3,
+      "width": "normal",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [8, -11, -13],
+      "rot": 90,
+      "length": 2,
+      "drop": 3,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [10, -14, -13],
+      "rot": 90,
+      "length": 4,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [15, -14, -13],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [15, -14, -15],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [17, -14, -13],
+      "rot": 90,
+      "length": 3,
+      "drop": 4,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [20, -18, -13],
+      "rot": 90,
+      "length": 2,
+      "drop": 2,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [23, -20, -13],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [23, -20, -11],
+      "rot": 180,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [25, -20, -13],
+      "rot": 90,
+      "length": 4,
+      "drop": 2,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [30, -22, -13],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "wall",
+      "cell": [31, -22, -14],
+      "rot": 90,
+      "length": 3,
+      "height": 0.6
+    }
+  ],
+  "entities": [
+    {
+      "type": "checkpoint",
+      "cell": [3, -8, -13]
+    },
+    {
+      "type": "hiddenGem",
+      "cell": [3, -8, -10]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [15, -14, -13]
+    },
+    {
+      "type": "crystal",
+      "cell": [15, -14, -16]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [23, -20, -13]
+    },
+    {
+      "type": "crystal",
+      "cell": [23, -20, -10]
+    },
+    {
+      "type": "crystal",
+      "cell": [12, -14, -13]
+    },
+    {
+      "type": "goal",
+      "cell": [30, -22, -13]
+    }
+  ],
+  "modifiers": [
+    {
+      "type": "shield",
+      "cell": [10, -14, -13]
+    }
+  ],
+  "signs": [],
+  "decor": {
+    "theme": "garden",
+    "seed": 3233
+  }
+}

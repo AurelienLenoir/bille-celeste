@@ -1,0 +1,293 @@
+{
+  "id": "w3-03",
+  "version": 3,
+  "name": {
+    "fr": "Dalles fragiles",
+    "en": "Brittle Tiles"
+  },
+  "world": 3,
+  "parTimeSec": 65,
+  "spawn": {
+    "cell": [0, 0, 0]
+  },
+  "pieces": [
+    {
+      "type": "platform",
+      "cell": [0, 0, 0],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "straight",
+      "cell": [0, 0, -2],
+      "rot": 0,
+      "length": 2,
+      "width": "narrow",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [0, 0, -4],
+      "rot": 0,
+      "length": 5,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [0, 0, -9],
+      "rot": 0,
+      "length": 3,
+      "drop": 4,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [0, -4, -12],
+      "rot": 0,
+      "radius": 3,
+      "angle": 90,
+      "dir": "left",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "bridge",
+      "cell": [-3, -4, -14],
+      "rot": 270,
+      "length": 3,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "platform",
+      "cell": [-7, -4, -14],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-7, -4, -16],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-10, -4, -14],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "movingPlatform",
+      "path": [
+        [-12.5, -4, -14],
+        [-16.5, -4, -14]
+      ],
+      "size": [2, 1.5],
+      "speed": 2.4000000000000004,
+      "pause": 0.95,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [-19, -4, -14],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "curve",
+      "cell": [-21, -4, -14],
+      "rot": 270,
+      "radius": 3,
+      "angle": 90,
+      "dir": "right",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-23, -4, -18],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [-23, -4, -20],
+      "delay": 0.7,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [-23, -4, -21],
+      "delay": 0.7,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [-23, -4, -22],
+      "delay": 0.7,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [-23, -4, -23],
+      "delay": 0.7,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [-23, -4, -24],
+      "delay": 0.7,
+      "surface": "rose"
+    },
+    {
+      "type": "straight",
+      "cell": [-23, -4, -25],
+      "rot": 0,
+      "length": 4,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-23, -4, -29],
+      "rot": 0,
+      "length": 3,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-23, -4, -33],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-21, -4, -33],
+      "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-23, -4, -36],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "funnel",
+      "cell": [-23, -4, -38],
+      "rot": 0,
+      "diameter": 3,
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-23, -4, -41],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "wall",
+      "cell": [-24, -4, -42],
+      "rot": 0,
+      "length": 3,
+      "height": 0.6
+    }
+  ],
+  "entities": [
+    {
+      "type": "checkpoint",
+      "cell": [-7, -4, -14]
+    },
+    {
+      "type": "hiddenGem",
+      "cell": [-7, -4, -17]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [-19, -4, -14]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [-23, -4, -18]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [-23, -4, -33]
+    },
+    {
+      "type": "crystal",
+      "cell": [-20, -4, -33]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -3]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -6]
+    },
+    {
+      "type": "crystal",
+      "cell": [-4, -4, -14]
+    },
+    {
+      "type": "crystal",
+      "cell": [-23, -4, -27]
+    },
+    {
+      "type": "crystal",
+      "cell": [-23, -4, -30]
+    },
+    {
+      "type": "crystal",
+      "cell": [-23, -4, -36]
+    },
+    {
+      "type": "goal",
+      "cell": [-23, -4, -41]
+    }
+  ],
+  "modifiers": [
+    {
+      "type": "slowMo",
+      "cell": [0, 0, -4]
+    },
+    {
+      "type": "slowMo",
+      "cell": [-23, -4, -25]
+    },
+    {
+      "type": "shield",
+      "cell": [-23, -4, -29]
+    }
+  ],
+  "signs": [],
+  "decor": {
+    "theme": "glacier",
+    "seed": 32083
+  }
+}

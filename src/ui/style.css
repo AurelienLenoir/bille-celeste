@@ -137,7 +137,7 @@ body {
   height: 22px;
   fill: var(--ink);
 }
-.pause-btn[hidden] {
+body:not([data-screen='play']):not([data-screen='pause']) .hud {
   display: none;
 }
 .perf {
@@ -418,6 +418,161 @@ h2 {
 }
 .toast.on {
   opacity: 1;
+}
+.loading {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 40px);
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-weight: 600;
+}
+/* World map and level select: a column of big tappable cards over the level. */
+.overlay.menu {
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 20px);
+  gap: 10px;
+}
+.menu > * {
+  width: 100%;
+  max-width: 440px;
+}
+.menu h2 {
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 2px 10px rgba(20, 40, 90, 0.45);
+  margin: 4px 0 4px;
+}
+.menu-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.menu-head .total {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+button.back {
+  padding: 0 16px;
+}
+.worlds,
+.levels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.world,
+.level {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border-radius: 22px;
+  padding: 12px 14px;
+  min-height: 72px;
+  background: #fffaf2;
+}
+.world {
+  min-height: 92px;
+  color: #fff;
+  background: linear-gradient(135deg, #6fbcff, #8fd68a);
+}
+.world.sunset {
+  background: linear-gradient(135deg, #5a6fd0, #ff9fb2 60%, #ffc27a);
+}
+.world.glacier {
+  background: linear-gradient(135deg, #5f9be0, #bfe6ff);
+}
+.world.factory {
+  background: linear-gradient(135deg, #2c2f5e, #8a7cc8);
+}
+.world .body small,
+.world .stars-count {
+  color: rgba(255, 255, 255, 0.92);
+}
+.world strong {
+  text-shadow: 0 1px 4px rgba(20, 40, 90, 0.35);
+}
+.world:disabled,
+.level:disabled {
+  cursor: default;
+  filter: grayscale(0.7);
+  opacity: 0.75;
+}
+.world:disabled:active,
+.level:disabled:active {
+  transform: none;
+}
+.num {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--blue);
+}
+.level .num {
+  background: #eef4ff;
+  font-size: 15px;
+}
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.body strong {
+  font-size: 18px;
+  line-height: 1.15;
+}
+.body small {
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+.stars-count {
+  flex: none;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.star-row {
+  flex: none;
+  font-size: 22px;
+  letter-spacing: -1px;
+  color: #c9d2e3;
+}
+.star-row .on {
+  color: #ffc93c;
+  text-shadow: 0 1px 4px rgba(200, 140, 0, 0.35);
+}
+.record {
+  font-weight: 600;
+  color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+.record.new {
+  color: var(--pink);
+}
+.unlocked {
+  font-weight: 600;
+  color: #2f9a62;
 }
 #err {
   position: fixed;

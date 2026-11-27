@@ -1,7 +1,7 @@
 import type { ActiveEffect } from '../../game/effects';
 import type { EventBus, GameEvents } from '../../game/events';
 import type { ModifierType } from '../../levels/schema';
-import { fr } from '../../i18n/fr';
+import { t } from '../../i18n';
 import { byId } from '../dom';
 import { formatTime } from '../format';
 import type { Toast } from '../toast';
@@ -10,7 +10,13 @@ import type { Toast } from '../toast';
 const ZONES = new Set<ModifierType>(['ice', 'sand', 'wind', 'conveyor', 'invert', 'fog']);
 
 const effectText = ({ type, left }: ActiveEffect) =>
-  Number.isFinite(left) ? `${fr.effects[type]} ${Math.ceil(left)}` : fr.effects[type];
+  Number.isFinite(left) ? `${t().effects[type]} ${Math.ceil(left)}` : t().effects[type];
+
+/** Writes the HUD labels in the current language. */
+export const labelHud = (): void => {
+  byId('crLabel').textContent = t().hud.crystals;
+  byId('flLabel').textContent = t().hud.falls;
+};
 
 /** Top bar (crystals, timer, falls), running effects and the in-game toasts. */
 export const bindHud = (events: EventBus<GameEvents>, toast: Toast): void => {
@@ -42,21 +48,21 @@ export const bindHud = (events: EventBus<GameEvents>, toast: Toast): void => {
     );
   });
   events.on('modifierFired', ({ type }) => {
-    const message = (fr.modifiers as Partial<Record<ModifierType, string>>)[type];
+    const message = t().modifiers[type];
     if (!message || (ZONES.has(type) && announced.has(type))) return;
     announced.add(type);
     toast(message, 1600);
   });
-  events.on('shieldSaved', () => toast(fr.shieldSaved, 1400));
-  events.on('hiddenGemFound', () => toast(fr.hiddenGem, 1800));
+  events.on('shieldSaved', () => toast(t().shieldSaved, 1400));
+  events.on('hiddenGemFound', () => toast(t().hiddenGem, 1800));
   events.on('crystalCollected', ({ collected, total }) => {
     crystals.textContent = `${collected}/${total}`;
   });
-  events.on('allCrystalsCollected', () => toast(fr.allCrystals, 2200));
-  events.on('checkpointReached', () => toast(fr.checkpoint, 1200));
-  events.on('goalLocked', ({ missing }) => toast(fr.missingCrystals(missing)));
+  events.on('allCrystalsCollected', () => toast(t().allCrystals, 2200));
+  events.on('checkpointReached', () => toast(t().checkpoint, 1200));
+  events.on('goalLocked', ({ missing }) => toast(t().missingCrystals(missing)));
   events.on('fell', ({ falls: n }) => {
     falls.textContent = String(n);
-    toast(fr.fell, 900);
+    toast(t().fell, 900);
   });
 };

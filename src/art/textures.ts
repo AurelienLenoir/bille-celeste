@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SKY_GRADIENT } from './palette';
+import { SKY_GRADIENT, type SkyGradient } from './palette';
 
 const canvas2d = (width: number, height: number) => {
   const canvas = document.createElement('canvas');
@@ -16,10 +16,10 @@ const toTexture = (canvas: HTMLCanvasElement) => {
   return texture;
 };
 
-export const createSkyTexture = (): THREE.Texture => {
+export const createSkyTexture = (sky: SkyGradient = SKY_GRADIENT): THREE.Texture => {
   const { canvas, ctx } = canvas2d(2, 256);
   const gradient = ctx.createLinearGradient(0, 0, 0, 256);
-  for (const [stop, color] of SKY_GRADIENT) gradient.addColorStop(stop, color);
+  for (const [stop, color] of sky) gradient.addColorStop(stop, color);
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 2, 256);
   return toTexture(canvas);

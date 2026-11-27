@@ -32,90 +32,17 @@
     <canvas id="c"></canvas>
 
     <div class="hud">
-      <div class="pill">Cristaux <b id="cr">0/0</b></div>
+      <div class="pill"><span id="crLabel">Cristaux</span> <b id="cr">0/0</b></div>
       <div class="pill" id="tm">0:00.0</div>
-      <div class="pill">Chutes <b id="fl">0</b></div>
+      <div class="pill"><span id="flLabel">Chutes</span> <b id="fl">0</b></div>
       <div class="effects" id="fx" aria-live="polite"></div>
     </div>
-    <button class="pause-btn" id="pause" aria-label="Pause" hidden>
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="6" y="5" width="4" height="14" rx="1.5" />
-        <rect x="14" y="5" width="4" height="14" rx="1.5" />
-      </svg>
-    </button>
     <div class="perf" id="perf" hidden></div>
 
     <div class="joy" id="joy"><div class="knob" id="knob"></div></div>
     <div class="toast" id="toast"></div>
 
-    <div class="overlay" id="start">
-      <div class="card">
-        <h1>Bille Céleste</h1>
-        <p>
-          Penche le parcours pour guider la bille, ramasse <b>tous les cristaux</b> puis traverse l’anneau d’arrivée.
-        </p>
-        <p class="small">
-          Tiens ton téléphone en portrait, dans une position confortable : elle servira de position neutre.
-        </p>
-        <button class="main" id="playGyro">Jouer en inclinant</button>
-        <button class="alt" id="playTouch">Jouer au doigt</button>
-        <button class="link" id="startSettings">Réglages</button>
-        <p class="small">
-          Au doigt : pose ton pouce n’importe où et glisse. Sur ordinateur : flèches ou ZQSD, Échap pour la pause.
-        </p>
-      </div>
-    </div>
-
-    <div class="overlay" id="pauseMenu" hidden>
-      <div class="card">
-        <h2>Pause</h2>
-        <button class="main" id="resume">Reprendre</button>
-        <button class="alt" id="calib" hidden>Recalibrer</button>
-        <p class="small" id="calibHint" hidden>Tiens ton téléphone dans ta position neutre, puis touche Recalibrer.</p>
-        <button class="alt" id="restart">Recommencer</button>
-        <button class="alt" id="pauseSettings">Réglages</button>
-      </div>
-    </div>
-
-    <div class="overlay" id="settings" hidden>
-      <form class="card settings" id="settingsForm">
-        <h2>Réglages</h2>
-        <fieldset class="choice">
-          <legend>Contrôle</legend>
-          <div class="segmented">
-            <label><input type="radio" name="controlMode" value="tilt" /><span>Inclinaison</span></label>
-            <label><input type="radio" name="controlMode" value="touch" /><span>Doigt</span></label>
-          </div>
-        </fieldset>
-        <label class="row slider">
-          <span>Angle pour pencher à fond <output id="tiltRangeOut"></output></span>
-          <input type="range" name="tiltRangeDeg" min="10" max="35" step="1" />
-        </label>
-        <label class="row slider">
-          <span>Sensibilité du doigt <output id="touchSensitivityOut"></output></span>
-          <input type="range" name="touchSensitivity" min="0.5" max="2" step="0.1" />
-        </label>
-        <label class="row toggle"><span>Inverser gauche / droite</span><input type="checkbox" name="invertX" /></label>
-        <label class="row toggle"><span>Inverser avant / arrière</span><input type="checkbox" name="invertY" /></label>
-        <label class="row toggle"><span>Vibrations</span><input type="checkbox" name="haptics" /></label>
-        <label class="row toggle"><span>Sons</span><input type="checkbox" name="sound" /></label>
-        <button class="main" type="button" id="settingsBack">Retour</button>
-      </form>
-    </div>
-
-    <div class="overlay" id="win" hidden>
-      <div class="card">
-        <h2>Niveau terminé !</h2>
-        <ul class="stars" id="wStars" role="img"></ul>
-        <div class="stats">
-          <div><strong id="wTime">0:00</strong>temps</div>
-          <div><strong id="wFalls">0</strong>chutes</div>
-          <div><strong id="wCrystals">0/0</strong>cristaux</div>
-        </div>
-        <p class="small gem" id="wGem"></p>
-        <button class="main" id="again">Rejouer</button>
-      </div>
-    </div>
+    <div id="ui"></div>
 
     <div id="err" hidden></div>
 

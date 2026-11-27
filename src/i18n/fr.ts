@@ -1,5 +1,68 @@
-/** French UI strings. English arrives with the i18n work in phase 4. */
+/** French UI strings: the reference language, `en.ts` follows the same shape. */
 export const fr = {
+  lang: 'fr',
+  gameTitle: 'Bille Céleste',
+  hud: { crystals: 'Cristaux', falls: 'Chutes', pause: 'Pause' },
+  title: {
+    pitch: 'Penche le parcours pour guider la bille, ramasse tous les cristaux puis traverse l’anneau d’arrivée.',
+    neutral: 'Tiens ton téléphone en portrait, dans une position confortable : elle servira de position neutre.',
+    playTilt: 'Jouer en inclinant',
+    playTouch: 'Jouer au doigt',
+    settings: 'Réglages',
+    keys: 'Au doigt : pose ton pouce n’importe où et glisse. Sur ordinateur : flèches ou ZQSD, Échap pour la pause.',
+  },
+  map: {
+    title: 'Les mondes',
+    totalStars: (n: number, max: number) => `${n} / ${max} étoiles`,
+    locked: (n: number) => `${n} ★ pour ouvrir`,
+    back: 'Accueil',
+  },
+  levels: {
+    back: 'Mondes',
+    locked: 'Termine le niveau précédent',
+    best: (time: string) => `Record ${time}`,
+    notPlayed: 'À découvrir',
+    gem: 'Gemme trouvée',
+  },
+  pause: {
+    title: 'Pause',
+    resume: 'Reprendre',
+    calibrate: 'Recalibrer',
+    calibrateHint: 'Tiens ton téléphone dans ta position neutre, puis touche Recalibrer.',
+    restart: 'Recommencer',
+    settings: 'Réglages',
+    quit: 'Quitter le niveau',
+  },
+  win: {
+    title: 'Niveau terminé !',
+    time: 'temps',
+    falls: 'chutes',
+    crystals: 'cristaux',
+    newRecord: 'Nouveau record !',
+    record: (time: string) => `Record : ${time}`,
+    next: 'Niveau suivant',
+    again: 'Rejouer',
+    levels: 'Niveaux',
+    starsLabel: (n: number) => `${n} étoile${n > 1 ? 's' : ''} sur 3`,
+    worldOpened: (name: string) => `Nouveau monde ouvert : ${name} !`,
+    campaignDone: 'Tu as terminé les 20 niveaux. Bravo !',
+  },
+  settings: {
+    title: 'Réglages',
+    control: 'Contrôle',
+    tilt: 'Inclinaison',
+    touch: 'Doigt',
+    tiltRange: 'Angle pour pencher à fond',
+    touchSensitivity: 'Sensibilité du doigt',
+    invertX: 'Inverser gauche / droite',
+    invertY: 'Inverser avant / arrière',
+    haptics: 'Vibrations',
+    sound: 'Sons',
+    language: 'Langue',
+    auto: 'Auto',
+    back: 'Retour',
+  },
+  loading: 'Chargement…',
   touchHint: 'Pose ton pouce et glisse pour pencher le parcours',
   tiltUnavailable:
     'Le capteur d’inclinaison n’est pas accessible depuis cette page. Contrôle au doigt activé : pose ton pouce et glisse.',
@@ -9,7 +72,7 @@ export const fr = {
   allCrystals: 'Tous les cristaux ! Fonce vers l’anneau doré',
   checkpoint: 'Checkpoint !',
   fell: 'Oups !',
-  missingCrystals: (n: number) => `Il manque encore ${n} cristal${n > 1 ? 'x' : ''} !`,
+  missingCrystals: (n: number) => `Il manque encore ${n} ${n > 1 ? 'cristaux' : 'cristal'} !`,
   hiddenGem: 'Gemme cachée trouvée !',
   shieldSaved: 'La bulle t’a rattrapé !',
   /** Toast when a bonus or malus goes off (zones: only the first time in a run). */
@@ -26,7 +89,7 @@ export const fr = {
     conveyor: 'Tapis roulant',
     invert: 'Commandes inversées !',
     fog: 'Brouillard…',
-  },
+  } as Partial<Record<string, string>>,
   /** Short names of the effects shown under the HUD. */
   effects: {
     magnet: 'Aimant',
@@ -38,4 +101,6 @@ export const fr = {
   stars: { finished: 'Terminé', underPar: (par: number) => `Moins de ${par} s`, noFall: 'Sans chute' },
   gemFound: 'Gemme cachée trouvée',
   gemMissed: 'Une gemme cachée t’attend quelque part…',
-} as const;
+};
+
+export type Strings = typeof fr;

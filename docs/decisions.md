@@ -2,6 +2,22 @@
 
 Journal des choix structurants (le plus récent en haut).
 
+## 2026-11-27 — Phase 4 : contenu et progression
+
+- **Campagne** (`levels/worlds.ts`) : 4 mondes de 5 niveaux, `w1-01` à `w4-05`. Le monde 2 s'ouvre à 10 étoiles, le 3 à 22, le 4 à 35 (sur 15, 30 et 45 possibles avant chacun). Dans un monde, un niveau s'ouvre quand le précédent est terminé. `?unlock` ouvre tout, pour tester.
+- **Étoiles cumulées** : chaque étoile (terminé, sous le temps de référence, sans chute) est gagnée une fois pour toutes, même sur des parties différentes. Le record est le meilleur temps d'une partie gagnée. Plus simple à comprendre pour un joueur qu'une note « meilleure partie ».
+- **Niveaux** : `w1-01` et `w1-02` sont écrits à la main (didacticiel). Les 18 autres sont générés avec une nouvelle option `focus` du générateur (`--focus ice,tiles`), qui fait revenir environ 4 fois plus souvent les mécaniques que le niveau introduit, puis la meilleure graine sur 40 est retenue (validateur, bot sans chute, mécaniques présentes, gemme). Retouches : noms, pads de vitesse ajoutés (`w2-03`), seconde zone inversée (`w4-04`), rebondisseur (`w4-05`), et éléments retirés là où l'estimation des draw calls dépassait 80 (bras rotatif de `w4-02`, aimant de `w4-05`). Le bras rotatif n'est donc dans aucun niveau de la campagne pour l'instant ; il reste dans le `sandbox`.
+- **Courbe** : difficulté du générateur de 0,12 à 0,4 dans le monde 1, 0,2 à 0,65 dans le 2, 0,32 à 0,72 dans le 3, 0,45 à 0,85 dans le 4. Chaque monde présente sa mécanique dans le niveau 1, la combine ensuite, et le niveau 5 met tout à l'épreuve (§ 3.3).
+- **Gemme cachée** : le générateur la pose au bout de la première branche latérale qui tient (avant, il n'en posait pas). Chaque niveau de la campagne en a une.
+- **Temps de référence calibrés** : `npm run level:bot -- --par` réécrit le temps de chaque niveau de la campagne à 1,3 × le temps du bot, arrondi aux 5 s (règle de la phase 2). Les niveaux hors campagne (`poc`, `pieces`, `sandbox`) gardent le leur.
+- **Format de niveau v3** : champ `signs` (au plus 8 panneaux : case, orientation, texte FR et EN), avec migration v2 → v3 testée. Les panneaux flottent au-dessus de la piste, sans collision, et s'effacent quand la bille passe dessous (la caméra regarderait à travers). Ils comptent dans l'estimation des draw calls. Pas encore d'outil pour les poser dans l'éditeur : ils s'écrivent dans le JSON et l'éditeur les conserve.
+- **Réglages v2** : ajout de la langue (`auto`, `fr`, `en`), migration v1 → v2 testée (`auto` pour les joueurs existants). `auto` choisit le français sur un appareil en français, l'anglais sinon.
+- **Sauvegarde de la progression** (`meta/progress.ts`, clé `bille-celeste.progress`, version 1) : meilleur temps, étoiles et gemme par niveau terminé. Un niveau illisible est ignoré sans perdre les autres. Les deux formats (réglages, progression) passent par le même lecteur versionné (`meta/save.ts`).
+- **i18n** : `i18n/fr.ts` (référence) et `i18n/en.ts` (même forme, vérifiée par un test). Les tests e2e tournent en `fr-FR`.
+- **Écrans en Preact** (`ui/screens/*.tsx`) : titre, carte des mondes, choix des niveaux (étoiles, record, gemme), pause (avec « Quitter le niveau »), victoire (temps, étoiles, record, niveau suivant, monde ouvert), réglages. Un petit store Zustand (`ui/state.ts`) dit quel écran est affiché. Le HUD reste en DOM simple.
+- **Changement de niveau sans recharger la page** (`game/stage.ts`) : chaque niveau est construit dans son propre groupe Three.js et son propre monde Rapier, et tout est libéré en le quittant. Derrière les menus, le niveau en cours est affiché, immobile (les entrées sont ignorées hors partie). Le ciel et la brume prennent la couleur du monde ; le reste de l'habillage reste pour la phase 5.
+- **`?level=<id>`** mène toujours directement à ce niveau depuis l'écran titre (éditeur, `sandbox`, tests).
+
 ## 2026-11-27 — Phase 3 : validation sur téléphone
 
 - **Phase 3 validée** par l'utilisateur sur iPhone avec le niveau `sandbox`.

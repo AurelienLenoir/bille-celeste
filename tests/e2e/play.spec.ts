@@ -11,7 +11,7 @@ const collectErrors = (page: Page) => {
 
 test('loads the start card without errors', async ({ page }) => {
   const errors = collectErrors(page);
-  await page.goto('./');
+  await page.goto('./?level=poc');
   await expect(page.getByRole('heading', { name: 'Bille Céleste' })).toBeVisible();
   await expect(page.locator('#cr')).toHaveText('0/7');
   await expect(page.locator('#err')).toBeHidden();
@@ -20,7 +20,7 @@ test('loads the start card without errors', async ({ page }) => {
 
 test('rolling forward collects the first crystal and reaches checkpoint 1', async ({ page }) => {
   const errors = collectErrors(page);
-  await page.goto('./');
+  await page.goto('./?level=poc');
   await page.getByRole('button', { name: 'Jouer au doigt' }).click();
   await expect(page.locator('#start')).toBeHidden();
   await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible();
@@ -35,7 +35,7 @@ test('rolling forward collects the first crystal and reaches checkpoint 1', asyn
 });
 
 test('restart resets the counters', async ({ page }) => {
-  await page.goto('./');
+  await page.goto('./?level=poc');
   await page.getByRole('button', { name: 'Jouer au doigt' }).click();
   await page.keyboard.down('ArrowUp');
   await expect(page.locator('#cr')).toHaveText('1/7', { timeout: 10_000 });
@@ -48,7 +48,7 @@ test('restart resets the counters', async ({ page }) => {
 });
 
 test('pause freezes the timer and resume continues it', async ({ page }) => {
-  await page.goto('./');
+  await page.goto('./?level=poc');
   await page.getByRole('button', { name: 'Jouer au doigt' }).click();
   await expect(page.locator('#tm')).not.toHaveText('0:00.0');
   await page.getByRole('button', { name: 'Pause' }).click();
@@ -62,7 +62,7 @@ test('pause freezes the timer and resume continues it', async ({ page }) => {
 });
 
 test('escape toggles pause, and hiding the page pauses automatically', async ({ page }) => {
-  await page.goto('./');
+  await page.goto('./?level=poc');
   await page.getByRole('button', { name: 'Jouer au doigt' }).click();
   await page.keyboard.press('Escape');
   await expect(page.locator('#pauseMenu')).toBeVisible();
@@ -76,7 +76,7 @@ test('escape toggles pause, and hiding the page pauses automatically', async ({ 
 });
 
 test('settings are saved and survive a reload', async ({ page }) => {
-  await page.goto('./');
+  await page.goto('./?level=poc');
   await page.getByRole('button', { name: 'Réglages' }).click();
   await expect(page.getByRole('heading', { name: 'Réglages' })).toBeVisible();
   await page.getByLabel('Inverser gauche / droite').check();

@@ -1,21 +1,24 @@
 /**
  * Bot run of every level, without rendering (PLAN.md § 4.4), then the non-regression replays.
- * Usage: npm run level:bot [-- --level id] [-- --record]
+ * Usage: npm run level:bot [-- --level id] [-- --record] [-- --par]
  *   --record  saves the bot's winning inputs as tests/replays/<id>.json
+ *   --par     calibrates the reference time of each campaign level from the bot's time (PLAN.md § 8, phase 4)
  */
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { initPhysics } from '../src/engine/physics';
 import type { Vec2 } from '../src/engine/math';
-import { runBot } from '../src/game/bot';
+import { parTimeFrom, runBot } from '../src/game/bot';
 import { runHeadless } from '../src/game/headless';
 import { createRecorder, playReplay, replaySchema } from '../src/game/replay';
 import type { Level } from '../src/levels/schema';
-import { arg, readLevels } from './levels';
+import { CAMPAIGN } from '../src/levels/worlds';
+import { arg, readLevels, writeLevelFile } from './levels';
 
 const REPLAY_DIR = 'tests/replays';
 const only = arg('level');
 const record = process.argv.includes('--record');
+const calibrate = process.argv.includes('--par');
 
 await initPhysics();
 const levels = new Map<string, Level>();
@@ -47,6 +50,11 @@ for (const { file, result } of readLevels()) {
       ? `terminé en ${run.time.toFixed(1)} s (référence ${level.parTimeSec} s), ${run.falls} chute(s)`
       : `échec après ${run.time.toFixed(1)} s, ${run.falls} chute(s)`;
   console.log(`${run.won ? '✓' : '✗'} ${level.id} : ${outcome} [${ms} ms]`);
+  if (calibrate && run.won && CAMPAIGN.includes(level.id) && parTimeFrom(run.time) !== level.parTimeSec) {
+    const raw = JSON.parse(readFileSync(file, 'utf8')) as Record<string, unknown>;
+    await writeLevelFile(file, { ...raw, parTimeSec: parTimeFrom(run.time) });
+    console.log(`    temps de référence : ${level.parTimeSec} s → ${parTimeFrom(run.time)} s`);
+  }
   if (record && run.won) {
     mkdirSync(REPLAY_DIR, { recursive: true });
     const replay = recorder.finish(level.id, { time: run.time, falls: run.falls });

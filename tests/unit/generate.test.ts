@@ -25,6 +25,23 @@ describe('generateLevel', () => {
     expect(runBot(level).won).toBe(true);
   });
 
+  it('features the focused mechanics, and hides a gem on a side branch', () => {
+    const count = (focus: string[]) => {
+      let n = 0;
+      for (let seed = 1; seed <= 6; seed++) {
+        const level = generateLevel({ world: 3, difficulty: 0.5, seed, focus });
+        n += level.pieces.filter((p) => p.type === 'fallingTile').length;
+        n += level.modifiers.filter((m) => m.type === 'wind').length;
+        expect(level.entities.filter((e) => e.type === 'hiddenGem').length).toBeLessThanOrEqual(1);
+      }
+      return n;
+    };
+    expect(count(['tiles', 'wind'])).toBeGreaterThan(count([]) * 1.5);
+    expect(generateLevel({ world: 2, difficulty: 0.4, seed: 9 }).entities.some((e) => e.type === 'hiddenGem')).toBe(
+      true,
+    );
+  });
+
   it('introduces mechanics by world', () => {
     const types = (world: number) =>
       new Set(generateLevel({ world, difficulty: 0.5, seed: 5 }).pieces.map((p) => p.type));

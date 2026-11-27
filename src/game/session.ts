@@ -38,6 +38,8 @@ export type Session = {
   clock: () => number;
   /** Resets the level and starts playing. */
   start: () => void;
+  /** Leaves the run: the level goes back to its start, still and out of play (menus). */
+  stop: () => void;
   /** Freezes the run (physics, timer, movers). Does nothing outside of play. */
   pause: () => void;
   resume: () => void;
@@ -293,6 +295,10 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     start: () => {
       reset();
       state = 'play';
+    },
+    stop: () => {
+      reset();
+      state = 'menu';
     },
     pause: () => {
       if (state !== 'play') return;

@@ -1,9 +1,14 @@
 import { z } from 'zod';
+import { parseSave, readSave, type Migration, type SaveFormat } from './save';
 
-export const SETTINGS_VERSION = 1;
+export const SETTINGS_VERSION = 2;
 
 export const CONTROL_MODES = ['tilt', 'touch'] as const;
 export type ControlMode = (typeof CONTROL_MODES)[number];
+
+/** `auto` follows the device language (French if it is French, English otherwise). */
+export const LANGUAGES = ['auto', 'fr', 'en'] as const;
+export type LanguageSetting = (typeof LANGUAGES)[number];
 
 export const TILT_RANGE_DEG = { min: 10, max: 35 } as const;
 export const TOUCH_SENSITIVITY = { min: 0.5, max: 2 } as const;
@@ -20,6 +25,8 @@ export const settingsSchema = z.object({
   sound: z.boolean(),
   /** Stored now so the save format does not change when music arrives (phase 5). */
   music: z.boolean(),
+  /** Version 2. */
+  language: z.enum(LANGUAGES),
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
@@ -34,6 +41,7 @@ export const DEFAULT_SETTINGS: Settings = {
   haptics: true,
   sound: true,
   music: true,
+  language: 'auto',
 };
 
 const fieldSchemas = settingsSchema.omit({ version: true }).shape;
@@ -49,35 +57,20 @@ const salvage = (raw: Record<string, unknown>): Settings => {
   return settingsSchema.parse(result);
 };
 
-/**
- * One function per old version, each returning the next version's shape. Version 1 is the first
- * stored format, so the list is empty; a future v2 adds `1: (v1) => v2` and a test for it.
- */
-const MIGRATIONS: Record<number, (old: Record<string, unknown>) => Record<string, unknown>> = {};
+/** One function per old version, each returning the next version's shape (tested in settings.test.ts). */
+export const SETTINGS_MIGRATIONS: Record<number, Migration> = {
+  /** Version 2 adds the language: players of version 1 keep following their device. */
+  1: (v1) => ({ ...v1, language: 'auto' }),
+};
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+const SETTINGS_FORMAT: SaveFormat<Settings> = {
+  version: SETTINGS_VERSION,
+  migrations: SETTINGS_MIGRATIONS,
+  fallback: () => ({ ...DEFAULT_SETTINGS }),
+  finalize: salvage,
+};
 
 /** Turns whatever was stored (possibly nothing, an old version or garbage) into valid settings. */
-export const migrateSettings = (stored: unknown): Settings => {
-  if (!isRecord(stored)) return { ...DEFAULT_SETTINGS };
-  let data = stored;
-  let version = typeof data.version === 'number' ? data.version : SETTINGS_VERSION;
-  if (version > SETTINGS_VERSION) return { ...DEFAULT_SETTINGS };
-  while (version < SETTINGS_VERSION) {
-    const migrate = MIGRATIONS[version];
-    if (!migrate) return { ...DEFAULT_SETTINGS };
-    data = migrate(data);
-    version++;
-  }
-  return salvage({ ...data, version: SETTINGS_VERSION });
-};
+export const migrateSettings = (stored: unknown): Settings => readSave(stored, SETTINGS_FORMAT);
 
-export const parseStoredSettings = (json: string | null): Settings => {
-  if (json === null) return { ...DEFAULT_SETTINGS };
-  try {
-    return migrateSettings(JSON.parse(json));
-  } catch {
-    return { ...DEFAULT_SETTINGS };
-  }
-};
+export const parseStoredSettings = (json: string | null): Settings => parseSave(json, SETTINGS_FORMAT);

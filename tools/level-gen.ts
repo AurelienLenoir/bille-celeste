@@ -1,14 +1,13 @@
 /**
  * Procedural level draft (PLAN.md § 4.2), checked by the validator and the bot.
- * Usage: npm run level:gen -- --world 3 --difficulty 0.6 --seed 42 [--id w3-draft] [--out file.json]
+ * Usage: npm run level:gen -- --world 3 --difficulty 0.6 --seed 42 [--id w3-draft] [--focus ice,tiles] [--out file.json]
  * The par time is set from the bot's time. Without --out the file goes to src/levels/data/<id>.json.
  */
-import { writeFileSync } from 'node:fs';
 import { initPhysics } from '../src/engine/physics';
 import { parTimeFrom, runBot } from '../src/game/bot';
 import { generateLevel } from '../src/levels/generate';
 import { validateLevel } from '../src/levels/validate';
-import { arg, LEVEL_DIR } from './levels';
+import { arg, LEVEL_DIR, writeLevelFile } from './levels';
 
 const world = Number(arg('world') ?? 1);
 const difficulty = Number(arg('difficulty') ?? 0.3);
@@ -20,7 +19,8 @@ if (!(world >= 1 && world <= 4) || !(difficulty >= 0 && difficulty <= 1) || !Num
 
 await initPhysics();
 const id = arg('id');
-const level = generateLevel({ world, difficulty, seed, ...(id ? { id } : {}) });
+const focus = arg('focus')?.split(',').filter(Boolean) ?? [];
+const level = generateLevel({ world, difficulty, seed, focus, ...(id ? { id } : {}) });
 const warnings = validateLevel(level);
 const bot = runBot(level);
 const counts = level.entities.reduce<Record<string, number>>((c, e) => ({ ...c, [e.type]: (c[e.type] ?? 0) + 1 }), {});
@@ -34,7 +34,7 @@ if (!bot.won) {
 }
 level.parTimeSec = parTimeFrom(bot.time);
 const out = arg('out') ?? `${LEVEL_DIR}/${level.id}.json`;
-writeFileSync(out, `${JSON.stringify(level, null, 2)}\n`);
+await writeLevelFile(out, level);
 console.log(
   `✓ Bot : ${bot.time.toFixed(1)} s, ${bot.falls} chute(s). Temps de référence ${level.parTimeSec} s. Écrit dans ${out}`,
 );

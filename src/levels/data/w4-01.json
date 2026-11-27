@@ -1,0 +1,328 @@
+{
+  "id": "w4-01",
+  "version": 3,
+  "name": {
+    "fr": "La chaîne de montage",
+    "en": "Assembly Line"
+  },
+  "world": 4,
+  "parTimeSec": 60,
+  "spawn": {
+    "cell": [0, 0, 0]
+  },
+  "pieces": [
+    {
+      "type": "platform",
+      "cell": [0, 0, 0],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "ramp",
+      "cell": [0, 0, -2],
+      "rot": 0,
+      "length": 4,
+      "drop": 5,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "stairs",
+      "cell": [0, -5, -6],
+      "rot": 0,
+      "steps": 2,
+      "width": "normal",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [0, -7, -9],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "funnel",
+      "cell": [0, -7, -11],
+      "rot": 0,
+      "diameter": 3,
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [0, -7, -13],
+      "rot": 0,
+      "radius": 1,
+      "angle": 90,
+      "dir": "left",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-1, -7, -13],
+      "rot": 270,
+      "length": 3,
+      "width": "wide",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-4, -7, -13],
+      "rot": 270,
+      "length": 3,
+      "width": "wide",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-8, -7, -13],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-8, -7, -15],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "stairs",
+      "cell": [-10, -7, -13],
+      "rot": 270,
+      "steps": 3,
+      "width": "normal",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-14, -10, -13],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "movingPlatform",
+      "path": [
+        [-16.5, -10, -13],
+        [-20.5, -10, -13]
+      ],
+      "size": [2, 1.5],
+      "speed": 2.3200000000000003,
+      "pause": 0.975,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [-23, -10, -13],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "straight",
+      "cell": [-25, -10, -13],
+      "rot": 270,
+      "length": 3,
+      "width": "wide",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-29, -10, -13],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-29, -10, -15],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-31, -10, -13],
+      "rot": 270,
+      "length": 4,
+      "width": "narrow",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [-35, -10, -13],
+      "rot": 270,
+      "length": 4,
+      "drop": 3,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-39, -13, -13],
+      "rot": 270,
+      "length": 3,
+      "width": "wide",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-43, -13, -13],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-43, -13, -11],
+      "rot": 180,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-45, -13, -13],
+      "rot": 270,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "rotatingPlatform",
+      "cell": [-50, -13, -13],
+      "diameter": 3,
+      "speed": -26.25,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [-53, -13, -13],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "wall",
+      "cell": [-54, -13, -12],
+      "rot": 270,
+      "length": 3,
+      "height": 0.6
+    }
+  ],
+  "entities": [
+    {
+      "type": "checkpoint",
+      "cell": [-8, -7, -13]
+    },
+    {
+      "type": "hiddenGem",
+      "cell": [-8, -7, -16]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [-23, -10, -13]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [-29, -10, -13]
+    },
+    {
+      "type": "crystal",
+      "cell": [-29, -10, -16]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [-43, -13, -13]
+    },
+    {
+      "type": "crystal",
+      "cell": [-43, -13, -10]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, -7, -9]
+    },
+    {
+      "type": "crystal",
+      "cell": [-2, -7, -13]
+    },
+    {
+      "type": "crystal",
+      "cell": [-5, -7, -13]
+    },
+    {
+      "type": "crystal",
+      "cell": [-26, -10, -13]
+    },
+    {
+      "type": "crystal",
+      "cell": [-33, -10, -13]
+    },
+    {
+      "type": "crystal",
+      "cell": [-40, -13, -13]
+    },
+    {
+      "type": "goal",
+      "cell": [-53, -13, -13]
+    }
+  ],
+  "modifiers": [
+    {
+      "type": "conveyor",
+      "cell": [-2, -7, -13],
+      "size": [3, 1],
+      "rot": 0,
+      "speed": 3.4
+    },
+    {
+      "type": "conveyor",
+      "cell": [-5, -7, -13],
+      "size": [3, 1],
+      "rot": 270,
+      "speed": 3.4
+    },
+    {
+      "type": "conveyor",
+      "cell": [-26, -10, -13],
+      "size": [3, 1],
+      "rot": 0,
+      "speed": 3.4
+    },
+    {
+      "type": "conveyor",
+      "cell": [-40, -13, -13],
+      "size": [3, 1],
+      "rot": 180,
+      "speed": 3.4
+    },
+    {
+      "type": "hourglass",
+      "cell": [-45, -13, -13]
+    }
+  ],
+  "signs": [],
+  "decor": {
+    "theme": "factory",
+    "seed": 3135
+  }
+}

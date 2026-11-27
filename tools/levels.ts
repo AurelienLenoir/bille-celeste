@@ -1,4 +1,5 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { format, resolveConfig } from 'prettier';
 import { basename, join } from 'node:path';
 import { parseLevel, type ParseResult } from '../src/levels/loader';
 
@@ -26,4 +27,10 @@ export const readLevels = (dir = LEVEL_DIR): LevelFile[] =>
 export const arg = (name: string): string | undefined => {
   const i = process.argv.indexOf(`--${name}`);
   return i >= 0 ? process.argv[i + 1] : undefined;
+};
+
+/** Writes a level file formatted like the rest of the repository (Prettier). */
+export const writeLevelFile = async (file: string, level: unknown): Promise<void> => {
+  const options = (await resolveConfig(file)) ?? {};
+  writeFileSync(file, await format(JSON.stringify(level), { ...options, parser: 'json' }));
 };

@@ -1,0 +1,230 @@
+{
+  "id": "w2-01",
+  "version": 3,
+  "name": {
+    "fr": "Le bac du soir",
+    "en": "The Evening Ferry"
+  },
+  "world": 2,
+  "parTimeSec": 55,
+  "spawn": {
+    "cell": [0, 0, 0]
+  },
+  "pieces": [
+    {
+      "type": "platform",
+      "cell": [0, 0, 0],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "stairs",
+      "cell": [0, 0, -2],
+      "rot": 0,
+      "steps": 3,
+      "width": "normal",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [0, -3, -5],
+      "rot": 0,
+      "radius": 2,
+      "angle": 90,
+      "dir": "right",
+      "width": "wide",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [3, -3, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "movingPlatform",
+      "path": [
+        [5.5, -3, -6],
+        [8.5, -3, -6]
+      ],
+      "size": [2, 1.5],
+      "speed": 1.9200000000000002,
+      "pause": 1.0999999999999999,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [11, -3, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "platform",
+      "cell": [14, -3, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [14, -3, -4],
+      "rot": 180,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [16, -3, -6],
+      "rot": 90,
+      "length": 3,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [20, -3, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "movingPlatform",
+      "path": [
+        [22.5, -3, -6],
+        [26.5, -3, -6]
+      ],
+      "size": [2, 1.5],
+      "speed": 1.9200000000000002,
+      "pause": 1.0999999999999999,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [29, -3, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "platform",
+      "cell": [32, -3, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [34, -3, -6],
+      "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [37, -3, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [37, -3, -8],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [39, -3, -6],
+      "rot": 90,
+      "length": 2,
+      "width": "wide",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [42, -3, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "wall",
+      "cell": [43, -3, -7],
+      "rot": 90,
+      "length": 3,
+      "height": 0.6
+    }
+  ],
+  "entities": [
+    {
+      "type": "checkpoint",
+      "cell": [11, -3, -6]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [14, -3, -6]
+    },
+    {
+      "type": "hiddenGem",
+      "cell": [14, -3, -3]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [29, -3, -6]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [32, -3, -6]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [37, -3, -6]
+    },
+    {
+      "type": "crystal",
+      "cell": [37, -3, -9]
+    },
+    {
+      "type": "crystal",
+      "cell": [17, -3, -6]
+    },
+    {
+      "type": "crystal",
+      "cell": [35, -3, -6]
+    },
+    {
+      "type": "crystal",
+      "cell": [40, -3, -6]
+    },
+    {
+      "type": "goal",
+      "cell": [42, -3, -6]
+    }
+  ],
+  "modifiers": [
+    {
+      "type": "speedPad",
+      "cell": [16, -3, -6],
+      "rot": 90,
+      "speed": 8
+    }
+  ],
+  "signs": [],
+  "decor": {
+    "theme": "sunset",
+    "seed": 2931
+  }
+}
