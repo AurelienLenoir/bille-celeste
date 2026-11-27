@@ -4,12 +4,13 @@ import { centreRadius } from '../game/pieces/curve';
 import type { FootCell } from '../game/pieces/kit';
 import { CELL, forwardOf, rightOf, STEP, type Rot } from './grid';
 import { loadLevel } from './loader';
-import { LEVEL_VERSION, type Entity, type Level, type LevelInput, type Width } from './schema';
+import { LEVEL_VERSION, type Entity, type Level, type LevelInput, type ModifierType, type Width } from './schema';
 import { hasErrors, validateLevel } from './validate';
 
 export type GenerateOptions = { world: number; difficulty: number; seed: number; id?: string };
 
 type PieceInput = LevelInput['pieces'][number];
+type ModifierInput = NonNullable<LevelInput['modifiers']>[number];
 type Cell = [number, number, number];
 /** Where the next piece starts: its entry cell, facing `rot` (never 180: the course never comes back towards the camera). */
 type Turtle = { cell: Cell; rot: Rot };
@@ -20,8 +21,30 @@ type Segment = {
   checkpoint?: Cell;
   /** Course length added, in cells. */
   cells: number;
-  /** Extra cells to keep free (the empty lane of a moving platform). */
+  /** Extra cells to keep free (the empty lane of a moving platform, a pusher's housing). */
   lane?: FootCell[];
+  modifiers?: ModifierInput[];
+};
+
+/** Bonuses and maluses the generator uses, by the world that introduces them (PLAN.md § 3.3). */
+export const GENERATED_MODIFIERS: Record<number, { bonus: ModifierType[]; malus: ModifierType[] }> = {
+  1: { bonus: ['hourglass', 'shield'], malus: [] },
+  2: { bonus: ['speedPad', 'spring'], malus: ['sand'] },
+  3: { bonus: ['slowMo', 'feather'], malus: ['ice', 'wind'] },
+  4: { bonus: ['magnet'], malus: ['conveyor', 'pusher', 'invert', 'heavy', 'fog'] },
+};
+
+/** Everything introduced up to `world`. */
+const modifiersUpTo = (world: number, kind: 'bonus' | 'malus'): ModifierType[] =>
+  [1, 2, 3, 4].filter((w) => w <= world).flatMap((w) => GENERATED_MODIFIERS[w]?.[kind] ?? []);
+
+/** Smallest zone (centre cell and size) covering some cells. */
+const zoneOver = (cells: Cell[]): { cell: Cell; size: [number, number] } => {
+  const is = cells.map((c) => c[0]);
+  const ks = cells.map((c) => c[2]);
+  const [i0, i1, k0, k1] = [Math.min(...is), Math.max(...is), Math.min(...ks), Math.max(...ks)];
+  const size: [number, number] = [i1 - i0 + 1, k1 - k0 + 1];
+  return { cell: [i0 + Math.floor((size[0] - 1) / 2), cells[0]?.[1] ?? 0, k0 + Math.floor((size[1] - 1) / 2)], size };
 };
 
 const MAX_ATTEMPTS = 40;
@@ -91,6 +114,7 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
   const rnd = createRandom(seed);
   const occupied = new Map<string, [number, number][]>();
   const pieces: PieceInput[] = [];
+  const modifiers: ModifierInput[] = [];
   const entities: Entity[] = [];
   const crystalSpots: Cell[] = [];
 
@@ -129,7 +153,7 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
   // Segment builders. Each returns the pieces it adds and where the course continues.
   const straight = (t: Turtle): Segment => {
     const length = between(rnd, 2, 5);
-    const piece: PieceInput = {
+    const piece: PieceInput & { type: 'straight' } = {
       type: 'straight',
       cell: t.cell,
       rot: t.rot,
@@ -137,12 +161,65 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
       width: widthFor(),
       rails: railsFor(),
     };
-    return {
+    const segment: Segment = {
       pieces: [piece],
       next: exitOf(piece),
       crystals: [step(t.cell, t.rot, Math.floor(length / 2))],
       cells: length,
     };
+    return decorate(t, piece, length, segment);
+  };
+
+  // Bonuses and maluses: dropped on straights, a few per level, more maluses with difficulty.
+  const bonuses = modifiersUpTo(world, 'bonus');
+  const maluses = modifiersUpTo(world, 'malus');
+  let malusLeft = maluses.length ? Math.round(1 + difficulty * 4 + (world - 2)) : 0;
+  let bonusLeft = 1 + Math.round(rnd() * 2);
+  const decorate = (t: Turtle, piece: PieceInput & { type: 'straight' }, length: number, segment: Segment): Segment => {
+    const cells: Cell[] = Array.from({ length }, (_, n) => step(t.cell, t.rot, n));
+    const first = cells[0] ?? t.cell;
+    const middle = cells[Math.floor(cells.length / 2)] ?? first;
+    const side = ((t.rot + (rnd() < 0.5 ? 90 : 270)) % 360) as Rot;
+    const r = rnd();
+    if (malusLeft > 0 && length >= 3 && r < 0.45) {
+      const type = pick(rnd, maluses);
+      malusLeft--;
+      const zone = zoneOver(cells);
+      const add = (m: ModifierInput, change: Partial<typeof piece> = {}, lane?: FootCell[]): Segment => {
+        Object.assign(piece, change);
+        return { ...segment, next: exitOf(piece), modifiers: [m], ...(lane ? { lane } : {}) };
+      };
+      if (type === 'ice' || type === 'sand' || type === 'invert' || type === 'fog')
+        return add({ type, ...zone }, { width: piece.width === 'rail' ? 'narrow' : piece.width });
+      if (type === 'wind')
+        return add(
+          { type, ...zone, rot: side, strength: 2 + difficulty * 3, gusts: difficulty > 0.5 ? 3 : 0 },
+          { rails: 'both', width: 'wide' },
+        );
+      if (type === 'conveyor')
+        return add(
+          { type, ...zone, rot: rnd() < 0.5 ? t.rot : side, speed: 1.5 + difficulty * 1.5 },
+          { rails: 'both', width: 'wide' },
+        );
+      if (type === 'pusher') {
+        const [hx, hy, hz] = step(middle, side, -1);
+        return add({ type, cell: middle, rot: side, period: 3.5 - difficulty }, { rails: 'none', width: 'normal' }, [
+          { i: hx, k: hz, yMin: hy * STEP, yMax: hy * STEP + 1 },
+        ]);
+      }
+      if (type === 'heavy') return add({ type, cell: cells.at(-1) ?? middle });
+    }
+    if (bonusLeft > 0 && r > 0.7) {
+      const type = pick(rnd, bonuses);
+      bonusLeft--;
+      if (type === 'speedPad') return { ...segment, modifiers: [{ type, cell: first, rot: t.rot, speed: 8 }] };
+      // The ball flies over its own cell and the next one: the crystal goes at the far end.
+      if (type === 'spring' && length >= 4)
+        return { ...segment, crystals: [cells.at(-1) ?? middle], modifiers: [{ type, cell: first, height: 1.5 }] };
+      if (type === 'spring') return segment;
+      return { ...segment, modifiers: [{ type, cell: first } as ModifierInput] };
+    }
+    return segment;
   };
   const turn = (t: Turtle): Segment => {
     const dirs = t.rot === 0 ? ['left', 'right'] : t.rot === 90 ? ['left'] : ['right'];
@@ -294,6 +371,7 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
     if (!cells) return false;
     claim(cells);
     pieces.push(...segment.pieces);
+    modifiers.push(...(segment.modifiers ?? []));
     crystalSpots.push(...(segment.crystals ?? []));
     if (segment.checkpoint) entities.push({ type: 'checkpoint', cell: segment.checkpoint });
     turtle = segment.next;
@@ -363,6 +441,7 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
     spawn: { cell: [0, 0, 0] },
     pieces,
     entities: [...entities.filter((e) => e.type !== 'goal'), ...entities.filter((e) => e.type === 'goal')],
+    modifiers,
     decor: {
       theme: (['garden', 'sunset', 'glacier', 'factory'] as const)[world - 1] ?? 'garden',
       seed: seed % 2_000_000_000 || 1,

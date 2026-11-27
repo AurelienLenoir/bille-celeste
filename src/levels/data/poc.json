@@ -1,6 +1,6 @@
 {
   "id": "poc",
-  "version": 1,
+  "version": 2,
   "name": { "fr": "Niveau 1", "en": "Level 1" },
   "world": 1,
   "parTimeSec": 60,
@@ -46,5 +46,6 @@
     { "type": "checkpoint", "cell": [7, -6, -34] },
     { "type": "goal", "cell": [7, -6, -41] }
   ],
+  "modifiers": [],
   "decor": { "theme": "garden", "seed": 7 }
 }

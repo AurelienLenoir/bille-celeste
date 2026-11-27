@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hasFallen, isInGoal, reachesCheckpoint, touchesCrystal } from '../../src/game/rules';
+import { hasFallen, isInGoal, reachesCheckpoint, starsFor, touchesCrystal } from '../../src/game/rules';
 
 describe('touchesCrystal', () => {
   it('picks up a crystal when the ball rolls through it', () => {
@@ -35,5 +35,14 @@ describe('hasFallen', () => {
     expect(hasFallen({ x: 0, y: -8, z: 0 }, { x: 0, y: 0, z: 0 })).toBe(false);
     expect(hasFallen({ x: 0, y: -9.1, z: 0 }, { x: 0, y: 0, z: 0 })).toBe(true);
     expect(hasFallen({ x: 0, y: -9.1, z: 0 }, { x: 0, y: -3, z: 0 })).toBe(false);
+  });
+});
+
+describe('starsFor', () => {
+  it('gives one star for finishing, one under par time, one without a fall', () => {
+    expect(starsFor(50, 0, 60)).toEqual({ underPar: true, noFall: true, count: 3 });
+    expect(starsFor(61, 0, 60)).toEqual({ underPar: false, noFall: true, count: 2 });
+    expect(starsFor(40, 2, 60)).toEqual({ underPar: true, noFall: false, count: 2 });
+    expect(starsFor(90, 1, 60).count).toBe(1);
   });
 });

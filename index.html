@@ -35,6 +35,7 @@
       <div class="pill">Cristaux <b id="cr">0/0</b></div>
       <div class="pill" id="tm">0:00.0</div>
       <div class="pill">Chutes <b id="fl">0</b></div>
+      <div class="effects" id="fx" aria-live="polite"></div>
     </div>
     <button class="pause-btn" id="pause" aria-label="Pause" hidden>
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -105,11 +106,13 @@
     <div class="overlay" id="win" hidden>
       <div class="card">
         <h2>Niveau terminé !</h2>
+        <ul class="stars" id="wStars" role="img"></ul>
         <div class="stats">
           <div><strong id="wTime">0:00</strong>temps</div>
           <div><strong id="wFalls">0</strong>chutes</div>
           <div><strong id="wCrystals">0/0</strong>cristaux</div>
         </div>
+        <p class="small gem" id="wGem"></p>
         <button class="main" id="again">Rejouer</button>
       </div>
     </div>

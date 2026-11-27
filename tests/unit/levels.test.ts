@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { parseLevel } from '../../src/levels/loader';
 import { migrateLevel } from '../../src/levels/migrations';
 import { cellToWorld, entryFrame, forwardOf, toWorld } from '../../src/levels/grid';
+import { LEVEL_VERSION } from '../../src/levels/schema';
 import { levelWith, shippedLevel } from './helpers';
 
 describe('grid', () => {
@@ -44,7 +45,8 @@ describe('level schema', () => {
   });
 
   it('every shipped level parses', () => {
-    for (const file of readdirSync('src/levels/data')) expect(shippedLevel(file.replace('.json', '')).version).toBe(1);
+    for (const file of readdirSync('src/levels/data'))
+      expect(shippedLevel(file.replace('.json', '')).version).toBe(LEVEL_VERSION);
   });
 });
 
@@ -66,6 +68,17 @@ describe('level migrations', () => {
   it('refuses newer files and gaps in the chain', () => {
     expect(() => migrateLevel({ version: 4 }, migrations, 3)).toThrow(/version 4/);
     expect(() => migrateLevel({ version: 0 }, migrations, 3)).toThrow(/version 0/);
+  });
+
+  it('brings a version-1 level (no modifiers) up to version 2', () => {
+    const { modifiers: _dropped, ...v1 } = { ...levelWith([{ type: 'platform', cell: [0, 0, 0] }]), version: 1 };
+    void _dropped;
+    const result = parseLevel(v1);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.level.version).toBe(2);
+      expect(result.level.modifiers).toEqual([]);
+    }
   });
 
   it('turns a migration error into a parse error', () => {

@@ -39,9 +39,34 @@ export const applyGravity = (world: PhysicsWorld, dir: GravityDirection): void =
   world.gravity = { x: dir.x * GRAVITY, y: dir.y * GRAVITY, z: dir.z * GRAVITY };
 };
 
-/** Advances the world by exactly one PHYSICS_STEP. */
-export const stepPhysics = (world: PhysicsWorld): void => {
+/** Advances the world by exactly one PHYSICS_STEP, or by `scale` of it when the game is slowed down. */
+export const stepPhysics = (world: PhysicsWorld, scale = 1): void => {
+  const timestep = PHYSICS_STEP * scale;
+  if (world.timestep !== timestep) world.timestep = timestep;
   world.step();
+};
+
+/**
+ * Distance from `from` straight down to the first solid surface (sensors and `exclude` ignored),
+ * or undefined if there is none within `maxDistance`.
+ */
+export const distanceDown = (
+  world: PhysicsWorld,
+  from: { x: number; y: number; z: number },
+  maxDistance: number,
+  exclude?: PhysicsBody,
+): number | undefined => {
+  const ray = new RAPIER.Ray({ x: from.x, y: from.y, z: from.z }, { x: 0, y: -1, z: 0 });
+  const hit = world.castRay(
+    ray,
+    maxDistance,
+    true,
+    RAPIER.QueryFilterFlags.EXCLUDE_SENSORS,
+    undefined,
+    undefined,
+    exclude,
+  );
+  return hit ? hit.timeOfImpact : undefined;
 };
 
 /** Adds the whole static course as one trimesh collider whose internal edges are smoothed out. */

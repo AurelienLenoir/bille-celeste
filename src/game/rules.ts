@@ -23,3 +23,12 @@ export const isInGoal = (ball: Point, goal: Point): boolean =>
 
 /** Falling is measured from the current respawn point, so lower sections still work. */
 export const hasFallen = (ball: Point, spawn: Point): boolean => ball.y < spawn.y - FALL_DEPTH;
+
+/** Stars of a finished run (PLAN.md § 5.3): one for finishing, one under the par time, one without a fall. */
+export type Stars = { underPar: boolean; noFall: boolean; count: 1 | 2 | 3 };
+
+export const starsFor = (time: number, falls: number, parTimeSec: number): Stars => {
+  const underPar = time <= parTimeSec;
+  const noFall = falls === 0;
+  return { underPar, noFall, count: (1 + Number(underPar) + Number(noFall)) as Stars['count'] };
+};

@@ -7,12 +7,21 @@ import { parTimeFrom, runBot } from '../../src/game/bot';
 import { DEFAULT_LEVEL, EDITOR_LEVEL_KEY, fetchLevel, LEVEL_IDS } from '../../src/levels/catalog';
 import { generateLevel } from '../../src/levels/generate';
 import { parseLevel } from '../../src/levels/loader';
-import { THEMES, type Entity, type Level, type Piece, type PieceType } from '../../src/levels/schema';
+import {
+  BONUS_TYPES,
+  MALUS_TYPES,
+  THEMES,
+  type Entity,
+  type Level,
+  type Modifier,
+  type Piece,
+  type PieceType,
+} from '../../src/levels/schema';
 import { validateLevel, type Issue } from '../../src/levels/validate';
 import { downloadJson } from '../../src/ui/download';
 import { cellAt, drawLevel, fitView, hitTest, toWorldXZ, type View } from './draw';
-import { hasRot, PIECE_TYPES, pieceFields, type Field } from './fields';
-import { ENTITY_LABELS, FIELD_LABELS, OPTION_LABELS, PIECE_LABELS } from './labels';
+import { hasRot, modifierFields, modifierHasRot, PIECE_TYPES, pieceFields, type Field } from './fields';
+import { ENTITY_LABELS, FIELD_LABELS, MODIFIER_LABELS, OPTION_LABELS, PIECE_LABELS } from './labels';
 import {
   deleteSelection,
   duplicateSelection,
@@ -24,6 +33,7 @@ import {
   rotate,
   undo,
   updateLevel,
+  updateModifier,
   updatePiece,
   type EditorState,
   type Tool,
@@ -281,6 +291,10 @@ const Palette = () => {
       <h3>Objets</h3>
       {ENTITY_TOOLS.map((type) => item({ kind: 'entity', type }, ENTITY_LABELS[type]))}
       {item({ kind: 'spawn' }, 'Départ')}
+      <h3>Bonus</h3>
+      {BONUS_TYPES.map((type) => item({ kind: 'modifier', type }, MODIFIER_LABELS[type]))}
+      <h3>Malus</h3>
+      {MALUS_TYPES.map((type) => item({ kind: 'modifier', type }, MODIFIER_LABELS[type]))}
     </nav>
   );
 };
@@ -549,6 +563,30 @@ const PieceInspector = ({ index, piece }: { index: number; piece: Piece }) => {
   );
 };
 
+const ModifierInspector = ({ index, modifier }: { index: number; modifier: Modifier }) => {
+  const patch = (p: Record<string, unknown>) => set((s) => updateModifier(s, index, p));
+  return (
+    <section>
+      <h2>{MODIFIER_LABELS[modifier.type]}</h2>
+      <CellInput cell={modifier.cell} onChange={(cell) => patch({ cell })} />
+      {modifierHasRot(modifier.type) && 'rot' in modifier && (
+        <FieldInput
+          field={{ key: 'rot', kind: 'choice', options: [0, 90, 180, 270] }}
+          value={modifier.rot}
+          onChange={(rot) => patch({ rot })}
+        />
+      )}
+      {modifierFields(modifier.type).map((field) => (
+        <FieldInput
+          field={field}
+          value={(modifier as Record<string, unknown>)[field.key]}
+          onChange={(v) => patch({ [field.key]: v })}
+        />
+      ))}
+    </section>
+  );
+};
+
 const LevelInspector = ({ level }: { level: Level }) => {
   const patch = (p: Partial<Level>) => set((s) => updateLevel(s, p));
   const text = (label: string, value: string, change: (v: string) => void) => (
@@ -588,7 +626,8 @@ const LevelInspector = ({ level }: { level: Level }) => {
         onChange={(cell) => patch({ spawn: { cell: cell as [number, number, number] } })}
       />
       <p class="hint">
-        {level.pieces.length} pièces · {level.entities.filter((e) => e.type === 'crystal').length} cristaux
+        {level.pieces.length} pièces · {level.entities.filter((e) => e.type === 'crystal').length} cristaux ·{' '}
+        {level.modifiers.length} bonus et malus
       </p>
     </section>
   );
@@ -607,6 +646,8 @@ const Inspector = () => {
     );
   if (first?.kind === 'piece' && level.pieces[first.index])
     return <PieceInspector index={first.index} piece={level.pieces[first.index] as Piece} />;
+  if (first?.kind === 'modifier' && level.modifiers[first.index])
+    return <ModifierInspector index={first.index} modifier={level.modifiers[first.index] as Modifier} />;
   if (first?.kind === 'entity') {
     const entity = level.entities[first.index];
     if (entity)

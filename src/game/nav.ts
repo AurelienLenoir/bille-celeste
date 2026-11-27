@@ -1,6 +1,7 @@
 import type { Vec3Tuple } from '../engine/math';
-import { cellToWorld } from '../levels/grid';
+import { cellToWorld, STEP, worldToCell } from '../levels/grid';
 import type { Entity, Level } from '../levels/schema';
+import { modifierModule } from './modifiers';
 import { buildPiece } from './pieces';
 import type { NavBlock, NavKind, NavPort, PieceBuild } from './pieces/kit';
 
@@ -8,6 +9,8 @@ import type { NavBlock, NavKind, NavPort, PieceBuild } from './pieces/kit';
 const LEVEL_TOLERANCE = 0.15;
 /** A ball may roll off an edge onto a piece at most this much lower. */
 export const MAX_DROP = 4;
+/** Extra cost of stepping into a cell a moving obstacle sweeps: routes go around when they can. */
+export const HAZARD_COST = 8;
 
 export type NavEdge = { to: number; kind: NavKind; cost: number };
 export type NavNode = { at: Vec3Tuple; piece: number };
@@ -66,7 +69,32 @@ export const buildNav = (level: Level): LevelNav => {
       }
     }
   }
+  avoidObstacles(level, nodes, edges);
   return { graph: { nodes, edges }, builds };
+};
+
+/** Cells (with their floor height) listed by the level's modifiers. */
+const obstacleCells = (level: Level, kind: 'solidCells' | 'hazardCells') =>
+  level.modifiers.flatMap((m) => (modifierModule(m)[kind]?.(m) ?? []).map(([i, k]) => ({ i, k, y: m.cell[1] * STEP })));
+
+/** Nobody rolls through a solid obstacle; cells a moving one sweeps cost more. */
+const avoidObstacles = (level: Level, nodes: NavNode[], edges: NavEdge[][]) => {
+  if (!level.modifiers.length) return;
+  const inCells = (cells: { i: number; k: number; y: number }[]) => (node: NavNode | undefined) => {
+    if (!node) return false;
+    const [i, k] = worldToCell(node.at[0], node.at[2]);
+    return cells.some((c) => c.i === i && c.k === k && Math.abs(c.y - node.at[1]) < 1.5);
+  };
+  const solid = inCells(obstacleCells(level, 'solidCells'));
+  const hazard = inCells(obstacleCells(level, 'hazardCells'));
+  edges.forEach((list, from) => {
+    const kept = solid(nodes[from])
+      ? []
+      : list
+          .filter((e) => !solid(nodes[e.to]))
+          .map((e) => (hazard(nodes[e.to]) ? { ...e, cost: e.cost + HAZARD_COST } : e));
+    edges[from] = kept;
+  });
 };
 
 /** Nav node standing for an entity: the closest one on the same floor, if any is close enough. */

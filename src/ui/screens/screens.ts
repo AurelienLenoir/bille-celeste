@@ -12,6 +12,10 @@ export type ScreenActions = {
   enableTilt: () => Promise<void>;
   hasTiltReading: () => boolean;
   openSettings: (back: () => void) => void;
+  /** Par time of the level, for the second star. */
+  parTimeSec: number;
+  /** The level hides a gem. */
+  hasGem: boolean;
 };
 
 const TILT_PROBE_MS = 1200;
@@ -55,10 +59,23 @@ export const bindScreens = (events: EventBus<GameEvents>, toast: Toast, actions:
 
   let total = 0;
   events.on('reset', (reset) => (total = reset.total));
-  events.on('levelWon', ({ time, falls }) => {
+  events.on('levelWon', ({ time, falls, stars, gem }) => {
     byId('wCrystals').textContent = `${total}/${total}`;
     byId('wTime').textContent = formatTimeShort(time);
     byId('wFalls').textContent = String(falls);
+    const earned = [true, stars.underPar, stars.noFall];
+    const labels = [fr.stars.finished, fr.stars.underPar(actions.parTimeSec), fr.stars.noFall];
+    byId('wStars').replaceChildren(
+      ...earned.map((on, i) => {
+        const star = document.createElement('li');
+        star.className = on ? 'on' : '';
+        star.innerHTML = `<span aria-hidden="true">★</span>`;
+        star.append(labels[i] ?? '');
+        return star;
+      }),
+    );
+    byId('wStars').setAttribute('aria-label', `${stars.count} étoile${stars.count > 1 ? 's' : ''} sur 3`);
+    byId('wGem').textContent = gem ? fr.gemFound : actions.hasGem ? fr.gemMissed : '';
     win.hidden = false;
     pauseButton.hidden = true;
   });

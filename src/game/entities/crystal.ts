@@ -9,7 +9,10 @@ const geometry = (() => {
 })();
 
 export type Crystal = {
+  /** Where the crystal is now: its cell, unless a magnet is pulling it. */
   position: Vec3Tuple;
+  /** Moves the crystal `distance` units towards `target` (magnet). */
+  pull: (target: Vec3Tuple, distance: number) => void;
   taken: boolean;
   collect: () => void;
   reset: () => void;
@@ -33,14 +36,22 @@ export const createCrystal = (scene: THREE.Scene, position: Vec3Tuple, index: nu
 
   /** Pop-out animation progress after pickup: 1 → 0. */
   let fade = 0;
+  const home = position;
   const crystal: Crystal = {
     position,
+    pull: (target, distance) => {
+      const [x, y, z] = crystal.position;
+      const d = Math.hypot(target[0] - x, target[1] - y, target[2] - z);
+      const k = d > distance ? distance / d : 1;
+      crystal.position = [x + (target[0] - x) * k, y + (target[1] - y) * k, z + (target[2] - z) * k];
+    },
     taken: false,
     collect: () => {
       crystal.taken = true;
       fade = 1;
     },
     reset: () => {
+      crystal.position = home;
       crystal.taken = false;
       fade = 0;
       mesh.visible = true;
@@ -56,7 +67,7 @@ export const createCrystal = (scene: THREE.Scene, position: Vec3Tuple, index: nu
         mesh.visible = fade > 0;
         return;
       }
-      const [x, y, z] = position;
+      const [x, y, z] = crystal.position;
       mesh.position.set(x, y + 0.75 + Math.sin(clock * 2.4 + index) * 0.12, z);
       mesh.rotation.y = clock * 1.8 + index;
     },
