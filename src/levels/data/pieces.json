@@ -1,6 +1,6 @@
 {
   "id": "pieces",
-  "version": 1,
+  "version": 2,
   "name": { "fr": "Toutes les pièces", "en": "Every piece" },
   "world": 1,
   "parTimeSec": 90,
@@ -55,5 +55,6 @@
     { "type": "checkpoint", "cell": [6, -5, -48] },
     { "type": "goal", "cell": [6, -5, -57] }
   ],
+  "modifiers": [],
   "decor": { "theme": "garden", "seed": 11 }
 }

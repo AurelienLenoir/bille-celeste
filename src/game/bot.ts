@@ -18,7 +18,7 @@ export const runBot = (level: Level, onStep?: (input: Vec2) => void): BotResult 
   if (!route) return { won: false, time: 0, falls: 0, steps: 0, planned: false, routeLength: 0 };
   const result = runHeadless(
     level,
-    (run) => createAutopilot(level, route, run.world, run.ball),
+    (run) => createAutopilot(level, route, run.world, run.ball, run.session.status),
     botTimeLimit(level),
     onStep,
   );

@@ -1,4 +1,4 @@
-import type { Entity, PieceType } from '../../src/levels/schema';
+import type { Entity, ModifierType, PieceType } from '../../src/levels/schema';
 
 /** French labels of the editor (a development tool, so French only). */
 export const PIECE_LABELS: Record<PieceType, string> = {
@@ -25,6 +25,26 @@ export const ENTITY_LABELS: Record<Entity['type'], string> = {
   goal: 'Arrivée',
 };
 
+export const MODIFIER_LABELS: Record<ModifierType, string> = {
+  speedPad: 'Pad de vitesse',
+  spring: 'Ressort',
+  magnet: 'Aimant',
+  shield: 'Bulle-bouclier',
+  slowMo: 'Ralenti',
+  hourglass: 'Sablier',
+  feather: 'Bille plume',
+  ice: 'Glace',
+  sand: 'Sable / boue',
+  wind: 'Vent',
+  conveyor: 'Tapis roulant',
+  pusher: 'Pousseur',
+  sweeper: 'Barre tournante',
+  bumper: 'Bumper',
+  heavy: 'Bille lourde',
+  invert: 'Zone inversée',
+  fog: 'Brouillard',
+};
+
 export const FIELD_LABELS: Record<string, string> = {
   size: 'Taille (cases)',
   length: 'Longueur (cases)',
@@ -42,6 +62,12 @@ export const FIELD_LABELS: Record<string, string> = {
   pause: 'Pause (s)',
   delay: 'Délai (s)',
   rot: 'Rotation (°)',
+  forward: 'Élan vers l’avant',
+  strength: 'Force',
+  gusts: 'Rafales (s, 0 = constant)',
+  period: 'Période (s)',
+  phase: 'Décalage (0–1)',
+  density: 'Densité',
   world: 'Monde',
   theme: 'Thème',
 };

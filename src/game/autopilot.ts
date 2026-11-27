@@ -1,9 +1,11 @@
 import { clamp, type Vec2, type Vec3Tuple } from '../engine/math';
-import { PHYSICS_STEP } from '../engine/physics';
+import { GRAVITY, MAX_TILT, PHYSICS_STEP } from '../engine/physics';
 import type { Level } from '../levels/schema';
-import type { Ball } from './ball';
+import { BALL_RADIUS, type Ball as BallType } from './ball';
+import type { Hazard } from './modifiers/kit';
 import type { Route } from './nav';
 import { centreRadius } from './pieces/curve';
+import type { RunStatus } from './session';
 import type { LevelWorld } from './world';
 
 /** Cruise speeds (units/s) by situation. */
@@ -17,6 +19,8 @@ const JUMP_LOOKAHEAD = 5;
 /** Respawn is detected when the ball is suddenly this far from where the bot thought it was. */
 const LOST = 6;
 const DOCKED = 0.2;
+/** Crossing a moving obstacle: assumed average speed from a standstill (units/s) and start-up delay (s). */
+const CROSSING = { speed: 3, delay: 0.45, window: 0.4, margin: BALL_RADIUS + 0.4 } as const;
 
 type Flat = { x: number; z: number };
 
@@ -45,7 +49,13 @@ const pieceSpeed = (level: Level, piece: number): number => {
  * velocity matches a target velocity towards a point a little ahead on the route. It waits for
  * moving platforms at their docks, rides them, and speeds up before gaps.
  */
-export const createAutopilot = (level: Level, route: Route, world: LevelWorld, ball: Ball): (() => Vec2) => {
+export const createAutopilot = (
+  level: Level,
+  route: Route,
+  world: LevelWorld,
+  ball: BallType,
+  status: () => RunStatus,
+): (() => Vec2) => {
   const steps = route.steps;
   const last = steps.length - 1;
   let idx = 0;
@@ -94,8 +104,53 @@ export const createAutopilot = (level: Level, route: Route, world: LevelWorld, b
     return !!platform && len(sub(flat(platform), flat(at(i)))) <= DOCKED;
   };
 
+  const hazards = world.modifiers.flatMap((m) => m.instance.hazard ?? []);
+
+  /** Would rolling from route step `idx` through `hazard` now get the ball hit on the way? */
+  const crossingIsUnsafe = (hazard: Hazard, from: number, delay: number) => {
+    const scale = status().timeScale;
+    let travelled = 0;
+    let prev = flat(at(from));
+    for (let i = from + 1; i <= last; i++) {
+      const point = flat(at(i));
+      const seg = len(sub(point, prev));
+      for (let d = 0; d < seg; d += 0.25) {
+        const x = prev.x + ((point.x - prev.x) * d) / seg;
+        const z = prev.z + ((point.z - prev.z) * d) / seg;
+        if (!hazard.covers(x, z)) continue;
+        const t = delay + CROSSING.delay + (travelled + d) / CROSSING.speed;
+        for (const dt of [-CROSSING.window, 0, CROSSING.window])
+          if (hazard.hitsAt(x, z, Math.max(0, t + dt) * scale, CROSSING.margin)) return true;
+      }
+      travelled += seg;
+      prev = point;
+      if (!hazard.covers(point.x, point.z) && i > from + 1) break;
+    }
+    return false;
+  };
+
+  /**
+   * Route step `i` is the last one before a moving obstacle's reach, and setting off from it in
+   * `delay` seconds would get the ball hit.
+   */
+  const gateUnsafe = (i: number, delay = 0) => {
+    if (i >= last) return false;
+    const here = flat(at(i));
+    const next = flat(at(i + 1));
+    return hazards.some((h) => !h.covers(here.x, here.z) && h.covers(next.x, next.z) && crossingIsUnsafe(h, i, delay));
+  };
+  /** Gate the bot decided to cross: it does not change its mind halfway. */
+  let committed = -1;
+  const mustWaitForHazard = () => {
+    if (committed === idx) return false;
+    if (gateUnsafe(idx)) return true;
+    if (hazards.length && idx < last) committed = idx;
+    return false;
+  };
+
   const advance = (p: Flat) => {
     while (idx < last) {
+      if (mustWaitForHazard()) return;
       const next = steps[idx + 1];
       // Step onto a moving platform only when it is at this dock, and leave it only at the next stop.
       if (next && next.via !== 'ride' && moverAt(idx + 1) && !isDocked(idx + 1)) return;
@@ -128,10 +183,14 @@ export const createAutopilot = (level: Level, route: Route, world: LevelWorld, b
     const platform = moverAt(idx)?.();
     const carried = platform && lastPlatform ? sub(flat(platform), flat(lastPlatform)) : { x: 0, z: 0 };
     lastPlatform = platform;
-    const carriedVel = { x: carried.x / PHYSICS_STEP, z: carried.z / PHYSICS_STEP };
+    const run = status();
+    const stepTime = PHYSICS_STEP * run.timeScale;
+    const carriedVel = { x: carried.x / stepTime, z: carried.z / stepTime };
 
     if (platform && next?.via === 'ride') {
       wanted = hold(p, flat(platform), carriedVel);
+    } else if (idx < last && mustWaitForHazard()) {
+      wanted = hold(p, flat(at(idx)), { x: 0, z: 0 });
     } else if (next && next.via !== 'ride' && moverAt(idx + 1) && !isDocked(idx + 1)) {
       wanted = hold(p, flat(at(idx)), { x: 0, z: 0 });
     } else {
@@ -152,11 +211,18 @@ export const createAutopilot = (level: Level, route: Route, world: LevelWorld, b
         if (cos < 0.8) speed = Math.min(speed, SPEED.turn);
       }
       if (idx >= last) speed = SPEED.careful;
+      // Coming up to a moving obstacle that is not clear: arrive slowly enough to stop at the gate.
+      if (hazards.length && gateUnsafe(idx + 1, 0.5))
+        speed = Math.min(speed, 0.4 + 1.4 * len(sub(flat(at(idx + 1)), p)));
       const d = sub(target, p);
       const dist = len(d) || 1;
       wanted = { x: (d.x / dist) * speed + carriedVel.x, z: (d.z / dist) * speed + carriedVel.z };
     }
 
-    return { x: clamp((wanted.x - v.x) * GAIN), y: clamp(-(wanted.z - v.z) * GAIN) };
+    // Feed-forward: cancel what wind and belts push, since the tilt only answers after the fact.
+    const perInput = GRAVITY * MAX_TILT;
+    const x = clamp((wanted.x - v.x) * GAIN - run.push.x / perInput);
+    const y = clamp(-(wanted.z - v.z) * GAIN + run.push.z / perInput);
+    return run.invert ? { x: -x, y: -y } : { x, y };
   };
 };

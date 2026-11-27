@@ -2,7 +2,10 @@ import { LEVEL_VERSION } from './schema';
 
 /** `MIGRATIONS[n]` turns a version-n level into a version n + 1 level. Version 1 is the first format. */
 export type Migrations = Record<number, (level: Record<string, unknown>) => Record<string, unknown>>;
-export const MIGRATIONS: Migrations = {};
+export const MIGRATIONS: Migrations = {
+  /** Version 2 adds the bonuses and maluses: a version-1 level has none. */
+  1: (level) => ({ ...level, modifiers: [] }),
+};
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);

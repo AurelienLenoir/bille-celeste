@@ -4,6 +4,7 @@ import { initPhysics } from '../../src/engine/physics';
 import { runBot } from '../../src/game/bot';
 import { runHeadless } from '../../src/game/headless';
 import { createRecorder, playReplay, replaySchema } from '../../src/game/replay';
+import { MODIFIERS } from '../../src/game/modifiers';
 import { shippedLevel } from './helpers';
 
 describe('replay encoding', () => {
@@ -32,6 +33,14 @@ describe('bot and replays', () => {
 
   it('the bot finishes the prototype level without falling', () => {
     const run = runBot(shippedLevel('poc'));
+    expect(run.won).toBe(true);
+    expect(run.falls).toBe(0);
+  });
+
+  it('the sandbox holds every bonus and malus, and the bot finishes it', () => {
+    const level = shippedLevel('sandbox');
+    expect(new Set(level.modifiers.map((m) => m.type))).toEqual(new Set(Object.keys(MODIFIERS)));
+    const run = runBot(level);
     expect(run.won).toBe(true);
     expect(run.falls).toBe(0);
   });

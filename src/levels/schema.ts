@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
 /**
- * Level format, version 1 (PLAN.md § 3). This file is the source of truth: the TypeScript types,
+ * Level format, version 2 (PLAN.md § 3): version 1 plus the bonuses and maluses (`modifiers`). This file is the source of truth: the TypeScript types,
  * the loader, the editor, the generator and the validator all derive from it.
  *
  * Grid: a cell is 2 × 2 units, heights go by steps of 0.5. `cell` is [x, height, z] in cells and
  * steps. Rotation 0 faces -z (away from the camera), 90 turns right (+x).
  */
-export const LEVEL_VERSION = 1;
+export const LEVEL_VERSION = 2;
 
 const int = (min: number, max: number) => z.number().int().min(min).max(max);
 const half = (min: number, max: number) => z.number().multipleOf(0.5).min(min).max(max);
@@ -184,6 +184,101 @@ export const entitySchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('goal'), cell: cellSchema }),
 ]);
 
+/** A zone covers `size` cells (x by z) centred on `cell`, like a platform (the cell before the middle when even). */
+const zoneSize = z.tuple([int(1, 12), int(1, 12)]).default([1, 1]);
+const pickup = <T extends string>(type: T) => z.object({ type: z.literal(type), cell: cellSchema });
+
+/** Bonuses (PLAN.md § 5.1). Durations and strengths of pickups are fixed by the game, not per level. */
+export const bonusSchemas = [
+  z.object({
+    type: z.literal('speedPad'),
+    cell: cellSchema,
+    rot: rotSchema,
+    /** Speed (units/s) the ball has along `rot` when it leaves the pad. */
+    speed: z.number().min(5).max(13).default(10),
+  }),
+  z.object({
+    type: z.literal('spring'),
+    cell: cellSchema,
+    rot: rotSchema,
+    /** Height of the jump's apex above the pad (units). */
+    height: z.number().min(0.5).max(4).default(2.5),
+    /** Horizontal speed along `rot` (units/s): 0 bounces straight up, more jumps in an arc. */
+    forward: z.number().min(0).max(10).default(0),
+  }),
+  pickup('magnet'),
+  pickup('shield'),
+  pickup('slowMo'),
+  pickup('hourglass'),
+  pickup('feather'),
+] as const;
+
+/** Maluses (PLAN.md § 5.2). */
+export const malusSchemas = [
+  z.object({ type: z.literal('ice'), cell: cellSchema, size: zoneSize }),
+  z.object({ type: z.literal('sand'), cell: cellSchema, size: zoneSize }),
+  z.object({
+    type: z.literal('wind'),
+    cell: cellSchema,
+    size: zoneSize,
+    /** Direction the wind blows towards. */
+    rot: rotSchema,
+    /** Acceleration given to the ball (units/s²). */
+    strength: z.number().min(1).max(8).default(4),
+    /** Seconds between two gusts; 0 blows steadily. */
+    gusts: z.number().min(0).max(8).default(0),
+  }),
+  z.object({
+    type: z.literal('conveyor'),
+    cell: cellSchema,
+    size: zoneSize,
+    rot: rotSchema,
+    /** Belt speed (units/s). */
+    speed: z.number().min(1).max(6).default(3),
+  }),
+  z.object({
+    type: z.literal('pusher'),
+    /** The track cell the block sweeps; it comes out of the next cell behind `rot` and pushes towards `rot`. */
+    cell: cellSchema,
+    rot: rotSchema,
+    /** Seconds between two strikes. */
+    period: z.number().min(1.5).max(8).default(3),
+    /** Fraction of the period by which this pusher is late (to stagger several). */
+    phase: z.number().min(0).max(1).default(0),
+  }),
+  z.object({
+    type: z.literal('sweeper'),
+    /** Pivot of the arm (usually the middle of a platform). */
+    cell: cellSchema,
+    /** Arm length in cells. */
+    length: half(1, 4).default(1.5),
+    /** Degrees per second, positive turns clockwise seen from above. */
+    speed: z
+      .number()
+      .min(-180)
+      .max(180)
+      .refine((n) => n !== 0, 'Une barre tournante doit tourner')
+      .default(60),
+  }),
+  z.object({
+    type: z.literal('bumper'),
+    cell: cellSchema,
+    /** Speed (units/s) the ball bounces off at. */
+    strength: z.number().min(4).max(13).default(9),
+  }),
+  pickup('heavy'),
+  z.object({ type: z.literal('invert'), cell: cellSchema, size: zoneSize }),
+  z.object({
+    type: z.literal('fog'),
+    cell: cellSchema,
+    size: zoneSize,
+    /** 0 leaves the view clear, 1 is the thickest fog. */
+    density: z.number().min(0.2).max(1).default(0.8),
+  }),
+] as const;
+
+export const modifierSchema = z.discriminatedUnion('type', [...bonusSchemas, ...malusSchemas]);
+
 const textSchema = z.object({ fr: z.string().min(1).max(60), en: z.string().min(1).max(60) });
 
 export const THEMES = ['garden', 'sunset', 'glacier', 'factory'] as const;
@@ -198,6 +293,7 @@ export const levelSchema = z
     spawn: z.object({ cell: cellSchema }),
     pieces: z.array(pieceSchema).min(1).max(300),
     entities: z.array(entitySchema).max(120),
+    modifiers: z.array(modifierSchema).max(60).default([]),
     decor: z.object({ theme: z.enum(THEMES).default('garden'), seed: int(1, 2_000_000_000).default(7) }),
   })
   .superRefine((level, ctx) => {
@@ -219,3 +315,8 @@ export type Entity = z.output<typeof entitySchema>;
 export type Surface = (typeof SURFACE_NAMES)[number];
 export type Width = keyof typeof WIDTHS;
 export type Rails = z.output<typeof railsSchema>;
+export type Modifier = z.output<typeof modifierSchema>;
+export type ModifierType = Modifier['type'];
+export type ModifierOf<T extends ModifierType> = Extract<Modifier, { type: T }>;
+export const BONUS_TYPES = bonusSchemas.map((s) => s.shape.type.value);
+export const MALUS_TYPES = malusSchemas.map((s) => s.shape.type.value);

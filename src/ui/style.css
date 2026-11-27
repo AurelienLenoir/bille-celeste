@@ -58,6 +58,69 @@ body {
 .pill b {
   color: var(--blue);
 }
+.effects {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  min-height: 0;
+}
+.effect {
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--blue);
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 8px rgba(30, 60, 110, 0.18);
+}
+.effect.magnet {
+  background: #e0394e;
+}
+.effect.shield {
+  background: #1aa3c8;
+}
+.effect.slowMo {
+  background: #4f7fe0;
+}
+.effect.feather {
+  background: #8a9bc0;
+}
+.effect.heavy {
+  background: #3b3f52;
+}
+.stars {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0;
+}
+.stars li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 12px;
+  opacity: 0.45;
+  max-width: 90px;
+}
+.stars li span {
+  font-size: 38px;
+  line-height: 1;
+  color: #b8c3d6;
+}
+.stars li.on {
+  opacity: 1;
+}
+.stars li.on span {
+  color: #ffc93c;
+  text-shadow: 0 2px 6px rgba(200, 140, 0, 0.35);
+}
+.gem:empty {
+  display: none;
+}
 .pause-btn {
   position: fixed;
   top: calc(env(safe-area-inset-top) + 58px);
@@ -340,7 +403,7 @@ h2 {
 .toast {
   position: fixed;
   left: 50%;
-  top: calc(env(safe-area-inset-top) + 64px);
+  top: calc(env(safe-area-inset-top) + 92px);
   transform: translateX(-50%);
   background: var(--ink);
   color: #fff;

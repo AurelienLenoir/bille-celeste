@@ -10,10 +10,14 @@ const FOLLOW_RATE = 6;
 const VERTICAL_FOLLOW_RATE = 3.5;
 /** The aim point lags a little behind the ball, which hides the last bits of physics jitter. */
 const LOOK_RATE = 14;
+/** How fast a camera shake dies out (1/s). */
+const SHAKE_DECAY = 9;
 
 export type FollowCamera = {
   camera: THREE.PerspectiveCamera;
   snapTo: (x: number, y: number, z: number) => void;
+  /** Short decaying shake (bumpers); `amount` is the initial offset in units. */
+  shake: (amount: number) => void;
   update: (target: THREE.Vector3, gravity: GravityDirection, dt: number) => void;
 };
 
@@ -32,6 +36,8 @@ export const createFollowCamera = (): FollowCamera => {
   const rotation = new THREE.Quaternion();
   const offset = new THREE.Vector3();
   const desired = new THREE.Vector3();
+  let shaking = 0;
+  let shakeTime = 0;
 
   const snapTo = (x: number, y: number, z: number) => {
     position.set(x, y + 6, z + 9);
@@ -49,9 +55,20 @@ export const createFollowCamera = (): FollowCamera => {
     position.y += (desired.y - position.y) * followFactor(VERTICAL_FOLLOW_RATE, dt);
     aim.lerp(desired.set(target.x, target.y, target.z - LOOK_AHEAD_Z), followFactor(LOOK_RATE, dt));
     camera.position.copy(position);
+    if (shaking > 0.001) {
+      shakeTime += dt;
+      camera.position.x += Math.sin(shakeTime * 71) * shaking;
+      camera.position.y += Math.sin(shakeTime * 53 + 1) * shaking;
+      shaking *= Math.exp(-dt * SHAKE_DECAY);
+    }
     camera.up.copy(up);
     camera.lookAt(aim);
   };
 
-  return { camera, snapTo, update };
+  const shake = (amount: number) => {
+    shaking = Math.max(shaking, amount);
+    shakeTime = 0;
+  };
+
+  return { camera, snapTo, shake, update };
 };

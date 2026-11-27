@@ -13,6 +13,8 @@ export const SKY_GRADIENT = [
 ] as const;
 
 export const FOG = { color: 0xd6ebff, near: 28, far: 90 } as const;
+/** Scene fog inside the thickest fog zone. */
+export const FOG_THICK = { near: 2, far: 13 } as const;
 
 export const CRYSTAL_HUES = [0x4fd8ff, 0xff6fae, 0xffd04f] as const;
 

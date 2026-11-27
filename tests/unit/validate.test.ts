@@ -112,3 +112,49 @@ describe('validateLevel', () => {
     expect(estimateDrawCalls(level, buildNav(level).builds)).toBeLessThan(80);
   });
 });
+
+describe('modifier checks', () => {
+  const base = (modifiers: NonNullable<Parameters<typeof levelWith>[1]>['modifiers']) =>
+    levelWith(
+      [
+        { type: 'platform', cell: [0, 0, 0] },
+        { type: 'straight', cell: [0, 0, -2], length: 3 },
+        { type: 'platform', cell: [0, 0, -6] },
+      ],
+      {
+        entities: [
+          { type: 'crystal', cell: [0, 0, -3] },
+          { type: 'goal', cell: [0, 0, -6] },
+        ],
+        modifiers,
+      },
+    );
+
+  it('accepts modifiers on the course and counts their draw calls', () => {
+    const level = base([
+      { type: 'speedPad', cell: [0, 0, -2] },
+      { type: 'ice', cell: [0, 0, -3], size: [1, 3] },
+    ]);
+    expect(validateLevel(level)).toEqual([]);
+    expect(estimateDrawCalls(level, buildNav(level).builds)).toBe(
+      estimateDrawCalls(corridor, buildNav(corridor).builds) + 2,
+    );
+  });
+
+  it('flags a modifier in the void, a pusher stuck in a piece and a spring that jumps off the course', () => {
+    const text = messages(
+      base([
+        { type: 'magnet', cell: [5, 0, 0] },
+        { type: 'pusher', cell: [0, 0, -3], rot: 180 },
+        { type: 'spring', cell: [0, 0, -1], rot: 90, forward: 6 },
+      ]),
+    );
+    expect(text).toMatch(/Aimant 0 .* n'est posé sur aucune pièce/);
+    expect(text).toMatch(/Pousseur 1 .* logement/);
+    expect(text).toMatch(/Ressort 2 .* dans le vide/);
+  });
+
+  it('a bumper blocking the only way makes the goal unreachable', () => {
+    expect(hasErrors(validateLevel(base([{ type: 'bumper', cell: [0, 0, -3] }])))).toBe(true);
+  });
+});

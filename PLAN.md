@@ -444,7 +444,7 @@ Un jeu de bille coloré attire les enfants. Si le jeu est déclaré comme destin
 - [x] Phase 0 — Mise en place (Vite + TS strict, ESLint/Prettier, Vitest, Playwright, CI + GitHub Pages ; reste à valider : CI verte et page Pages jouable)
 - [x] Phase 1 — Cœur du jeu et sensation (Rapier, pas fixe 120 Hz + interpolation, collider trimesh fusionné, entrées complètes, caméra lissée, pause, réglages sauvegardés, mesure des fps. Validé par l'utilisateur sur iPhone : 60 fps stables, contrôle au doigt et au gyroscope agréables. Test Android reporté à la phase 7)
 - [x] Phase 2 — Système de niveaux (format v1 validé par Zod avec migrations, 14 pièces sur grille, collider et rendu fusionnés, validateur statique, graphe de navigation, bot et replays, générateur procédural, éditeur web sur `/editor/` avec génération de niveaux. Le niveau du POC est en JSON, un niveau généré passe le validateur et le bot. Validé par l'utilisateur dans l'éditeur en ligne)
-- [ ] Phase 3 — Bonus et malus
+- [ ] Phase 3 — Bonus et malus (code terminé : format de niveau v2 avec migration, système de modificateurs sur capteurs Rapier, 7 bonus et 10 malus (un par fichier, chacun avec visuel, son, vibration et test), gemme cachée, étoiles (fin, temps de référence, sans chute), éditeur, générateur et validateur. Le niveau `sandbox` contient tous les modificateurs et le bot le termine, son replay est enregistré. Reste la validation par l'utilisateur sur téléphone : `?level=sandbox`)
 - [ ] Phase 4 — Contenu et progression (20 niveaux)
 - [ ] Phase 5 — Habillage
 - [ ] Phase 6 — Applications natives

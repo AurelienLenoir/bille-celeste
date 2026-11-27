@@ -67,6 +67,22 @@ export const mergeShape = (into: TrackShape, from: TrackShape): TrackShape => {
 export const floorHeight = (patch: FloorPatch, x: number, z: number): number =>
   patch.y + (patch.slopeX ?? 0) * (x - patch.minX) + (patch.slopeZ ?? 0) * (z - patch.minZ);
 
+const heightInTriangle = (x: number, z: number, [a, b, c]: readonly [Vec3Tuple, Vec3Tuple, Vec3Tuple]) => {
+  const d = (b[2] - c[2]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[2] - c[2]);
+  const u = ((b[2] - c[2]) * (x - c[0]) + (c[0] - b[0]) * (z - c[2])) / d;
+  const v = ((c[2] - a[2]) * (x - c[0]) + (a[0] - c[0]) * (z - c[2])) / d;
+  return u >= 0 && v >= 0 && u + v <= 1 ? a[1] * u + b[1] * v + c[1] * (1 - u - v) : undefined;
+};
+
+/** Heights of every walkable surface of `shapes` right above or below (x, z). */
+export const surfaceHeightsAt = (shapes: readonly TrackShape[], x: number, z: number): number[] =>
+  shapes.flatMap((shape) => [
+    ...shape.floors
+      .filter((f) => x > f.minX && x < f.maxX && z > f.minZ && z < f.maxZ)
+      .map((f) => floorHeight(f, x, z)),
+    ...shape.triangles.flatMap((t) => heightInTriangle(x, z, t.points) ?? []),
+  ]);
+
 const sub = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 const dot = (a: Vec3, b: Vec3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const cross = (u: Vec3, w: Vec3): Vec3 => [

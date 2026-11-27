@@ -2,6 +2,22 @@
 
 Journal des choix structurants (le plus récent en haut).
 
+## 2026-11-27 — Phase 3 : bonus et malus
+
+- **Format de niveau v2** : champ `modifiers` (au plus 60), une union Zod discriminée par `type` avec les réglages propres à chaque modificateur et des valeurs par défaut. La migration v1 → v2 ajoute une liste vide ; elle est testée.
+- **Déclenchement par capteurs Rapier** : chaque modificateur à zone ou à ramassage a un collider capteur (boîte ou sphère), interrogé avec `intersectionPair` après chaque pas. Entrée, sortie et « dedans » sont donc calculés au pas fixe, ce qui garde les parties déterministes et rejouables.
+- **Effets appliqués à chaque pas** plutôt qu'en modifiant les corps : adhérence (frottement avec la règle `Min` et amortissement en plus, pour la glace et le sable), poussée (vent, tapis) ajoutée à la vitesse, échelle de gravité (plume, bille lourde), inversion des commandes appliquée avant le lissage, brouillard. Sans modificateur, rien ne change : le replay du POC est identique au bit près.
+- **Durées fixes** : aimant 8 s, ralenti 5 s, plume et bille lourde 6 s, bulle jusqu'à son usage. Plume et bille lourde s'annulent. Les durées sont comptées en temps du chrono.
+- **Ralenti** : le pas physique est multiplié par 0,6, mais le chrono avance normalement. Le ralenti aide à passer un obstacle, pas à gagner du temps (c'est le rôle du sablier, −5 s).
+- **Bulle** : la bille garde une trace des points où elle touchait le sol. À la chute, elle repart du point d'il y a 0,5 s au lieu du dernier checkpoint, et la chute ne compte pas.
+- **Bot** : chaque obstacle mobile (pousseur, bras rotatif) expose sa zone et un test « touche à l'instant t ». Le pilote s'arrête avant la zone jusqu'à ce que la traversée soit sûre, puis s'engage sans revenir en arrière. Il compense la poussée des zones et l'inversion des commandes. La navigation évite les cases pleines (poteau du rebondisseur, axe du bras) et pénalise les cases dangereuses.
+- **Générateur** : les modificateurs arrivent par monde (1 : sablier, bulle · 2 : pad, ressort, sable · 3 : ralenti, plume, glace, vent · 4 : aimant, tapis, pousseur, inversion, bille lourde, brouillard). Le bras rotatif et le rebondisseur ne sont pas générés : ils demandent un placement à la main. 96 niveaux générés sur 96 sont gagnés par le bot.
+- **Validateur** : modificateur hors du parcours (erreur), boîtier de pousseur sur une case occupée (erreur), ressort qui atterrit dans le vide (erreur), bonus inaccessible, deux modificateurs sur une case, ressort sur un cristal (avertissements). L'estimation des draw calls compte les modificateurs et la gemme.
+- **Draw calls** : les zones sont des décalques à couleurs par sommet qui suivent le sol (un maillage par zone), les objets à ramasser ne projettent pas d'ombre. Le niveau `sandbox`, avec ses 17 modificateurs, reste sous le budget de 80 selon l'estimation du validateur.
+- **`?bot`** dans l'URL fait jouer le niveau par le pilote automatique, pour vérifier un niveau dans le navigateur et pour le test e2e.
+- **Niveau `sandbox`** : une ligne droite avec tous les modificateurs dans l'ordre, une gemme sur une branche, enregistré en replay de non-régression.
+- **Textes** toujours en français seulement ; l'anglais arrive avec l'i18n de la phase 4.
+
 ## 2026-11-27 — Phase 2 : système de niveaux
 
 - **Grille** : une case fait 2 × 2 unités, une marche 0,5. `cell` vaut `[x, hauteur, z]` en cases et en marches. Rotation 0 vers -z (loin de la caméra), 90 vers +x. Les pièces linéaires partent du milieu du bord arrière de leur case, si bien que deux pièces se raccordent quand la sortie de l'une est l'entrée de l'autre.

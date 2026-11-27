@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { initPhysics } from '../../src/engine/physics';
 import { runBot } from '../../src/game/bot';
-import { generateLevel } from '../../src/levels/generate';
+import { generateLevel, GENERATED_MODIFIERS } from '../../src/levels/generate';
 import { hasErrors, validateLevel } from '../../src/levels/validate';
 
 describe('generateLevel', () => {
@@ -30,5 +30,22 @@ describe('generateLevel', () => {
       new Set(generateLevel({ world, difficulty: 0.5, seed: 5 }).pieces.map((p) => p.type));
     expect(types(1).has('movingPlatform')).toBe(false);
     expect(types(1).has('fallingTile')).toBe(false);
+  });
+
+  it('adds bonuses and maluses from the worlds introduced so far', () => {
+    const allowed = (world: number) =>
+      new Set(
+        [1, 2, 3, 4]
+          .filter((w) => w <= world)
+          .flatMap((w) => [...(GENERATED_MODIFIERS[w]?.bonus ?? []), ...(GENERATED_MODIFIERS[w]?.malus ?? [])]),
+      );
+    for (const world of [1, 2, 3, 4]) {
+      for (const seed of [1, 2, 3]) {
+        const level = generateLevel({ world, difficulty: 0.7, seed });
+        for (const m of level.modifiers) expect(allowed(world).has(m.type)).toBe(true);
+      }
+    }
+    const w4 = [1, 2, 3, 4, 5].flatMap((seed) => generateLevel({ world: 4, difficulty: 0.8, seed }).modifiers);
+    expect(w4.some((m) => GENERATED_MODIFIERS[4]?.malus.includes(m.type))).toBe(true);
   });
 });

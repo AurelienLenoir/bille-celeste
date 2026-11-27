@@ -3,19 +3,23 @@ import {
   entitySchema,
   LEVEL_VERSION,
   levelSchema,
+  modifierSchema,
   pieceSchema,
   type Entity,
   type Level,
+  type Modifier,
+  type ModifierType,
   type Piece,
   type PieceType,
 } from '../../src/levels/schema';
-import { hasRot } from './fields';
+import { hasRot, modifierHasRot } from './fields';
 
-export type Selection = { kind: 'piece' | 'entity'; index: number };
+export type Selection = { kind: 'piece' | 'entity' | 'modifier'; index: number };
 export type Tool =
   | { kind: 'select' }
   | { kind: 'piece'; type: PieceType }
   | { kind: 'entity'; type: Entity['type'] }
+  | { kind: 'modifier'; type: ModifierType }
   | { kind: 'spawn' };
 
 export type EditorState = {
@@ -116,9 +120,20 @@ export const placeAt = (state: EditorState, i: number, k: number): EditorState =
     const entities = [...kept, entitySchema.parse({ type: tool.type, cell })];
     return commit(state, { ...level, entities }, [{ kind: 'entity', index: entities.length - 1 }]);
   }
+  if (tool.kind === 'modifier') {
+    const modifiers = [...level.modifiers, newModifier(tool.type, cell, state.rot)];
+    return commit(state, { ...level, modifiers }, [{ kind: 'modifier', index: modifiers.length - 1 }]);
+  }
   if (tool.kind === 'spawn') return commit(state, { ...level, spawn: { cell } }, []);
   return state;
 };
+
+/** A new bonus or malus of `type` on a cell, every other parameter at its default. */
+export const newModifier = (type: ModifierType, cell: [number, number, number], rot: Rot): Modifier =>
+  modifierSchema.parse(modifierHasRot(type) ? { type, cell, rot } : { type, cell });
+
+const shiftCell = (cell: readonly [number, number, number], di: number, dj: number, dk: number) =>
+  [cell[0] + di, cell[1] + dj, cell[2] + dk] as [number, number, number];
 
 const selected = (state: EditorState, kind: Selection['kind']) =>
   new Set(state.selection.filter((s) => s.kind === kind).map((s) => s.index));
@@ -136,15 +151,13 @@ export const moveSelection = (state: EditorState, di: number, dj: number, dk: nu
   if (!state.selection.length) return state;
   const pieces = selected(state, 'piece');
   const entities = selected(state, 'entity');
+  const modifiers = selected(state, 'modifier');
   const { level } = state;
   return commit(state, {
     ...level,
     pieces: level.pieces.map((p, i) => (pieces.has(i) ? shiftPiece(p, di, dj, dk) : p)),
-    entities: level.entities.map((e, i) =>
-      entities.has(i)
-        ? { ...e, cell: [e.cell[0] + di, e.cell[1] + dj, e.cell[2] + dk] as [number, number, number] }
-        : e,
-    ),
+    entities: level.entities.map((e, i) => (entities.has(i) ? { ...e, cell: shiftCell(e.cell, di, dj, dk) } : e)),
+    modifiers: level.modifiers.map((m, i) => (modifiers.has(i) ? { ...m, cell: shiftCell(m.cell, di, dj, dk) } : m)),
   });
 };
 
@@ -161,17 +174,29 @@ const turn = (piece: Piece): Piece => {
   return { ...piece, rot: ((piece.rot + 90) % 360) as Rot };
 };
 
-/** R: turns the selected pieces a quarter turn, or the rotation of the pieces about to be placed. */
+const turnModifier = (m: Modifier): Modifier => {
+  if ('rot' in m) return { ...m, rot: ((m.rot + 90) % 360) as Rot };
+  if ('size' in m) return { ...m, size: [m.size[1], m.size[0]] };
+  return m;
+};
+
+/** R: turns the selected pieces and modifiers a quarter turn, or the rotation of the next ones placed. */
 export const rotate = (state: EditorState): EditorState => {
   const pieces = selected(state, 'piece');
-  if (!pieces.size) return { ...state, rot: ((state.rot + 90) % 360) as Rot };
-  return commit(state, { ...state.level, pieces: state.level.pieces.map((p, i) => (pieces.has(i) ? turn(p) : p)) });
+  const modifiers = selected(state, 'modifier');
+  if (!pieces.size && !modifiers.size) return { ...state, rot: ((state.rot + 90) % 360) as Rot };
+  return commit(state, {
+    ...state.level,
+    pieces: state.level.pieces.map((p, i) => (pieces.has(i) ? turn(p) : p)),
+    modifiers: state.level.modifiers.map((m, i) => (modifiers.has(i) ? turnModifier(m) : m)),
+  });
 };
 
 export const deleteSelection = (state: EditorState): EditorState => {
   if (!state.selection.length) return state;
   const pieces = selected(state, 'piece');
   const entities = selected(state, 'entity');
+  const modifiers = selected(state, 'modifier');
   const { level } = state;
   return commit(
     state,
@@ -179,6 +204,7 @@ export const deleteSelection = (state: EditorState): EditorState => {
       ...level,
       pieces: level.pieces.filter((_, i) => !pieces.has(i)),
       entities: level.entities.filter((e, i) => !entities.has(i) || e.type === 'goal'),
+      modifiers: level.modifiers.filter((_, i) => !modifiers.has(i)),
     },
     [],
   );
@@ -191,11 +217,20 @@ export const duplicateSelection = (state: EditorState): EditorState => {
   const pieces = level.pieces.filter((_, i) => selected(state, 'piece').has(i)).map((p) => shiftPiece(p, 1, 0, 0));
   const entities = level.entities
     .filter((e, i) => selected(state, 'entity').has(i) && e.type !== 'goal')
-    .map((e) => ({ ...e, cell: [e.cell[0] + 1, e.cell[1], e.cell[2]] as [number, number, number] }));
-  const next = { ...level, pieces: [...level.pieces, ...pieces], entities: [...level.entities, ...entities] };
+    .map((e) => ({ ...e, cell: shiftCell(e.cell, 1, 0, 0) }));
+  const modifiers = level.modifiers
+    .filter((_, i) => selected(state, 'modifier').has(i))
+    .map((m) => ({ ...m, cell: shiftCell(m.cell, 1, 0, 0) }));
+  const next = {
+    ...level,
+    pieces: [...level.pieces, ...pieces],
+    entities: [...level.entities, ...entities],
+    modifiers: [...level.modifiers, ...modifiers],
+  };
   const selection: Selection[] = [
     ...pieces.map((_, n) => ({ kind: 'piece' as const, index: level.pieces.length + n })),
     ...entities.map((_, n) => ({ kind: 'entity' as const, index: level.entities.length + n })),
+    ...modifiers.map((_, n) => ({ kind: 'modifier' as const, index: level.modifiers.length + n })),
   ];
   return commit(state, next, selection);
 };
@@ -206,6 +241,17 @@ export const updatePiece = (state: EditorState, index: number, patch: Record<str
   const next = current && pieceSchema.safeParse({ ...current, ...patch });
   if (!next?.success) return state;
   return commit(state, { ...state.level, pieces: state.level.pieces.map((p, i) => (i === index ? next.data : p)) });
+};
+
+/** Applies a parameter change to one bonus or malus if the schema accepts it. */
+export const updateModifier = (state: EditorState, index: number, patch: Record<string, unknown>): EditorState => {
+  const current = state.level.modifiers[index];
+  const next = current && modifierSchema.safeParse({ ...current, ...patch });
+  if (!next?.success) return state;
+  return commit(state, {
+    ...state.level,
+    modifiers: state.level.modifiers.map((m, i) => (i === index ? next.data : m)),
+  });
 };
 
 /** Applies a change to the level's own fields (id, name, world…) if the schema accepts it. */

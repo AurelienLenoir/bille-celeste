@@ -1,7 +1,8 @@
 import './ui/style.css';
 import { createDecor } from './art/decor';
 import { createSurfaceMaterials } from './art/materials';
-import { FOG } from './art/palette';
+import * as THREE from 'three';
+import { FOG, FOG_THICK } from './art/palette';
 import { createSkyTexture } from './art/textures';
 import { createAudio } from './engine/audio';
 import { createFollowCamera } from './engine/camera';
@@ -16,6 +17,10 @@ import { createPhysicsWorld, initPhysics } from './engine/physics';
 import { bindResize, createRenderContext, followSun, setLowQuality } from './engine/renderer';
 import { createBall } from './game/ball';
 import { createEventBus, type GameEvents } from './game/events';
+import { createAutopilot } from './game/autopilot';
+import { createEffectAura } from './game/effectAura';
+import { buildNav, planRoute } from './game/nav';
+import type { Vec2 } from './engine/math';
 import { bindHapticFeedback } from './game/hapticFeedback';
 import { createSession } from './game/session';
 import { bindSoundEffects } from './game/sfx';
@@ -85,7 +90,10 @@ const joystick = createJoystick({ surface: canvas, base: byId('joy'), knob: byId
 const playerInput = combineInputs(joystick, createKeyboard(), { read: () => (usesTilt() ? tilt.read() : null) });
 // `?record` keeps every input of a run and downloads it as a replay when the level is won.
 const recorder = createRecorder(() => session.state() === 'play');
-const readInput = params.has('record') ? recorder.wrap(playerInput) : playerInput;
+const recorded = params.has('record') ? recorder.wrap(playerInput) : playerInput;
+// `?bot` lets the autopilot play (demo of a level, and screenshots of every modifier in tests).
+let autopilot: (() => Vec2) | undefined;
+const readInput = () => (autopilot ? autopilot() : recorded());
 
 let tiltEnabled = false;
 const enableTilt = async () => {
@@ -98,13 +106,22 @@ settingsStore.subscribe(({ settings: next }, { settings: before }) => {
   if (next.controlMode === 'tilt' && before.controlMode !== 'tilt') void enableTilt();
 });
 
-bindSoundEffects(events, audio.beep);
+bindSoundEffects(events, audio);
 bindHapticFeedback(events, haptics);
 bindHud(events, toast);
 events.on('respawned', ({ x, y, z }) => follow.snapTo(x, y, z));
+const SHAKERS = new Set(['bumper', 'pusher', 'sweeper']);
+events.on('modifierFired', ({ type }) => {
+  if (SHAKERS.has(type)) follow.shake(0.22);
+});
+const aura = createEffectAura(scene);
 events.on('paused', joystick.release);
 
 const session = createSession({ physics, world, ball, events });
+const route = params.has('bot') ? planRoute(level, buildNav(level)) : undefined;
+events.on('reset', () => {
+  if (route) autopilot = createAutopilot(level, route, world, ball, session.status);
+});
 events.on('reset', recorder.clear);
 events.on('levelWon', (result) => {
   if (params.has('record')) downloadJson(`replay-${level.id}.json`, recorder.finish(level.id, result));
@@ -123,6 +140,8 @@ bindScreens(events, toast, {
   enableTilt,
   hasTiltReading: tilt.hasReading,
   openSettings,
+  parTimeSec: level.parTimeSec,
+  hasGem: level.entities.some((e) => e.type === 'hiddenGem'),
 });
 bindPauseMenu(events, toast, {
   pause: session.pause,
@@ -143,8 +162,20 @@ const updatePerf = bindPerfOverlay(
     (quality.isLow() ? ' · basse' : ''),
 );
 
+/** Scene fog follows the fog zones the ball is in, smoothly. */
+const fogLevel = { now: 0 };
+const updateFog = (target: number, dt: number) => {
+  fogLevel.now += (target - fogLevel.now) * Math.min(1, dt * 2.5);
+  if (!(scene.fog instanceof THREE.Fog)) return;
+  scene.fog.near = FOG.near + (FOG_THICK.near - FOG.near) * fogLevel.now;
+  scene.fog.far = FOG.far + (FOG_THICK.far - FOG.far) * fogLevel.now;
+};
+
 startLoop((dt) => {
   const gravity = session.update(dt, readInput);
+  const status = session.status();
+  updateFog(session.state() === 'play' ? status.fog : 0, dt);
+  aura.update(ball.mesh.position, session.state() === 'play' ? status.effects : [], session.clock());
   decor.update(session.clock(), dt);
   follow.update(ball.mesh.position, gravity, dt);
   followSun(sun, ball.mesh.position);

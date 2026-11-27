@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import { pieceSchema, type PieceType } from '../../src/levels/schema';
+import { modifierSchema, pieceSchema, type ModifierType, type PieceType } from '../../src/levels/schema';
 
 /** One editable parameter of a piece, read from the Zod schema so the inspector never drifts from it. */
 export type Field =
@@ -56,14 +56,23 @@ const fieldOf = (key: string, raw: AnySchema): Field | undefined => {
 };
 
 const shapes = new Map(pieceSchema.options.map((option) => [option.shape.type.value, option.shape]));
+const modifierShapes = new Map(modifierSchema.options.map((option) => [option.shape.type.value, option.shape]));
 
-/** Editable parameters of a piece type, in schema order. */
-export const pieceFields = (type: PieceType): Field[] =>
-  Object.entries(shapes.get(type) ?? {}).flatMap(([key, schema]) =>
+const fieldsOf = (shape: Record<string, unknown> | undefined): Field[] =>
+  Object.entries(shape ?? {}).flatMap(([key, schema]) =>
     SKIPPED.has(key) ? [] : (fieldOf(key, schema as unknown as AnySchema) ?? []),
   );
+
+/** Editable parameters of a piece type, in schema order. */
+export const pieceFields = (type: PieceType): Field[] => fieldsOf(shapes.get(type));
+
+/** Editable parameters of a bonus or malus, in schema order. */
+export const modifierFields = (type: ModifierType): Field[] => fieldsOf(modifierShapes.get(type));
 
 export const PIECE_TYPES = [...shapes.keys()] as PieceType[];
 
 /** Pieces that have a rotation. */
 export const hasRot = (type: PieceType): boolean => 'rot' in (shapes.get(type) ?? {});
+
+/** Bonuses and maluses that point somewhere (pads, wind, belts, pushers). */
+export const modifierHasRot = (type: ModifierType): boolean => 'rot' in (modifierShapes.get(type) ?? {});

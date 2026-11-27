@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fitView, hitTest, toScreen } from '../../tools/level-editor/draw';
-import { hasRot, PIECE_TYPES, pieceFields } from '../../tools/level-editor/fields';
+import { hasRot, modifierFields, PIECE_TYPES, pieceFields } from '../../tools/level-editor/fields';
 import {
   deleteSelection,
   duplicateSelection,
@@ -12,6 +12,7 @@ import {
   rotate,
   undo,
   updateLevel,
+  updateModifier,
   updatePiece,
   type EditorState,
 } from '../../tools/level-editor/model';
@@ -112,6 +113,42 @@ describe('editor model', () => {
     expect(updatePiece(state, 1, { length: 6 }).level.pieces[1]).toMatchObject({ length: 6 });
     expect(updateLevel(state, { id: 'Pas Valide' })).toBe(state);
     expect(updateLevel(state, { id: 'mon-niveau' }).level.id).toBe('mon-niveau');
+  });
+});
+
+describe('editor bonuses and maluses', () => {
+  it('reads their parameters from the schema', () => {
+    expect(modifierFields('wind').map((f) => f.key)).toEqual(['size', 'strength', 'gusts']);
+    expect(modifierFields('magnet')).toEqual([]);
+    expect(modifierFields('sweeper').find((f) => f.key === 'length')).toMatchObject({ kind: 'number', step: 0.5 });
+  });
+
+  it('places, turns, moves, duplicates, edits and deletes them', () => {
+    let state = placeAt({ ...withTool(initialState(), { kind: 'modifier', type: 'speedPad' }), rot: 90 }, 0, -3);
+    expect(state.level.modifiers).toEqual([{ type: 'speedPad', cell: [0, 0, -3], rot: 90, speed: 10 }]);
+    expect(state.selection).toEqual([{ kind: 'modifier', index: 0 }]);
+    state = rotate(state);
+    expect(state.level.modifiers[0]).toMatchObject({ rot: 180 });
+    state = moveSelection(state, 0, 0, -1);
+    expect(state.level.modifiers[0]).toMatchObject({ cell: [0, 0, -4] });
+    state = duplicateSelection(state);
+    expect(state.level.modifiers[1]).toMatchObject({ cell: [1, 0, -4] });
+    expect(updateModifier(state, 0, { speed: 99 })).toBe(state);
+    expect(updateModifier(state, 0, { speed: 12 }).level.modifiers[0]).toMatchObject({ speed: 12 });
+    state = deleteSelection(state);
+    expect(state.level.modifiers).toHaveLength(1);
+  });
+
+  it('turning a zone swaps its size', () => {
+    const state = placeAt(withTool(initialState(), { kind: 'modifier', type: 'ice' }), 0, -3);
+    const wide = updateModifier(state, 0, { size: [1, 3] });
+    expect(rotate(wide).level.modifiers[0]).toMatchObject({ size: [3, 1] });
+  });
+
+  it('picks a modifier under the click, before the piece it sits on', () => {
+    const state = placeAt(withTool(initialState(), { kind: 'modifier', type: 'ice' }), 0, -4);
+    const view = fitView(state.level, 400, 600);
+    expect(hitTest(state.level, view, ...toScreen(view, 0, -8), 0)).toEqual({ kind: 'modifier', index: 0 });
   });
 });
 

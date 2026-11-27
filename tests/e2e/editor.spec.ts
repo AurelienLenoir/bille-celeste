@@ -16,6 +16,15 @@ test('the editor creates a level, tests it with the bot, plays it and exports it
   await grid.click({ position: { x: box.width / 2, y: box.height / 2 } });
   await page.keyboard.press('Escape');
   await expect(page.getByText('3 pièces · 2 cristaux')).toBeVisible();
+
+  // A speed pad on the straight, set from the inspector.
+  await page.getByRole('button', { name: 'Pad de vitesse' }).click();
+  await grid.click({ position: { x: box.width / 2, y: box.height / 2 + 30 } });
+  await expect(page.getByRole('heading', { name: 'Pad de vitesse' })).toBeVisible();
+  await page.getByLabel('Vitesse').fill('12');
+  await page.getByLabel('Vitesse').press('Tab');
+  await page.keyboard.press('Escape');
+  await expect(page.getByText('1 bonus et malus')).toBeVisible();
   await expect(page.getByText('✓ Niveau valide')).toBeVisible();
 
   await page.getByRole('button', { name: 'Tester avec le bot' }).click();
@@ -35,6 +44,7 @@ test('the editor creates a level, tests it with the bot, plays it and exports it
   expect(download.suggestedFilename()).toBe('nouveau.json');
   const exported = JSON.parse(await readFile(await download.path(), 'utf8'));
   expect(exported.entities.filter((e: { type: string }) => e.type === 'crystal')).toHaveLength(2);
+  expect(exported.modifiers).toMatchObject([{ type: 'speedPad', speed: 12 }]);
   expect(errors).toEqual([]);
 });
 
