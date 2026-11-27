@@ -1,0 +1,220 @@
+/* VOICE: jouet coloré, doux, joueur
+   IDEA: un parcours de bille suspendu dans le ciel
+   PICTURE: la scène 3D plein écran, rien par-dessus sauf un HUD discret
+   COLOUR and TYPE: ciel bleu pastel, pistes crème/menthe/rose, bille framboise ; Fredoka
+   LAYOUT: jeu plein écran, HUD en haut, boutons en bas à droite, cartes centrées */
+:root {
+  color-scheme: light;
+  --ink: #22304a;
+  --blue: #2b55b0;
+  --pink: #ff5d86;
+}
+* {
+  box-sizing: border-box;
+  min-width: 0;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #bfe3ff;
+  font-family: Fredoka, system-ui, sans-serif;
+  color: var(--ink);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+#c {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: calc(env(safe-area-inset-top) + 10px) 10px 0;
+  pointer-events: none;
+}
+.pill {
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: 0 3px 10px rgba(30, 60, 110, 0.15);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.pill b {
+  color: var(--blue);
+}
+.dock {
+  position: fixed;
+  right: 10px;
+  bottom: calc(env(safe-area-inset-bottom) + 12px);
+  display: flex;
+  gap: 8px;
+}
+button {
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 3px 10px rgba(30, 60, 110, 0.18);
+  transition: transform 0.12s;
+}
+button:active {
+  transform: scale(0.96);
+}
+button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+button.main {
+  background: var(--pink);
+  color: #fff;
+  font-size: 18px;
+  min-height: 52px;
+  width: 100%;
+  margin-top: 10px;
+}
+button.alt {
+  width: 100%;
+  margin-top: 10px;
+  background: #eef4ff;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(25, 45, 90, 0.35);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  padding: 20px;
+}
+.overlay[hidden],
+.dock[hidden] {
+  display: none;
+}
+.card {
+  background: #fffaf2;
+  border-radius: 28px;
+  padding: 28px 22px 22px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(20, 40, 90, 0.3);
+}
+h1 {
+  font-size: 42px;
+  line-height: 1.05;
+  margin: 0 0 6px;
+  color: var(--blue);
+  text-wrap: balance;
+}
+h2 {
+  font-size: 32px;
+  line-height: 1.05;
+  margin: 0 0 8px;
+  color: var(--blue);
+}
+.card p {
+  margin: 6px 0 4px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+.small {
+  font-size: 13px;
+  opacity: 0.75;
+}
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin: 14px 0 4px;
+  font-variant-numeric: tabular-nums;
+}
+.stats div {
+  font-size: 13px;
+}
+.stats strong {
+  display: block;
+  font-size: 26px;
+  color: var(--ink);
+}
+.joy {
+  position: fixed;
+  width: 130px;
+  height: 130px;
+  margin: -65px 0 0 -65px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+  display: none;
+}
+.knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+.toast {
+  position: fixed;
+  left: 50%;
+  top: calc(env(safe-area-inset-top) + 64px);
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 14px;
+  font-size: 15px;
+  max-width: min(92vw, 420px);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+.toast.on {
+  opacity: 1;
+}
+#err {
+  position: fixed;
+  inset: auto 12px 12px;
+  background: #fff;
+  color: #a01c3c;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+  }
+  .toast {
+    transition: none;
+  }
+}
