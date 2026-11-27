@@ -70,15 +70,40 @@ describe('level migrations', () => {
     expect(() => migrateLevel({ version: 0 }, migrations, 3)).toThrow(/version 0/);
   });
 
-  it('brings a version-1 level (no modifiers) up to version 2', () => {
-    const { modifiers: _dropped, ...v1 } = { ...levelWith([{ type: 'platform', cell: [0, 0, 0] }]), version: 1 };
-    void _dropped;
+  it('brings a version-1 level (no modifiers, no signs) up to the current version', () => {
+    const { modifiers: _m, signs: _s, ...v1 } = { ...levelWith([{ type: 'platform', cell: [0, 0, 0] }]), version: 1 };
+    void _m;
+    void _s;
     const result = parseLevel(v1);
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.level.version).toBe(2);
+      expect(result.level.version).toBe(LEVEL_VERSION);
       expect(result.level.modifiers).toEqual([]);
+      expect(result.level.signs).toEqual([]);
     }
+  });
+
+  it('brings a version-2 level up to version 3 with no signs, keeping its modifiers', () => {
+    const { signs: _s, ...v2 } = {
+      ...levelWith([{ type: 'platform', cell: [0, 0, 0] }]),
+      modifiers: [{ type: 'shield', cell: [0, 0, 0] }],
+      version: 2,
+    };
+    void _s;
+    expect(migrateLevel(v2)).toMatchObject({ version: 3, signs: [], modifiers: [{ type: 'shield' }] });
+    const result = parseLevel(v2);
+    expect(result.ok && result.level.signs).toEqual([]);
+  });
+
+  it('reads tutorial signs with their two languages', () => {
+    const level = levelWith([{ type: 'platform', cell: [0, 0, 0] }]);
+    const result = parseLevel({ ...level, signs: [{ cell: [0, 0, -1], text: { fr: 'Penche !', en: 'Tilt!' } }] });
+    expect(result.ok && result.level.signs[0]).toEqual({
+      cell: [0, 0, -1],
+      rot: 0,
+      text: { fr: 'Penche !', en: 'Tilt!' },
+    });
+    expect(parseLevel({ ...level, signs: [{ cell: [0, 0, 0], text: { fr: 'x' } }] }).ok).toBe(false);
   });
 
   it('turns a migration error into a parse error', () => {

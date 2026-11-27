@@ -44,7 +44,7 @@ test('replay matches the recorded run frame for frame', async ({ page }, testInf
   const advance = (frames: number) =>
     page.evaluate((n) => (window as unknown as { advance: (n: number) => void }).advance(n), frames);
 
-  await page.goto('./');
+  await page.goto('./?level=poc');
   await page.waitForFunction(() => 'advance' in window && '__ok' in window);
   await advance(5);
   await page.getByRole('button', { name: 'Jouer au doigt' }).click();

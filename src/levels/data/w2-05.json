@@ -1,0 +1,314 @@
+{
+  "id": "w2-05",
+  "version": 3,
+  "name": {
+    "fr": "Crépuscule",
+    "en": "Twilight Run"
+  },
+  "world": 2,
+  "parTimeSec": 75,
+  "spawn": {
+    "cell": [0, 0, 0]
+  },
+  "pieces": [
+    {
+      "type": "platform",
+      "cell": [0, 0, 0],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "bridge",
+      "cell": [0, 0, -2],
+      "rot": 0,
+      "length": 3,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "straight",
+      "cell": [0, 0, -5],
+      "rot": 0,
+      "length": 5,
+      "width": "narrow",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [0, 0, -10],
+      "rot": 0,
+      "radius": 1,
+      "angle": 90,
+      "dir": "right",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [2, 0, -10],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "movingPlatform",
+      "path": [
+        [4.5, 0, -10],
+        [7.5, 0, -10]
+      ],
+      "size": [2, 1.5],
+      "speed": 2.64,
+      "pause": 0.875,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [10, 0, -10],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "platform",
+      "cell": [13, 0, -10],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [13, 0, -8],
+      "rot": 180,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [15, 0, -10],
+      "rot": 90,
+      "length": 4,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [20, 0, -10],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "movingPlatform",
+      "path": [
+        [22.5, 0, -10],
+        [26.5, 0, -10]
+      ],
+      "size": [2, 1.5],
+      "speed": 2.64,
+      "pause": 0.875,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [29, 0, -10],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "platform",
+      "cell": [32, 0, -10],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [32, 0, -12],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [35, 0, -10],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "funnel",
+      "cell": [37, 0, -10],
+      "rot": 90,
+      "diameter": 3,
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [39, 0, -10],
+      "rot": 90,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "gap",
+      "cell": [43, 0, -10],
+      "rot": 90,
+      "length": 1,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [46, 0, -10],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [49, 0, -10],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [49, 0, -8],
+      "rot": 180,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [51, 0, -10],
+      "rot": 90,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "gap",
+      "cell": [55, 0, -10],
+      "rot": 90,
+      "length": 1,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [58, 0, -10],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [61, 0, -10],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "wall",
+      "cell": [62, 0, -11],
+      "rot": 90,
+      "length": 3,
+      "height": 0.6
+    }
+  ],
+  "entities": [
+    {
+      "type": "checkpoint",
+      "cell": [10, 0, -10]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [13, 0, -10]
+    },
+    {
+      "type": "hiddenGem",
+      "cell": [13, 0, -7]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [29, 0, -10]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [32, 0, -10]
+    },
+    {
+      "type": "crystal",
+      "cell": [32, 0, -13]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [46, 0, -10]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [49, 0, -10]
+    },
+    {
+      "type": "crystal",
+      "cell": [49, 0, -7]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [58, 0, -10]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -3]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -9]
+    },
+    {
+      "type": "crystal",
+      "cell": [18, 0, -10]
+    },
+    {
+      "type": "crystal",
+      "cell": [35, 0, -10]
+    },
+    {
+      "type": "goal",
+      "cell": [61, 0, -10]
+    }
+  ],
+  "modifiers": [
+    {
+      "type": "spring",
+      "cell": [0, 0, -5],
+      "rot": 0,
+      "height": 1.5,
+      "forward": 0
+    },
+    {
+      "type": "spring",
+      "cell": [15, 0, -10],
+      "rot": 0,
+      "height": 1.5,
+      "forward": 0
+    }
+  ],
+  "signs": [],
+  "decor": {
+    "theme": "sunset",
+    "seed": 2224
+  }
+}

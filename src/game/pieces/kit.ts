@@ -28,7 +28,7 @@ export type PieceBuild = {
 
 export type BuildContext = {
   world: PhysicsWorld;
-  scene: THREE.Scene;
+  scene: THREE.Object3D;
   materials: SurfaceMaterials;
 };
 

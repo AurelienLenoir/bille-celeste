@@ -12,7 +12,7 @@ export type HiddenGem = {
 };
 
 /** The level's optional gem, off the main path (PLAN.md § 5.3): faceted, purple, slowly turning. */
-export const createHiddenGem = (scene: THREE.Scene, position: Vec3Tuple): HiddenGem => {
+export const createHiddenGem = (scene: THREE.Object3D, position: Vec3Tuple): HiddenGem => {
   const geometry = new THREE.OctahedronGeometry(0.34, 1);
   geometry.scale(1, 1.25, 1);
   const material = new THREE.MeshStandardMaterial({

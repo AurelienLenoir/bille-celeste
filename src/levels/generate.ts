@@ -7,7 +7,34 @@ import { loadLevel } from './loader';
 import { LEVEL_VERSION, type Entity, type Level, type LevelInput, type ModifierType, type Width } from './schema';
 import { hasErrors, validateLevel } from './validate';
 
-export type GenerateOptions = { world: number; difficulty: number; seed: number; id?: string };
+/** Course segments the generator can lay, by name (`focus` can feature them). */
+export const SEGMENTS = [
+  'straight',
+  'turn',
+  'slope',
+  'steps',
+  'pipe',
+  'funnel',
+  'bridge',
+  'jump',
+  'ferry',
+  'tiles',
+  'plank',
+  'turntable',
+] as const;
+export type SegmentName = (typeof SEGMENTS)[number];
+
+export type GenerateOptions = {
+  world: number;
+  difficulty: number;
+  seed: number;
+  id?: string;
+  /**
+   * Mechanics to feature (segments or bonus / malus types): they come up about four times as
+   * often, which is how a world introduces what is new in it (PLAN.md § 3.3).
+   */
+  focus?: readonly string[];
+};
 
 type PieceInput = LevelInput['pieces'][number];
 type ModifierInput = NonNullable<LevelInput['modifiers']>[number];
@@ -97,20 +124,27 @@ const between = (rnd: () => number, min: number, max: number) => min + Math.floo
  * on short side branches), a checkpoint about every quarter, and the goal at the end.
  * The result always passes the validator; it is a draft to retouch in the editor.
  */
-export const generateLevel = ({ world, difficulty, seed, id }: GenerateOptions): Level => {
+export const generateLevel = ({ world, difficulty, seed, id, focus = [] }: GenerateOptions): Level => {
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const level = tryGenerate(
       world,
       Math.min(1, Math.max(0, difficulty)),
       seed + attempt * 7919,
       id ?? `gen-w${world}-${seed}`,
+      new Set(focus),
     );
     if (level && !hasErrors(validateLevel(level))) return level;
   }
   throw new Error(`Impossible de générer un niveau valide (monde ${world}, graine ${seed})`);
 };
 
-const tryGenerate = (world: number, difficulty: number, seed: number, id: string): Level | undefined => {
+const tryGenerate = (
+  world: number,
+  difficulty: number,
+  seed: number,
+  id: string,
+  focus: ReadonlySet<string>,
+): Level | undefined => {
   const rnd = createRandom(seed);
   const occupied = new Map<string, [number, number][]>();
   const pieces: PieceInput[] = [];
@@ -173,16 +207,24 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
   // Bonuses and maluses: dropped on straights, a few per level, more maluses with difficulty.
   const bonuses = modifiersUpTo(world, 'bonus');
   const maluses = modifiersUpTo(world, 'malus');
-  let malusLeft = maluses.length ? Math.round(1 + difficulty * 4 + (world - 2)) : 0;
-  let bonusLeft = 1 + Math.round(rnd() * 2);
+  const featured = (list: ModifierType[]) => list.filter((type) => focus.has(type));
+  /** Featured types win three times out of four. */
+  const pickType = (list: ModifierType[]): ModifierType => {
+    const star = featured(list);
+    return pick(rnd, star.length && rnd() < 0.75 ? star : list);
+  };
+  let malusLeft = maluses.length ? Math.round(1 + difficulty * 4 + (world - 2)) + featured(maluses).length : 0;
+  let bonusLeft = 1 + Math.round(rnd() * 2) + featured(bonuses).length;
+  const malusChance = featured(maluses).length ? 0.6 : 0.45;
+  const bonusChance = featured(bonuses).length ? 0.5 : 0.7;
   const decorate = (t: Turtle, piece: PieceInput & { type: 'straight' }, length: number, segment: Segment): Segment => {
     const cells: Cell[] = Array.from({ length }, (_, n) => step(t.cell, t.rot, n));
     const first = cells[0] ?? t.cell;
     const middle = cells[Math.floor(cells.length / 2)] ?? first;
     const side = ((t.rot + (rnd() < 0.5 ? 90 : 270)) % 360) as Rot;
     const r = rnd();
-    if (malusLeft > 0 && length >= 3 && r < 0.45) {
-      const type = pick(rnd, maluses);
+    if (malusLeft > 0 && length >= 3 && r < malusChance) {
+      const type = pickType(maluses);
       malusLeft--;
       const zone = zoneOver(cells);
       const add = (m: ModifierInput, change: Partial<typeof piece> = {}, lane?: FootCell[]): Segment => {
@@ -209,8 +251,8 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
       }
       if (type === 'heavy') return add({ type, cell: cells.at(-1) ?? middle });
     }
-    if (bonusLeft > 0 && r > 0.7) {
-      const type = pick(rnd, bonuses);
+    if (bonusLeft > 0 && r > bonusChance) {
+      const type = pickType(bonuses);
       bonusLeft--;
       if (type === 'speedPad') return { ...segment, modifiers: [{ type, cell: first, rot: t.rot, speed: 8 }] };
       // The ball flies over its own cell and the next one: the crystal goes at the far end.
@@ -332,19 +374,37 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
   };
 
   type Builder = (t: Turtle) => Segment | undefined;
-  const menu: [Builder, number][] = [
-    [straight, 4],
-    [turn, 3],
-    [slope, 2],
-    [steps, 1],
-    [pipe, 1],
-    [funnel, 0.7],
-    [bridge, 0.5 + difficulty * 2],
-  ];
-  if (world >= 2) menu.push([jump, 1 + difficulty], [ferry, 1.2]);
-  else if (difficulty > 0.5) menu.push([jump, 0.6]);
-  if (world >= 3) menu.push([tiles, 1.5]);
-  if (world >= 4) menu.push([plank, 1.2], [turntable, 1.2]);
+  const builders: Record<SegmentName, Builder> = {
+    straight,
+    turn,
+    slope,
+    steps,
+    pipe,
+    funnel,
+    bridge,
+    jump,
+    ferry,
+    tiles,
+    plank,
+    turntable,
+  };
+  const weights: Partial<Record<SegmentName, number>> = {
+    straight: 4,
+    turn: 3,
+    slope: 2,
+    steps: 1,
+    pipe: 1,
+    funnel: 0.7,
+    bridge: 0.5 + difficulty * 2,
+  };
+  if (world >= 2) Object.assign(weights, { jump: 1 + difficulty, ferry: 1.2 });
+  else if (difficulty > 0.5) weights.jump = 0.6;
+  if (world >= 3) weights.tiles = 1.5;
+  if (world >= 4) Object.assign(weights, { plank: 1.2, turntable: 1.2 });
+  const menu: [Builder, number][] = SEGMENTS.flatMap((name): [Builder, number][] => {
+    const weight = weights[name] ?? (focus.has(name) ? 1 : 0);
+    return weight ? [[builders[name], focus.has(name) ? weight * 4 : weight]] : [];
+  });
   const total = menu.reduce((s, [, w]) => s + w, 0);
   const choose = (): Builder => {
     let r = rnd() * total;
@@ -365,6 +425,7 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
   let length = 0;
   const checkpointsAt = [0.3, 0.6, 0.85].map((f) => f * target);
   let lastWasLinear = false;
+  let gemPlaced = false;
 
   const addSegment = (segment: Segment) => {
     const cells = fits(segment.pieces, segment.lane);
@@ -383,7 +444,8 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
     if (checkpointsAt.length && length >= (checkpointsAt[0] ?? Infinity)) {
       checkpointsAt.shift();
       const rest = platformAt(turtle, 'lav');
-      const branch = rnd() < 0.5 + difficulty * 0.3;
+      // The first side branch that fits holds the hidden gem; later ones hold optional crystals.
+      const branch = !gemPlaced || rnd() < 0.5 + difficulty * 0.3;
       const side = rnd() < 0.5 ? -1 : 1;
       const spur: PieceInput = {
         type: 'straight',
@@ -393,8 +455,13 @@ const tryGenerate = (world: number, difficulty: number, seed: number, id: string
         width: 'normal',
       };
       if (addSegment({ pieces: [rest.piece], next: rest.next, checkpoint: rest.centre, cells: 3 })) {
-        if (branch && addSegment({ pieces: [spur], next: turtle, cells: 0 }))
-          entities.push({ type: 'crystal', cell: step(rest.centre, turtle.rot, 0, side * 3) });
+        if (branch && addSegment({ pieces: [spur], next: turtle, cells: 0 })) {
+          entities.push({
+            type: gemPlaced ? 'crystal' : 'hiddenGem',
+            cell: step(rest.centre, turtle.rot, 0, side * 3),
+          });
+          gemPlaced = true;
+        }
         lastWasLinear = false;
         continue;
       }

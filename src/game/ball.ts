@@ -48,7 +48,7 @@ export const createBallMaterial = (textured = true): THREE.Material =>
     clearcoatRoughness: 0.08,
   });
 
-export const createBall = (world: PhysicsWorld, scene: THREE.Scene, material = createBallMaterial()): Ball => {
+export const createBall = (world: PhysicsWorld, scene: THREE.Object3D, material = createBallMaterial()): Ball => {
   const body = world.createRigidBody(
     RAPIER.RigidBodyDesc.dynamic()
       .setLinearDamping(LINEAR_DAMPING)

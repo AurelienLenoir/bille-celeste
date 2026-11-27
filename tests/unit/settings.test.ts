@@ -39,6 +39,21 @@ describe('settings migration', () => {
   it('ignores saves from a newer version of the game', () => {
     expect(migrateSettings({ version: SETTINGS_VERSION + 1, sound: false })).toEqual(DEFAULT_SETTINGS);
   });
+  it('migrates a version-1 save to version 2, keeping every choice and following the device language', () => {
+    const v1 = {
+      version: 1,
+      controlMode: 'tilt',
+      tiltRangeDeg: 14,
+      touchSensitivity: 1.6,
+      invertX: true,
+      invertY: false,
+      haptics: false,
+      sound: true,
+      music: false,
+    };
+    expect(migrateSettings(v1)).toEqual({ ...v1, version: 2, language: 'auto' });
+    expect(parseStoredSettings(JSON.stringify(v1)).language).toBe('auto');
+  });
   it('round-trips through JSON', () => {
     const custom = { ...DEFAULT_SETTINGS, invertX: true, touchSensitivity: 1.4 };
     expect(parseStoredSettings(JSON.stringify(custom))).toEqual(custom);

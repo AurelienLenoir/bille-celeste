@@ -5,6 +5,8 @@ export type Migrations = Record<number, (level: Record<string, unknown>) => Reco
 export const MIGRATIONS: Migrations = {
   /** Version 2 adds the bonuses and maluses: a version-1 level has none. */
   1: (level) => ({ ...level, modifiers: [] }),
+  /** Version 3 adds the tutorial signs: older levels have none. */
+  2: (level) => ({ ...level, signs: [] }),
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

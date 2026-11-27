@@ -19,7 +19,7 @@ export type Crystal = {
   animate: (clock: number, dt: number) => void;
 };
 
-export const createCrystal = (scene: THREE.Scene, position: Vec3Tuple, index: number): Crystal => {
+export const createCrystal = (scene: THREE.Object3D, position: Vec3Tuple, index: number): Crystal => {
   const hue = CRYSTAL_HUES[index % CRYSTAL_HUES.length] ?? CRYSTAL_HUES[0];
   const mesh = new THREE.Mesh(
     geometry,

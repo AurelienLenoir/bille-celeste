@@ -1,0 +1,121 @@
+{
+  "id": "w2-03",
+  "version": 3,
+  "name": { "fr": "Va-et-vient", "en": "Back and Forth" },
+  "world": 2,
+  "parTimeSec": 60,
+  "spawn": { "cell": [0, 0, 0] },
+  "pieces": [
+    { "type": "platform", "cell": [0, 0, 0], "size": [3, 3], "rot": 0, "surface": "mint" },
+    {
+      "type": "straight",
+      "cell": [0, 0, -2],
+      "rot": 0,
+      "length": 4,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    { "type": "platform", "cell": [0, 0, -7], "size": [3, 3], "rot": 0, "surface": "rose" },
+    {
+      "type": "movingPlatform",
+      "path": [
+        [0, 0, -9.5],
+        [0, 0, -12.5]
+      ],
+      "size": [1.5, 2],
+      "speed": 2.2720000000000002,
+      "pause": 0.99,
+      "surface": "lav"
+    },
+    { "type": "platform", "cell": [0, 0, -15], "size": [3, 3], "rot": 0, "surface": "mint" },
+    {
+      "type": "straight",
+      "cell": [0, 0, -17],
+      "rot": 0,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    { "type": "gap", "cell": [0, 0, -21], "rot": 0, "length": 1, "surface": "rose" },
+    { "type": "platform", "cell": [0, 0, -24], "size": [3, 3], "rot": 0, "surface": "rose" },
+    { "type": "platform", "cell": [0, 0, -27], "size": [3, 3], "rot": 0, "surface": "lav" },
+    {
+      "type": "straight",
+      "cell": [2, 0, -27],
+      "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    { "type": "platform", "cell": [0, 0, -30], "size": [3, 3], "rot": 0, "surface": "rose" },
+    {
+      "type": "movingPlatform",
+      "path": [
+        [0, 0, -32.5],
+        [0, 0, -35.5]
+      ],
+      "size": [1.5, 2],
+      "speed": 2.2720000000000002,
+      "pause": 0.99,
+      "surface": "lav"
+    },
+    { "type": "platform", "cell": [0, 0, -38], "size": [3, 3], "rot": 0, "surface": "mint" },
+    { "type": "platform", "cell": [0, 0, -41], "size": [3, 3], "rot": 0, "surface": "lav" },
+    {
+      "type": "straight",
+      "cell": [-2, 0, -41],
+      "rot": 270,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [0, 0, -43],
+      "rot": 0,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    { "type": "gap", "cell": [0, 0, -47], "rot": 0, "length": 1, "surface": "rose" },
+    { "type": "platform", "cell": [0, 0, -50], "size": [3, 3], "rot": 0, "surface": "rose" },
+    { "type": "platform", "cell": [0, 0, -53], "size": [3, 3], "rot": 0, "surface": "lav" },
+    {
+      "type": "straight",
+      "cell": [2, 0, -53],
+      "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    { "type": "platform", "cell": [0, 0, -56], "size": [3, 3], "rot": 0, "surface": "lav" },
+    { "type": "wall", "cell": [-1, 0, -57], "rot": 0, "length": 3, "height": 0.6 }
+  ],
+  "entities": [
+    { "type": "checkpoint", "cell": [0, 0, -15] },
+    { "type": "checkpoint", "cell": [0, 0, -24] },
+    { "type": "checkpoint", "cell": [0, 0, -27] },
+    { "type": "hiddenGem", "cell": [3, 0, -27] },
+    { "type": "checkpoint", "cell": [0, 0, -38] },
+    { "type": "checkpoint", "cell": [0, 0, -41] },
+    { "type": "crystal", "cell": [-3, 0, -41] },
+    { "type": "checkpoint", "cell": [0, 0, -50] },
+    { "type": "checkpoint", "cell": [0, 0, -53] },
+    { "type": "crystal", "cell": [3, 0, -53] },
+    { "type": "crystal", "cell": [0, 0, -4] },
+    { "type": "goal", "cell": [0, 0, -56] }
+  ],
+  "modifiers": [
+    { "type": "speedPad", "cell": [0, 0, -2], "rot": 0, "speed": 8 },
+    { "type": "speedPad", "cell": [0, 0, -17], "rot": 0, "speed": 9 },
+    { "type": "speedPad", "cell": [0, 0, -43], "rot": 0, "speed": 9 }
+  ],
+  "signs": [],
+  "decor": { "theme": "sunset", "seed": 1012 }
+}

@@ -11,6 +11,8 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: 'off',
+    // The game follows the device language; the tests read the French texts.
+    locale: 'fr-FR',
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },

@@ -1,0 +1,336 @@
+{
+  "id": "w3-04",
+  "version": 3,
+  "name": {
+    "fr": "Crevasses",
+    "en": "Crevasses"
+  },
+  "world": 3,
+  "parTimeSec": 55,
+  "spawn": {
+    "cell": [0, 0, 0]
+  },
+  "pieces": [
+    {
+      "type": "platform",
+      "cell": [0, 0, 0],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "halfPipe",
+      "cell": [0, 0, -2],
+      "rot": 0,
+      "length": 3,
+      "surface": "lav"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [0, 0, -5],
+      "delay": 0.66,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [0, 0, -6],
+      "delay": 0.66,
+      "surface": "rose"
+    },
+    {
+      "type": "straight",
+      "cell": [0, 0, -7],
+      "rot": 0,
+      "length": 5,
+      "width": "narrow",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [0, 0, -12],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [0, 0, -14],
+      "rot": 0,
+      "radius": 3,
+      "angle": 90,
+      "dir": "left",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [-3, 0, -16],
+      "rot": 270,
+      "length": 4,
+      "drop": 5,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-8, -5, -16],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-8, -5, -18],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "bridge",
+      "cell": [-10, -5, -16],
+      "rot": 270,
+      "length": 3,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "curve",
+      "cell": [-13, -5, -16],
+      "rot": 270,
+      "radius": 1,
+      "angle": 90,
+      "dir": "right",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [-13, -5, -17],
+      "rot": 0,
+      "length": 4,
+      "drop": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [-13, -7, -21],
+      "rot": 0,
+      "radius": 1,
+      "angle": 90,
+      "dir": "right",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-12, -7, -21],
+      "rot": 90,
+      "length": 4,
+      "width": "narrow",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [-8, -7, -21],
+      "rot": 90,
+      "radius": 3,
+      "angle": 90,
+      "dir": "left",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-6, -7, -25],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-8, -7, -25],
+      "rot": 270,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-6, -7, -27],
+      "rot": 0,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "stairs",
+      "cell": [-6, -7, -31],
+      "rot": 0,
+      "steps": 2,
+      "width": "normal",
+      "surface": "cream"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [-6, -9, -33],
+      "delay": 0.66,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [-6, -9, -34],
+      "delay": 0.66,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [-6, -9, -36],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-4, -9, -36],
+      "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-6, -9, -38],
+      "rot": 0,
+      "length": 5,
+      "width": "wide",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [-6, -9, -43],
+      "delay": 0.66,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [-6, -9, -44],
+      "delay": 0.66,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [-6, -9, -46],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "wall",
+      "cell": [-7, -9, -47],
+      "rot": 0,
+      "length": 3,
+      "height": 0.6
+    }
+  ],
+  "entities": [
+    {
+      "type": "checkpoint",
+      "cell": [-8, -5, -16]
+    },
+    {
+      "type": "hiddenGem",
+      "cell": [-8, -5, -19]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [-6, -7, -25]
+    },
+    {
+      "type": "crystal",
+      "cell": [-9, -7, -25]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [-6, -9, -36]
+    },
+    {
+      "type": "crystal",
+      "cell": [-3, -9, -36]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -3]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -9]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -13]
+    },
+    {
+      "type": "crystal",
+      "cell": [-11, -5, -16]
+    },
+    {
+      "type": "crystal",
+      "cell": [-10, -7, -21]
+    },
+    {
+      "type": "crystal",
+      "cell": [-6, -7, -29]
+    },
+    {
+      "type": "goal",
+      "cell": [-6, -9, -46]
+    }
+  ],
+  "modifiers": [
+    {
+      "type": "ice",
+      "cell": [0, 0, -9],
+      "size": [1, 5]
+    },
+    {
+      "type": "ice",
+      "cell": [-11, -7, -21],
+      "size": [4, 1]
+    },
+    {
+      "type": "ice",
+      "cell": [-6, -7, -29],
+      "size": [1, 4]
+    },
+    {
+      "type": "wind",
+      "cell": [-6, -9, -40],
+      "size": [1, 5],
+      "rot": 270,
+      "strength": 3.8,
+      "gusts": 3
+    }
+  ],
+  "signs": [],
+  "decor": {
+    "theme": "glacier",
+    "seed": 26992
+  }
+}

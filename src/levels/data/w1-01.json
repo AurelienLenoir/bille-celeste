@@ -1,0 +1,48 @@
+{
+  "id": "w1-01",
+  "version": 3,
+  "name": { "fr": "Premiers pas", "en": "First Steps" },
+  "world": 1,
+  "parTimeSec": 15,
+  "spawn": { "cell": [0, 0, 0] },
+  "pieces": [
+    { "type": "platform", "cell": [0, 0, 0], "size": [3, 3], "surface": "mint" },
+    { "type": "straight", "cell": [0, 0, -2], "rot": 0, "length": 6, "width": "wide", "rails": "both" },
+    { "type": "platform", "cell": [0, 0, -9], "size": [3, 3], "surface": "lav" },
+    { "type": "straight", "cell": [-2, 0, -9], "rot": 270, "length": 2, "width": "normal" },
+    { "type": "curve", "cell": [0, 0, -11], "rot": 0, "radius": 2, "dir": "right", "width": "wide", "rails": "both" },
+    { "type": "straight", "cell": [2, 0, -12], "rot": 90, "length": 3, "width": "wide", "rails": "both" },
+    { "type": "ramp", "cell": [5, 0, -12], "rot": 90, "length": 3, "drop": 2, "width": "wide", "rails": "both" },
+    { "type": "platform", "cell": [9, -2, -12], "size": [3, 3], "surface": "lav" },
+    { "type": "wall", "cell": [10, -2, -13], "rot": 90, "length": 3 }
+  ],
+  "entities": [
+    { "type": "crystal", "cell": [0, 0, -3] },
+    { "type": "crystal", "cell": [0, 0, -6] },
+    { "type": "checkpoint", "cell": [0, 0, -9] },
+    { "type": "hiddenGem", "cell": [-3, 0, -9] },
+    { "type": "crystal", "cell": [3, 0, -12] },
+    { "type": "goal", "cell": [9, -2, -12] }
+  ],
+  "modifiers": [],
+  "signs": [
+    { "cell": [0, 0, -2], "text": { "fr": "Penche pour faire rouler la bille", "en": "Tilt to roll the marble" } },
+    { "cell": [0, 0, -6], "text": { "fr": "Ramasse tous les cristaux", "en": "Collect every crystal" } },
+    {
+      "cell": [0, 0, -10],
+      "text": { "fr": "Checkpoint : si tu tombes, tu repars d’ici", "en": "Checkpoint: if you fall, you restart here" }
+    },
+    {
+      "cell": [4, 0, -12],
+      "text": { "fr": "Une pente ! Penche en arrière pour freiner", "en": "A slope! Tilt back to brake" }
+    },
+    {
+      "cell": [8, -2, -12],
+      "text": {
+        "fr": "L’anneau doré s’ouvre quand tous les cristaux sont pris",
+        "en": "The golden ring opens once every crystal is collected"
+      }
+    }
+  ],
+  "decor": { "theme": "garden", "seed": 101 }
+}

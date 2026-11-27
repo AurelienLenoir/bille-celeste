@@ -1,0 +1,285 @@
+{
+  "id": "w3-01",
+  "version": 3,
+  "name": {
+    "fr": "Premier gel",
+    "en": "First Frost"
+  },
+  "world": 3,
+  "parTimeSec": 55,
+  "spawn": {
+    "cell": [0, 0, 0]
+  },
+  "pieces": [
+    {
+      "type": "platform",
+      "cell": [0, 0, 0],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "platform",
+      "cell": [0, 0, -3],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "funnel",
+      "cell": [0, 0, -5],
+      "rot": 0,
+      "diameter": 3,
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [0, 0, -7],
+      "rot": 0,
+      "length": 3,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [0, 0, -10],
+      "rot": 0,
+      "radius": 3,
+      "angle": 90,
+      "dir": "right",
+      "width": "wide",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [3, 0, -12],
+      "delay": 0.772,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [4, 0, -12],
+      "delay": 0.772,
+      "surface": "rose"
+    },
+    {
+      "type": "fallingTile",
+      "cell": [5, 0, -12],
+      "delay": 0.772,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [7, 0, -12],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [7, 0, -14],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [9, 0, -12],
+      "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [11, 0, -12],
+      "rot": 90,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [16, 0, -12],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "movingPlatform",
+      "path": [
+        [18.5, 0, -12],
+        [22.5, 0, -12]
+      ],
+      "size": [2, 1.5],
+      "speed": 2.112,
+      "pause": 1.04,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [25, 0, -12],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "platform",
+      "cell": [28, 0, -12],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "halfPipe",
+      "cell": [30, 0, -12],
+      "rot": 90,
+      "length": 3,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [33, 0, -12],
+      "rot": 90,
+      "length": 5,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [39, 0, -12],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [39, 0, -14],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [41, 0, -12],
+      "rot": 90,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "gap",
+      "cell": [45, 0, -12],
+      "rot": 90,
+      "length": 1,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [48, 0, -12],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [51, 0, -12],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "wall",
+      "cell": [52, 0, -13],
+      "rot": 90,
+      "length": 3,
+      "height": 0.6
+    }
+  ],
+  "entities": [
+    {
+      "type": "checkpoint",
+      "cell": [7, 0, -12]
+    },
+    {
+      "type": "hiddenGem",
+      "cell": [7, 0, -15]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [25, 0, -12]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [28, 0, -12]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [39, 0, -12]
+    },
+    {
+      "type": "crystal",
+      "cell": [39, 0, -15]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [48, 0, -12]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -3]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -8]
+    },
+    {
+      "type": "crystal",
+      "cell": [10, 0, -12]
+    },
+    {
+      "type": "crystal",
+      "cell": [13, 0, -12]
+    },
+    {
+      "type": "crystal",
+      "cell": [31, 0, -12]
+    },
+    {
+      "type": "goal",
+      "cell": [51, 0, -12]
+    }
+  ],
+  "modifiers": [
+    {
+      "type": "ice",
+      "cell": [0, 0, -8],
+      "size": [1, 3]
+    },
+    {
+      "type": "ice",
+      "cell": [12, 0, -12],
+      "size": [4, 1]
+    },
+    {
+      "type": "ice",
+      "cell": [35, 0, -12],
+      "size": [5, 1]
+    }
+  ],
+  "signs": [],
+  "decor": {
+    "theme": "glacier",
+    "seed": 2225
+  }
+}

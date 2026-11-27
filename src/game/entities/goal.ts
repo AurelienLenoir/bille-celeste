@@ -12,7 +12,7 @@ export type Goal = {
 };
 
 /** Finish ring: grey while crystals remain, golden and spinning once it opens. */
-export const createGoal = (scene: THREE.Scene, [x, y, z]: Vec3Tuple): Goal => {
+export const createGoal = (scene: THREE.Object3D, [x, y, z]: Vec3Tuple): Goal => {
   const material = new THREE.MeshStandardMaterial({
     color: INACTIVE,
     emissive: 0x000000,

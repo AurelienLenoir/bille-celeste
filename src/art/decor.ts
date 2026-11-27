@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { createRandom } from '../engine/math';
-import { DECOR } from './palette';
+import { DECOR, type DecorColors } from './palette';
 
 export type Decor = { update: (clock: number, dt: number) => void };
 
@@ -37,7 +37,12 @@ const transform = (position: THREE.Vector3, rotationX = 0) =>
  * Floating islands and drifting clouds on both sides of the course (its vertices give the extent). All islands share one mesh
  * and each cloud is one mesh, which keeps the decor to 13 draw calls (PLAN.md § 9).
  */
-export const createDecor = (scene: THREE.Scene, seed: number, course: Float32Array): Decor => {
+export const createDecor = (
+  scene: THREE.Object3D,
+  seed: number,
+  course: Float32Array,
+  colors: DecorColors = DECOR,
+): Decor => {
   const rnd = createRandom(seed);
   const box = new THREE.Box3().setFromArray(course);
   const { min, max } = box.isEmpty() ? new THREE.Box3(new THREE.Vector3(), new THREE.Vector3()) : box;
@@ -46,8 +51,8 @@ export const createDecor = (scene: THREE.Scene, seed: number, course: Float32Arr
   const alongZ = () => max.z + 8 - rnd() * (max.z - min.z + 16);
   const islandMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true });
   const cloudMaterial = new THREE.MeshStandardMaterial({
-    color: DECOR.cloud,
-    emissive: DECOR.cloud,
+    color: colors.cloud,
+    emissive: colors.cloud,
     emissiveIntensity: 0.25,
     flatShading: true,
   });
@@ -59,15 +64,15 @@ export const createDecor = (scene: THREE.Scene, seed: number, course: Float32Arr
     const local: { geometry: THREE.BufferGeometry; color: number; at: THREE.Vector3; flip?: boolean }[] = [
       {
         geometry: new THREE.ConeGeometry(r, r * 1.8, 7),
-        color: DECOR.rock,
+        color: colors.rock,
         at: new THREE.Vector3(0, -r * 0.9, 0),
         flip: true,
       },
-      { geometry: new THREE.CylinderGeometry(r, r, 0.35, 7), color: DECOR.grass, at: new THREE.Vector3() },
+      { geometry: new THREE.CylinderGeometry(r, r, 0.35, 7), color: colors.grass, at: new THREE.Vector3() },
     ];
     for (let t = 0; t < 1 + rnd() * 3; t++) {
       const at = new THREE.Vector3((rnd() - 0.5) * r, 1, (rnd() - 0.5) * r);
-      local.push({ geometry: new THREE.ConeGeometry(0.5, 1.6, 6), color: DECOR.leaf, at });
+      local.push({ geometry: new THREE.ConeGeometry(0.5, 1.6, 6), color: colors.leaf, at });
     }
     const origin = new THREE.Vector3(besideX(side, 9 + rnd() * 14), min.y - 9 + rnd() * 9, alongZ());
     for (const { geometry, color, at, flip } of local) {

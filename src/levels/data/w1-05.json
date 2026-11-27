@@ -1,0 +1,257 @@
+{
+  "id": "w1-05",
+  "version": 3,
+  "name": {
+    "fr": "Le grand tour",
+    "en": "The Grand Tour"
+  },
+  "world": 1,
+  "parTimeSec": 50,
+  "spawn": {
+    "cell": [0, 0, 0]
+  },
+  "pieces": [
+    {
+      "type": "platform",
+      "cell": [0, 0, 0],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "bridge",
+      "cell": [0, 0, -2],
+      "rot": 0,
+      "length": 4,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "stairs",
+      "cell": [0, 0, -6],
+      "rot": 0,
+      "steps": 2,
+      "width": "normal",
+      "surface": "cream"
+    },
+    {
+      "type": "halfPipe",
+      "cell": [0, -2, -8],
+      "rot": 0,
+      "length": 5,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [0, -2, -13],
+      "rot": 0,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [0, -2, -18],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-2, -2, -18],
+      "rot": 270,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "bridge",
+      "cell": [0, -2, -20],
+      "rot": 0,
+      "length": 2,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "bridge",
+      "cell": [0, -2, -22],
+      "rot": 0,
+      "length": 4,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "ramp",
+      "cell": [0, -2, -26],
+      "rot": 0,
+      "length": 3,
+      "drop": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [0, -6, -29],
+      "rot": 0,
+      "length": 4,
+      "drop": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [0, -8, -34],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [2, -8, -34],
+      "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "bridge",
+      "cell": [0, -8, -36],
+      "rot": 0,
+      "length": 3,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "curve",
+      "cell": [0, -8, -39],
+      "rot": 0,
+      "radius": 1,
+      "angle": 90,
+      "dir": "left",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "bridge",
+      "cell": [-1, -8, -39],
+      "rot": 270,
+      "length": 2,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "platform",
+      "cell": [-4, -8, -39],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [-4, -8, -41],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [-6, -8, -39],
+      "rot": 270,
+      "length": 4,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "platform",
+      "cell": [-11, -8, -39],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "wall",
+      "cell": [-12, -8, -38],
+      "rot": 270,
+      "length": 3,
+      "height": 0.6
+    }
+  ],
+  "entities": [
+    {
+      "type": "checkpoint",
+      "cell": [0, -2, -18]
+    },
+    {
+      "type": "hiddenGem",
+      "cell": [-3, -2, -18]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [0, -8, -34]
+    },
+    {
+      "type": "crystal",
+      "cell": [3, -8, -34]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [-4, -8, -39]
+    },
+    {
+      "type": "crystal",
+      "cell": [-4, -8, -42]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -4]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, -2, -9]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, -2, -15]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, -2, -21]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, -2, -24]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, -8, -37]
+    },
+    {
+      "type": "goal",
+      "cell": [-11, -8, -39]
+    }
+  ],
+  "modifiers": [
+    {
+      "type": "shield",
+      "cell": [0, -2, -13]
+    },
+    {
+      "type": "shield",
+      "cell": [-6, -8, -39]
+    }
+  ],
+  "signs": [],
+  "decor": {
+    "theme": "garden",
+    "seed": 1314
+  }
+}

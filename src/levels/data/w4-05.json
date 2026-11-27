@@ -1,0 +1,168 @@
+{
+  "id": "w4-05",
+  "version": 3,
+  "name": { "fr": "La grande machine", "en": "The Great Machine" },
+  "world": 4,
+  "parTimeSec": 65,
+  "spawn": { "cell": [0, 0, 0] },
+  "pieces": [
+    { "type": "platform", "cell": [0, 0, 0], "size": [3, 3], "rot": 0, "surface": "mint" },
+    { "type": "platform", "cell": [0, 0, -3], "size": [3, 3], "rot": 0, "surface": "mint" },
+    { "type": "funnel", "cell": [0, 0, -5], "rot": 0, "diameter": 3, "surface": "cream" },
+    { "type": "fallingTile", "cell": [0, 0, -7], "delay": 0.56, "surface": "rose" },
+    { "type": "fallingTile", "cell": [0, 0, -8], "delay": 0.56, "surface": "rose" },
+    { "type": "fallingTile", "cell": [0, 0, -9], "delay": 0.56, "surface": "rose" },
+    { "type": "rotatingPlatform", "cell": [0, 0, -11], "diameter": 3, "speed": 36.25, "surface": "rose" },
+    {
+      "type": "curve",
+      "cell": [0, 0, -13],
+      "rot": 0,
+      "radius": 2,
+      "angle": 90,
+      "dir": "right",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [2, 0, -14],
+      "rot": 90,
+      "length": 5,
+      "width": "narrow",
+      "rails": "none",
+      "surface": "cream"
+    },
+    { "type": "platform", "cell": [8, 0, -14], "size": [3, 3], "rot": 0, "surface": "mint" },
+    { "type": "funnel", "cell": [10, 0, -14], "rot": 90, "diameter": 3, "surface": "cream" },
+    { "type": "platform", "cell": [13, 0, -14], "size": [3, 3], "rot": 0, "surface": "lav" },
+    {
+      "type": "straight",
+      "cell": [13, 0, -16],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    { "type": "bridge", "cell": [15, 0, -14], "rot": 90, "length": 3, "width": "narrow", "surface": "wood" },
+    {
+      "type": "straight",
+      "cell": [18, 0, -14],
+      "rot": 90,
+      "length": 4,
+      "width": "narrow",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [22, 0, -14],
+      "rot": 90,
+      "radius": 3,
+      "angle": 90,
+      "dir": "left",
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    { "type": "stairs", "cell": [24, 0, -17], "rot": 0, "steps": 3, "width": "normal", "surface": "cream" },
+    {
+      "type": "straight",
+      "cell": [24, -3, -20],
+      "rot": 0,
+      "length": 5,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    { "type": "platform", "cell": [24, -3, -26], "size": [3, 3], "rot": 0, "surface": "lav" },
+    {
+      "type": "straight",
+      "cell": [26, -3, -26],
+      "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [24, -3, -28],
+      "rot": 0,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    { "type": "gap", "cell": [24, -3, -32], "rot": 0, "length": 2, "surface": "rose" },
+    { "type": "platform", "cell": [24, -3, -36], "size": [3, 3], "rot": 0, "surface": "rose" },
+    {
+      "type": "straight",
+      "cell": [24, -3, -38],
+      "rot": 0,
+      "length": 4,
+      "width": "wide",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [24, -3, -42],
+      "rot": 0,
+      "length": 2,
+      "drop": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    { "type": "platform", "cell": [24, -5, -45], "size": [3, 3], "rot": 0, "surface": "lav" },
+    {
+      "type": "straight",
+      "cell": [26, -5, -45],
+      "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    { "type": "stairs", "cell": [24, -5, -47], "rot": 0, "steps": 3, "width": "normal", "surface": "cream" },
+    {
+      "type": "straight",
+      "cell": [24, -8, -50],
+      "rot": 0,
+      "length": 5,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    { "type": "platform", "cell": [24, -8, -56], "size": [3, 3], "rot": 0, "surface": "lav" },
+    { "type": "wall", "cell": [23, -8, -57], "rot": 0, "length": 3, "height": 0.6 }
+  ],
+  "entities": [
+    { "type": "checkpoint", "cell": [13, 0, -14] },
+    { "type": "hiddenGem", "cell": [13, 0, -17] },
+    { "type": "checkpoint", "cell": [24, -3, -26] },
+    { "type": "crystal", "cell": [27, -3, -26] },
+    { "type": "checkpoint", "cell": [24, -3, -36] },
+    { "type": "checkpoint", "cell": [24, -5, -45] },
+    { "type": "crystal", "cell": [27, -5, -45] },
+    { "type": "crystal", "cell": [0, 0, -3] },
+    { "type": "crystal", "cell": [0, 0, -11] },
+    { "type": "crystal", "cell": [4, 0, -14] },
+    { "type": "crystal", "cell": [8, 0, -14] },
+    { "type": "crystal", "cell": [16, 0, -14] },
+    { "type": "crystal", "cell": [20, 0, -14] },
+    { "type": "crystal", "cell": [24, -3, -22] },
+    { "type": "goal", "cell": [24, -8, -56] }
+  ],
+  "modifiers": [
+    { "type": "invert", "cell": [4, 0, -14], "size": [5, 1] },
+    { "type": "magnet", "cell": [18, 0, -14] },
+    { "type": "pusher", "cell": [24, -3, -22], "rot": 90, "period": 2.65, "phase": 0 },
+    { "type": "conveyor", "cell": [24, -3, -40], "size": [1, 4], "rot": 90, "speed": 4.2 },
+    { "type": "bumper", "cell": [8, 0, -15], "strength": 9 }
+  ],
+  "signs": [],
+  "decor": { "theme": "factory", "seed": 42326 }
+}
