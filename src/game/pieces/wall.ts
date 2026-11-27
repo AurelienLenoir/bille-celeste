@@ -1,4 +1,5 @@
 import type { BoxSpec } from './box';
+import { solidFromBox, type PieceCollision } from './shape';
 
 export const WALL_HEIGHT = 0.6;
 
@@ -8,3 +9,5 @@ export type WallData = { type: 'wall'; at: readonly [number, number, number]; si
 export const wall = ({ at: [x, y, z], size: [w, d] }: WallData): BoxSpec[] => [
   { position: [x, y + WALL_HEIGHT / 2, z], size: [w, WALL_HEIGHT, d], surface: 'lav' },
 ];
+
+export const wallCollision = (data: WallData): PieceCollision => ({ floors: [], solids: wall(data).map(solidFromBox) });

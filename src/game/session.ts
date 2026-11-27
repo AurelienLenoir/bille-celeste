@@ -1,6 +1,13 @@
-import type * as CANNON from 'cannon-es';
 import type { Vec2 } from '../engine/math';
-import { applyGravity, gravityDirection, stepPhysics, type GravityDirection } from '../engine/physics';
+import { createFixedStepper } from '../engine/loop';
+import {
+  applyGravity,
+  gravityDirection,
+  PHYSICS_STEP,
+  stepPhysics,
+  type GravityDirection,
+  type PhysicsWorld,
+} from '../engine/physics';
 import { smoothInput } from '../engine/input';
 import type { LevelData } from '../levels/types';
 import { BALL_RADIUS, type Ball } from './ball';
@@ -18,12 +25,15 @@ export type Session = {
   clock: () => number;
   /** Resets the level and starts playing. */
   start: () => void;
-  /** Advances one rendered frame and returns the gravity direction the camera should follow. */
-  update: (dt: number, input: Vec2) => GravityDirection;
+  /**
+   * Advances one rendered frame: runs as many fixed physics steps as `dt` allows, reading the input
+   * once per step, then blends the visuals. Returns the gravity direction the camera should follow.
+   */
+  update: (dt: number, readInput: () => Vec2) => GravityDirection;
 };
 
 type SessionDeps = {
-  physics: CANNON.World;
+  physics: PhysicsWorld;
   level: LevelData;
   world: LevelWorld;
   ball: Ball;
@@ -36,6 +46,8 @@ export const createSession = ({ physics, level, world, ball, events }: SessionDe
   const [sx, sy, sz] = level.start;
   const start: Point = { x: sx, y: sy, z: sz };
   const smoothed: Vec2 = { x: 0, y: 0 };
+  const stepper = createFixedStepper(PHYSICS_STEP);
+  let gravity = gravityDirection(smoothed);
 
   let state: SessionState = 'menu';
   let time = 0;
@@ -105,29 +117,33 @@ export const createSession = ({ physics, level, world, ball, events }: SessionDe
     respawn();
   };
 
-  const play = (dt: number) => {
-    movers.forEach((m) => m.update(dt));
-    stepPhysics(physics, dt);
-    time += dt;
+  const play = () => {
+    movers.forEach((m) => m.step(PHYSICS_STEP));
+    stepPhysics(physics);
+    time += PHYSICS_STEP;
     ball.limitSpeed();
-    const p = ball.body.position;
+    ball.capture();
+    const p = ball.position();
     checkCrystals(p);
     checkCheckpoints(p);
     checkGoal(p);
     checkFall(p);
-    events.emit('tick', { time });
   };
 
-  const update = (dt: number, input: Vec2) => {
-    clock += dt;
-    smoothInput(smoothed, input, dt);
-    const gravity = gravityDirection(smoothed);
+  const step = (readInput: () => Vec2) => {
+    smoothInput(smoothed, readInput(), PHYSICS_STEP);
+    gravity = gravityDirection(smoothed);
     applyGravity(physics, gravity);
+    if (state === 'play') play();
+  };
 
-    if (state === 'play') play(dt);
+  const update = (dt: number, readInput: () => Vec2) => {
+    clock += dt;
+    const alpha = stepper.advance(dt, () => step(readInput));
+    if (state === 'play') events.emit('tick', { time });
 
-    ball.syncMesh();
-    movers.forEach((m) => m.syncMesh());
+    ball.syncMesh(alpha);
+    movers.forEach((m) => m.syncMesh(alpha));
     crystals.forEach((c) => c.animate(clock, dt));
     goal.animate(clock, allCollected());
     return gravity;

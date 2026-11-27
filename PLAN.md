@@ -442,7 +442,7 @@ Un jeu de bille coloré attire les enfants. Si le jeu est déclaré comme destin
 
 - [x] POC jouable (Three.js + cannon-es, 1 niveau, gyroscope + tactile) — `index.html`
 - [x] Phase 0 — Mise en place (Vite + TS strict, ESLint/Prettier, Vitest, Playwright, CI + GitHub Pages ; reste à valider : CI verte et page Pages jouable)
-- [ ] Phase 1 — Cœur du jeu et sensation
+- [ ] Phase 1 — Cœur du jeu et sensation (en cours : Rapier, pas fixe 120 Hz + interpolation et collider trimesh fusionné faits ; sensation validée sur téléphone par l'utilisateur. Reste : module d'entrée complet, caméra, chrono/chutes, menu pause, réglages, mesure des 60 fps)
 - [ ] Phase 2 — Système de niveaux
 - [ ] Phase 3 — Bonus et malus
 - [ ] Phase 4 — Contenu et progression (20 niveaux)

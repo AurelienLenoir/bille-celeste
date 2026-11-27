@@ -1,26 +1,42 @@
-import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
 import { createBallTexture } from '../art/textures';
+import { RAPIER, SURFACE, rapierDamping, type PhysicsWorld } from '../engine/physics';
 
 export const BALL_RADIUS = 0.42;
 export const MAX_BALL_SPEED = 13;
+const BALL_MASS = 1;
+/** Prototype (cannon-es) damping values, converted so the ball keeps the same feel. */
+const LINEAR_DAMPING = rapierDamping(0.12);
+const ANGULAR_DAMPING = rapierDamping(0.25);
+
+type Point = { x: number; y: number; z: number };
 
 export type Ball = {
-  body: CANNON.Body;
   mesh: THREE.Mesh;
+  /** Ball centre after the last physics step. */
+  position: () => Point;
   placeAt: (x: number, y: number, z: number) => void;
   limitSpeed: () => void;
-  syncMesh: () => void;
+  /** Records the state after a physics step; rendering blends the last two records. */
+  capture: () => void;
+  syncMesh: (alpha: number) => void;
 };
 
-export const createBall = (world: CANNON.World, scene: THREE.Scene): Ball => {
-  const body = new CANNON.Body({
-    mass: 1,
-    shape: new CANNON.Sphere(BALL_RADIUS),
-    linearDamping: 0.12,
-    angularDamping: 0.25,
-  });
-  world.addBody(body);
+export const createBall = (world: PhysicsWorld, scene: THREE.Scene): Ball => {
+  const body = world.createRigidBody(
+    RAPIER.RigidBodyDesc.dynamic()
+      .setLinearDamping(LINEAR_DAMPING)
+      .setAngularDamping(ANGULAR_DAMPING)
+      .setCcdEnabled(true)
+      .setCanSleep(false),
+  );
+  world.createCollider(
+    RAPIER.ColliderDesc.ball(BALL_RADIUS)
+      .setFriction(SURFACE.friction)
+      .setRestitution(SURFACE.restitution)
+      .setMass(BALL_MASS),
+    body,
+  );
 
   const mesh = new THREE.Mesh(
     new THREE.SphereGeometry(BALL_RADIUS, 40, 24),
@@ -34,23 +50,41 @@ export const createBall = (world: CANNON.World, scene: THREE.Scene): Ball => {
   mesh.castShadow = true;
   scene.add(mesh);
 
+  const previous = { p: new THREE.Vector3(), q: new THREE.Quaternion() };
+  const current = { p: new THREE.Vector3(), q: new THREE.Quaternion() };
+  const readBody = () => {
+    const t = body.translation();
+    const r = body.rotation();
+    current.p.set(t.x, t.y, t.z);
+    current.q.set(r.x, r.y, r.z, r.w);
+  };
+
   return {
-    body,
     mesh,
+    position: () => current.p,
     placeAt: (x, y, z) => {
-      body.position.set(x, y, z);
-      body.velocity.setZero();
-      body.angularVelocity.setZero();
+      body.setTranslation({ x, y, z }, true);
+      body.setLinvel({ x: 0, y: 0, z: 0 }, true);
+      body.setAngvel({ x: 0, y: 0, z: 0 }, true);
+      readBody();
+      previous.p.copy(current.p);
+      previous.q.copy(current.q);
     },
     limitSpeed: () => {
-      const v = body.velocity;
-      const speed = v.length();
-      if (speed > MAX_BALL_SPEED) v.scale(MAX_BALL_SPEED / speed, v);
+      const v = body.linvel();
+      const speed = Math.hypot(v.x, v.y, v.z);
+      if (speed <= MAX_BALL_SPEED) return;
+      const k = MAX_BALL_SPEED / speed;
+      body.setLinvel({ x: v.x * k, y: v.y * k, z: v.z * k }, true);
     },
-    syncMesh: () => {
-      const { position: p, quaternion: q } = body;
-      mesh.position.set(p.x, p.y, p.z);
-      mesh.quaternion.set(q.x, q.y, q.z, q.w);
+    capture: () => {
+      previous.p.copy(current.p);
+      previous.q.copy(current.q);
+      readBody();
+    },
+    syncMesh: (alpha) => {
+      mesh.position.lerpVectors(previous.p, current.p, alpha);
+      mesh.quaternion.slerpQuaternions(previous.q, current.q, alpha);
     },
   };
 };
