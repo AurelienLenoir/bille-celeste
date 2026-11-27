@@ -2,6 +2,21 @@
 
 Journal des choix structurants (le plus récent en haut).
 
+## 2026-11-27 — Phase 2 : système de niveaux
+
+- **Grille** : une case fait 2 × 2 unités, une marche 0,5. `cell` vaut `[x, hauteur, z]` en cases et en marches. Rotation 0 vers -z (loin de la caméra), 90 vers +x. Les pièces linéaires partent du milieu du bord arrière de leur case, si bien que deux pièces se raccordent quand la sortie de l'une est l'entrée de l'autre.
+- **Format v1 sans modificateurs** : le champ `modifiers` arrive avec les bonus et malus de la phase 3, en version 2 avec sa migration. La chaîne de migrations (`levels/migrations.ts`) est déjà en place et testée.
+- **Une pièce = un module** (`game/pieces/`) qui décrit sa forme (sols, triangles, rambardes), son graphe de navigation (nœuds, liens, ports, blocages) et ses cases occupées. Les pièces mobiles ajoutent un corps et un `Mover`. Tout le parcours statique reste **un seul trimesh**, et le **rendu utilise le même maillage**, groupé par couleur (dessus et côtés) : ~20 à 40 draw calls mesurés avec `?debug`.
+- **Épaisseur des sols 0,55** (et non 0,5) pour que le dessous d'une pièce ne coïncide jamais avec le dessus d'une pièce une marche plus bas. Les jonctions en T entre pièces de découpes différentes sont réparées dans le maillage.
+- **Pas de rambarde sur une piste `rail`** (moins de 1,2 de large) : la bille ne passerait pas entre les deux.
+- **Plateforme mobile** : accélération et freinage progressifs (0,5 s) aux arrêts, ce qui règle la glissade notée en phase 1. Arrêts possibles sur des demi-cases pour s'accoler au bord d'une case.
+- **Validateur** (§ 4.3) : chevauchements (2 unités de hauteur libre), objets posés sur le parcours, ni dans un mur ni sous une autre surface, accessibilité depuis le départ, arrivée accessible après chaque cristal, checkpoint obligatoire au-delà de 70 unités de parcours, pente des rampes (32° en descente, avertissement au-delà de 16° en montée), estimation haute des draw calls (budget 80).
+- **Bot** : il suit l'itinéraire calculé sur le graphe (départ, cristaux les plus proches, arrivée) avec un pilote en vitesse et anticipation, limité dans les virages serrés et sur les pièces étroites. Il attend les plateformes mobiles à quai. Temps limite : max(90 s, 4 × temps de référence). Le générateur fixe le temps de référence à 1,3 × le temps du bot.
+- **Replays** : les entrées sont quantifiées à 1/256 dans la session, pour qu'une partie se rejoue à l'identique à partir de l'entrée enregistrée. Format compressé (`[x, y, pas]`), versionné par Zod. `level:bot` rejoue `tests/replays/` et compare temps et chutes ; la CI lance `level:validate` et `level:bot`.
+- **Niveau du POC** posé sur la grille : la seconde moitié est décalée d'une unité, le reste est identique. Le replay e2e au clavier passe toujours sans réenregistrement.
+- **Éditeur** : page `/editor/` du même build Vite (déployée sur Pages avec le jeu), en Preact et Zustand. Vue de dessus sur canvas 2D, inspecteur généré à partir du schéma Zod (il ne peut pas dériver du format), validation en direct, aperçu 3D, bot, « Jouer » (transmis au jeu par localStorage, `?level=editor`), export JSON. Le brouillon est sauvegardé dans le navigateur. C'est un outil de développement : **textes en français seulement**.
+- **Preact 11** entre dans les dépendances avec l'éditeur, et **tsx** (dev) fait tourner les scripts `level:*` dans Node, sans navigateur (physique Rapier réelle, rendu ignoré).
+
 ## 2026-11-27 — Phase 1 : validation sur téléphone
 
 - **60 fps stables sur iPhone** (build GitHub Pages, mesuré par l'utilisateur).
