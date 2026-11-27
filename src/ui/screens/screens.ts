@@ -53,7 +53,10 @@ export const bindScreens = (events: EventBus<GameEvents>, toast: Toast, actions:
   });
   byId('again').addEventListener('click', begin);
 
+  let total = 0;
+  events.on('reset', (reset) => (total = reset.total));
   events.on('levelWon', ({ time, falls }) => {
+    byId('wCrystals').textContent = `${total}/${total}`;
     byId('wTime').textContent = formatTimeShort(time);
     byId('wFalls').textContent = String(falls);
     win.hidden = false;

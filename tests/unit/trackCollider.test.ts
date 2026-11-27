@@ -2,20 +2,19 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { addTrackCollider, createPhysicsWorld, initPhysics } from '../../src/engine/physics';
 import { buildTrackMesh, type FloorPatch } from '../../src/engine/trackCollider';
-import { rampCollision } from '../../src/game/pieces/ramp';
-import { slabCollision } from '../../src/game/pieces/slab';
+import { buildPiece } from '../../src/game/pieces';
+import { piece } from './helpers';
 
 const flat = (minX: number, maxX: number, minZ: number, maxZ: number, y = 0): FloorPatch => ({
   minX,
   maxX,
   minZ,
   maxZ,
-  heightAtMinZ: y,
-  heightAtMaxZ: y,
+  y,
 });
 
 /** Every edge of a closed, consistently wound mesh is used once in each direction. */
-const isClosedAndOriented = (indices: Uint32Array) => {
+export const isClosedAndOriented = (indices: Uint32Array): boolean => {
   const directed = new Map<string, number>();
   for (let t = 0; t < indices.length; t += 3) {
     for (let k = 0; k < 3; k++) {
@@ -29,26 +28,56 @@ const isClosedAndOriented = (indices: Uint32Array) => {
   });
 };
 
+const shapeOf = (...pieces: Parameters<typeof piece>[0][]) => {
+  const shape = { floors: [] as FloorPatch[], triangles: [], solids: [], barriers: [] } as ReturnType<
+    typeof buildPiece
+  >['shape'];
+  pieces.forEach((p) => {
+    const built = buildPiece(piece(p)).shape;
+    shape.floors.push(...built.floors);
+    shape.triangles.push(...built.triangles);
+    shape.barriers.push(...built.barriers);
+  });
+  return shape;
+};
+
 describe('buildTrackMesh', () => {
   it('welds two overlapping slabs into one closed box without T-junctions', () => {
-    const { vertices, indices } = buildTrackMesh([flat(-3, 3, -3, 3), flat(-1, 1, -13.1, -2.9)], []);
+    const { vertices, indices } = buildTrackMesh({ floors: [flat(-3, 3, -3, 3), flat(-1, 1, -13.1, -2.9)] });
     expect(isClosedAndOriented(indices)).toBe(true);
     // No vertex lies inside another face: the 0.1 overlap is cut on the shared grid.
     expect(vertices.length / 3).toBeLessThan(60);
   });
 
-  it('glues a ramp to the slabs at both ends', () => {
-    const top = slabCollision({ type: 'slab', at: [14, 0, -32], size: [6, 6], surface: 'mint' });
-    const slope = rampCollision({ type: 'ramp', at: [14, 0, -35], length: 10, drop: 3, width: 3, surface: 'cream' });
-    const bottom = slabCollision({ type: 'slab', at: [14, -3, -48], size: [6, 6], surface: 'rose' });
-    const { indices } = buildTrackMesh([...top.floors, ...slope.floors, ...bottom.floors], []);
+  it('glues a ramp to the platforms at both ends', () => {
+    const { indices } = buildTrackMesh(
+      shapeOf(
+        { type: 'platform', cell: [7, 0, -16] },
+        { type: 'ramp', cell: [7, 0, -18], length: 5, drop: 6 },
+        { type: 'platform', cell: [7, -6, -24] },
+      ),
+    );
     expect(isClosedAndOriented(indices)).toBe(true);
   });
 
-  it('adds walls and rails as separate closed boxes', () => {
-    const slope = rampCollision({ type: 'ramp', at: [0, 0, 0], length: 10, drop: 3, width: 3, surface: 'cream' });
-    const { indices } = buildTrackMesh(slope.floors, slope.solids);
+  it('splits faces so a curve joins straights without T-junctions', () => {
+    const { indices } = buildTrackMesh(
+      shapeOf(
+        { type: 'straight', cell: [0, 0, -1], length: 2 },
+        { type: 'curve', cell: [0, 0, -3], radius: 2 },
+        { type: 'straight', cell: [2, 0, -4], rot: 90, length: 2 },
+      ),
+    );
     expect(isClosedAndOriented(indices)).toBe(true);
+  });
+
+  it('adds rails as separate closed solids and tags every triangle', () => {
+    const { indices, tags } = buildTrackMesh(
+      shapeOf({ type: 'ramp', cell: [0, 0, 0], length: 5, drop: 6, rails: 'both' }),
+    );
+    expect(isClosedAndOriented(indices)).toBe(true);
+    expect(tags.length).toBe(indices.length / 3);
+    expect(new Set(tags).size).toBe(2);
   });
 });
 
@@ -63,7 +92,7 @@ describe('merged track collider (Rapier)', () => {
       const z = -i * 1.9;
       return flat(x - 2, x + 2, z - 1, z + 1);
     });
-    if (merged) addTrackCollider(world, buildTrackMesh(floors, []));
+    if (merged) addTrackCollider(world, buildTrackMesh({ floors }));
     else
       floors.forEach((f) =>
         world.createCollider(

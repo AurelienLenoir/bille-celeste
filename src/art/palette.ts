@@ -3,9 +3,8 @@ export const SURFACES = {
   mint: { top: ['#d9f5e6', '#bce8d1'], side: 0x5aa88a },
   rose: { top: ['#ffe2e8', '#ffc6d3'], side: 0xe0889f },
   lav: { top: ['#e8e2ff', '#d2c7ff'], side: 0x9586d8 },
+  wood: { top: ['#e9c79a', '#d9b07c'], side: 0xa8774a },
 } as const;
-
-export type Surface = keyof typeof SURFACES;
 
 export const SKY_GRADIENT = [
   [0, '#6fbcff'],

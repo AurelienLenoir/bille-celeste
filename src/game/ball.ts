@@ -15,6 +15,7 @@ export type Ball = {
   mesh: THREE.Mesh;
   /** Ball centre after the last physics step. */
   position: () => Point;
+  velocity: () => Point;
   placeAt: (x: number, y: number, z: number) => void;
   limitSpeed: () => void;
   /** Records the state after a physics step; rendering blends the last two records. */
@@ -22,7 +23,16 @@ export type Ball = {
   syncMesh: (alpha: number) => void;
 };
 
-export const createBall = (world: PhysicsWorld, scene: THREE.Scene): Ball => {
+/** The ball's look: textured in the game, plain where there is no DOM (bot, tests). */
+export const createBallMaterial = (textured = true): THREE.Material =>
+  new THREE.MeshPhysicalMaterial({
+    ...(textured ? { map: createBallTexture() } : { color: 0xff5d86 }),
+    roughness: 0.18,
+    clearcoat: 1,
+    clearcoatRoughness: 0.08,
+  });
+
+export const createBall = (world: PhysicsWorld, scene: THREE.Scene, material = createBallMaterial()): Ball => {
   const body = world.createRigidBody(
     RAPIER.RigidBodyDesc.dynamic()
       .setLinearDamping(LINEAR_DAMPING)
@@ -38,15 +48,7 @@ export const createBall = (world: PhysicsWorld, scene: THREE.Scene): Ball => {
     body,
   );
 
-  const mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(BALL_RADIUS, 40, 24),
-    new THREE.MeshPhysicalMaterial({
-      map: createBallTexture(),
-      roughness: 0.18,
-      clearcoat: 1,
-      clearcoatRoughness: 0.08,
-    }),
-  );
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(BALL_RADIUS, 40, 24), material);
   mesh.castShadow = true;
   scene.add(mesh);
 
@@ -62,6 +64,7 @@ export const createBall = (world: PhysicsWorld, scene: THREE.Scene): Ball => {
   return {
     mesh,
     position: () => current.p,
+    velocity: () => body.linvel(),
     placeAt: (x, y, z) => {
       body.setTranslation({ x, y, z }, true);
       body.setLinvel({ x: 0, y: 0, z: 0 }, true);

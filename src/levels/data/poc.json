@@ -1,0 +1,50 @@
+{
+  "id": "poc",
+  "version": 1,
+  "name": { "fr": "Niveau 1", "en": "Level 1" },
+  "world": 1,
+  "parTimeSec": 60,
+  "spawn": { "cell": [0, 0, 0] },
+  "pieces": [
+    { "type": "platform", "cell": [0, 0, 0], "size": [3, 3], "surface": "mint" },
+    { "type": "straight", "cell": [0, 0, -2], "rot": 0, "length": 5, "width": "normal" },
+    { "type": "platform", "cell": [0, 0, -8], "size": [3, 3], "surface": "mint" },
+    { "type": "wall", "cell": [-1, 0, -9], "rot": 0, "length": 3 },
+    { "type": "wall", "cell": [-1, 0, -7], "rot": 270, "length": 3 },
+    { "type": "straight", "cell": [2, 0, -8], "rot": 90, "length": 4, "width": "normal" },
+    { "type": "platform", "cell": [7, 0, -8], "size": [3, 3], "surface": "rose" },
+    { "type": "wall", "cell": [8, 0, -9], "rot": 90, "length": 3 },
+    { "type": "bridge", "cell": [7, 0, -10], "rot": 0, "length": 5, "width": "narrow", "surface": "cream" },
+    { "type": "platform", "cell": [7, 0, -16], "size": [3, 3], "surface": "mint" },
+    { "type": "ramp", "cell": [7, 0, -18], "rot": 0, "length": 5, "drop": 6, "width": "wide", "rails": "both" },
+    { "type": "platform", "cell": [7, -6, -24], "size": [3, 3], "surface": "rose" },
+    {
+      "type": "movingPlatform",
+      "path": [
+        [7, -6, -26.5],
+        [7, -6, -31.5]
+      ],
+      "size": [1.5, 2],
+      "speed": 2.2,
+      "pause": 1.2
+    },
+    { "type": "platform", "cell": [7, -6, -34], "size": [3, 3], "surface": "mint" },
+    { "type": "straight", "cell": [7, -6, -36], "rot": 0, "length": 4, "width": "normal" },
+    { "type": "platform", "cell": [7, -6, -41], "size": [3, 3], "surface": "lav" },
+    { "type": "wall", "cell": [6, -6, -42], "rot": 0, "length": 3 }
+  ],
+  "entities": [
+    { "type": "crystal", "cell": [0, 0, -4] },
+    { "type": "crystal", "cell": [1, 0, -8] },
+    { "type": "crystal", "cell": [4, 0, -8] },
+    { "type": "crystal", "cell": [7, 0, -12] },
+    { "type": "crystal", "cell": [6, -6, -24] },
+    { "type": "crystal", "cell": [8, -6, -34] },
+    { "type": "crystal", "cell": [7, -6, -37] },
+    { "type": "checkpoint", "cell": [0, 0, -8] },
+    { "type": "checkpoint", "cell": [7, 0, -16] },
+    { "type": "checkpoint", "cell": [7, -6, -34] },
+    { "type": "goal", "cell": [7, -6, -41] }
+  ],
+  "decor": { "theme": "garden", "seed": 7 }
+}

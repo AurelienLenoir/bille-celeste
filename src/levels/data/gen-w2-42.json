@@ -1,0 +1,252 @@
+{
+  "id": "gen-w2-42",
+  "version": 1,
+  "name": {
+    "fr": "Brouillon gen-w2-42",
+    "en": "Draft gen-w2-42"
+  },
+  "world": 2,
+  "parTimeSec": 40,
+  "spawn": {
+    "cell": [0, 0, 0]
+  },
+  "pieces": [
+    {
+      "type": "platform",
+      "cell": [0, 0, 0],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "mint"
+    },
+    {
+      "type": "straight",
+      "cell": [0, 0, -2],
+      "rot": 0,
+      "length": 4,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "curve",
+      "cell": [0, 0, -6],
+      "rot": 0,
+      "radius": 1,
+      "angle": 90,
+      "dir": "right",
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [1, 0, -6],
+      "rot": 90,
+      "length": 3,
+      "drop": 2,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [4, -2, -6],
+      "rot": 90,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "gap",
+      "cell": [8, -2, -6],
+      "rot": 90,
+      "length": 1,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [11, -2, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [14, -2, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "straight",
+      "cell": [14, -2, -8],
+      "rot": 0,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [16, -2, -6],
+      "rot": 90,
+      "length": 2,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "bridge",
+      "cell": [18, -2, -6],
+      "rot": 90,
+      "length": 3,
+      "width": "narrow",
+      "surface": "wood"
+    },
+    {
+      "type": "straight",
+      "cell": [21, -2, -6],
+      "rot": 90,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "gap",
+      "cell": [25, -2, -6],
+      "rot": 90,
+      "length": 1,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [28, -2, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [31, -2, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "ramp",
+      "cell": [33, -2, -6],
+      "rot": 90,
+      "length": 2,
+      "drop": 3,
+      "width": "normal",
+      "rails": "none",
+      "surface": "cream"
+    },
+    {
+      "type": "ramp",
+      "cell": [35, -5, -6],
+      "rot": 90,
+      "length": 2,
+      "drop": 2,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "straight",
+      "cell": [37, -7, -6],
+      "rot": 90,
+      "length": 4,
+      "width": "normal",
+      "rails": "both",
+      "surface": "cream"
+    },
+    {
+      "type": "gap",
+      "cell": [41, -7, -6],
+      "rot": 90,
+      "length": 1,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [44, -7, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "rose"
+    },
+    {
+      "type": "platform",
+      "cell": [47, -7, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "platform",
+      "cell": [50, -7, -6],
+      "size": [3, 3],
+      "rot": 0,
+      "surface": "lav"
+    },
+    {
+      "type": "wall",
+      "cell": [51, -7, -7],
+      "rot": 90,
+      "length": 3,
+      "height": 0.6
+    }
+  ],
+  "entities": [
+    {
+      "type": "checkpoint",
+      "cell": [11, -2, -6]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [14, -2, -6]
+    },
+    {
+      "type": "crystal",
+      "cell": [14, -2, -9]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [28, -2, -6]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [31, -2, -6]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [44, -7, -6]
+    },
+    {
+      "type": "checkpoint",
+      "cell": [47, -7, -6]
+    },
+    {
+      "type": "crystal",
+      "cell": [0, 0, -4]
+    },
+    {
+      "type": "crystal",
+      "cell": [17, -2, -6]
+    },
+    {
+      "type": "crystal",
+      "cell": [19, -2, -6]
+    },
+    {
+      "type": "goal",
+      "cell": [50, -7, -6]
+    }
+  ],
+  "decor": {
+    "theme": "sunset",
+    "seed": 42
+  }
+}

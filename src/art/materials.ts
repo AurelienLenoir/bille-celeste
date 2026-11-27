@@ -1,32 +1,41 @@
 import * as THREE from 'three';
-import { SURFACES, type Surface } from './palette';
+import type { Surface } from '../levels/schema';
+import { SURFACES } from './palette';
 import { createTileTexture } from './textures';
 
-/** [sides, top]: matches the two groups of `topAndSidesBox` in game/pieces/box.ts. */
-export type SurfaceMaterials = (surface: Surface, width: number, depth: number) => [THREE.Material, THREE.Material];
+export type SurfacePair = { top: THREE.Material; side: THREE.Material };
+/** Materials of a course surface: a tiled top and plain sides. */
+export type SurfaceMaterials = (surface: Surface) => SurfacePair;
 
-/**
- * Box materials: a tiled top (+y face) scaled to the box footprint, plain sides elsewhere.
- * Base tile textures are created once and cloned per box so each can have its own repeat.
- */
-export const createSurfaceMaterials = (): SurfaceMaterials => {
-  const tiles = new Map<Surface, THREE.Texture>();
-  const tileFor = (surface: Surface) => {
-    let tile = tiles.get(surface);
-    if (!tile) {
-      const [base, check] = SURFACES[surface].top;
-      tile = createTileTexture(base, check);
-      tiles.set(surface, tile);
-    }
-    return tile;
-  };
-
-  return (surface, width, depth) => {
-    const top = tileFor(surface).clone();
-    top.needsUpdate = true;
-    top.repeat.set(width / 2, depth / 2);
-    const side = new THREE.MeshStandardMaterial({ color: SURFACES[surface].side, roughness: 0.8 });
-    const topMaterial = new THREE.MeshStandardMaterial({ map: top, roughness: 0.7 });
-    return [side, topMaterial];
+const cached = (make: (surface: Surface) => SurfacePair): SurfaceMaterials => {
+  const pairs = new Map<Surface, SurfacePair>();
+  return (surface) => {
+    const known = pairs.get(surface);
+    if (known) return known;
+    const pair = make(surface);
+    pairs.set(surface, pair);
+    return pair;
   };
 };
+
+const side = (surface: Surface) => new THREE.MeshStandardMaterial({ color: SURFACES[surface].side, roughness: 0.8 });
+
+/**
+ * One material pair per surface, shared by the whole course. Tops use world-space UVs (one tile
+ * per 2 units), so merged meshes keep the same checkerboard everywhere.
+ */
+export const createSurfaceMaterials = (): SurfaceMaterials =>
+  cached((surface) => {
+    const [base, check] = SURFACES[surface].top;
+    return {
+      top: new THREE.MeshStandardMaterial({ map: createTileTexture(base, check), roughness: 0.7 }),
+      side: side(surface),
+    };
+  });
+
+/** Untextured materials, for previews and for running levels without a DOM (bot, tests). */
+export const createPlainMaterials = (): SurfaceMaterials =>
+  cached((surface) => ({
+    top: new THREE.MeshStandardMaterial({ color: SURFACES[surface].top[0], roughness: 0.7 }),
+    side: side(surface),
+  }));

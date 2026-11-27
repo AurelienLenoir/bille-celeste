@@ -20,7 +20,11 @@ import { bindHapticFeedback } from './game/hapticFeedback';
 import { createSession } from './game/session';
 import { bindSoundEffects } from './game/sfx';
 import { buildLevel } from './game/world';
-import { POC_LEVEL } from './levels/data/poc';
+import { DEFAULT_LEVEL, EDITOR_LEVEL_KEY, fetchLevel } from './levels/catalog';
+import { loadLevel } from './levels/loader';
+import type { Level } from './levels/schema';
+import { createRecorder } from './game/replay';
+import { downloadJson } from './ui/download';
 import { createSettingsStore } from './meta/store';
 import { onBackground } from './platform/lifecycle';
 import { webStorage } from './platform/storage';
@@ -35,7 +39,14 @@ import { createToast } from './ui/toast';
 // Tells the inline watchdog in index.html that the bundle loaded.
 Object.assign(window, { __ok: true });
 
-const level = POC_LEVEL;
+const params = new URLSearchParams(location.search);
+const chooseLevel = async (): Promise<Level> => {
+  const id = params.get('level') ?? DEFAULT_LEVEL;
+  if (id !== 'editor') return fetchLevel(id);
+  const saved = await webStorage.get(EDITOR_LEVEL_KEY);
+  return loadLevel(JSON.parse(saved ?? 'null'));
+};
+const level = await chooseLevel();
 const canvas = byId<HTMLCanvasElement>('c');
 
 const { renderer, scene, sun } = createRenderContext(canvas, {
@@ -52,7 +63,7 @@ const physics = createPhysicsWorld();
 const events = createEventBus<GameEvents>();
 const world = buildLevel({ world: physics, scene, materials: createSurfaceMaterials() }, level);
 const ball = createBall(physics, scene);
-const decor = createDecor(scene, level.decorSeed);
+const decor = createDecor(scene, level.decor.seed, world.track.vertices);
 
 const settingsStore = await createSettingsStore(webStorage);
 const settings = () => settingsStore.getState().settings;
@@ -71,7 +82,10 @@ const joystick = createJoystick({ surface: canvas, base: byId('joy'), knob: byId
   invertX: settings().invertX,
   invertY: settings().invertY,
 }));
-const readInput = combineInputs(joystick, createKeyboard(), { read: () => (usesTilt() ? tilt.read() : null) });
+const playerInput = combineInputs(joystick, createKeyboard(), { read: () => (usesTilt() ? tilt.read() : null) });
+// `?record` keeps every input of a run and downloads it as a replay when the level is won.
+const recorder = createRecorder(() => session.state() === 'play');
+const readInput = params.has('record') ? recorder.wrap(playerInput) : playerInput;
 
 let tiltEnabled = false;
 const enableTilt = async () => {
@@ -90,7 +104,11 @@ bindHud(events, toast);
 events.on('respawned', ({ x, y, z }) => follow.snapTo(x, y, z));
 events.on('paused', joystick.release);
 
-const session = createSession({ physics, level, world, ball, events });
+const session = createSession({ physics, world, ball, events });
+events.on('reset', recorder.clear);
+events.on('levelWon', (result) => {
+  if (params.has('record')) downloadJson(`replay-${level.id}.json`, recorder.finish(level.id, result));
+});
 const openSettings = bindSettings(settingsStore);
 
 const play = () => {

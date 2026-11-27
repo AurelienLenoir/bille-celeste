@@ -34,11 +34,16 @@ const transform = (position: THREE.Vector3, rotationX = 0) =>
   );
 
 /**
- * Floating islands and drifting clouds on both sides of the course. All islands share one mesh
+ * Floating islands and drifting clouds on both sides of the course (its vertices give the extent). All islands share one mesh
  * and each cloud is one mesh, which keeps the decor to 13 draw calls (PLAN.md § 9).
  */
-export const createDecor = (scene: THREE.Scene, seed: number): Decor => {
+export const createDecor = (scene: THREE.Scene, seed: number, course: Float32Array): Decor => {
   const rnd = createRandom(seed);
+  const box = new THREE.Box3().setFromArray(course);
+  const { min, max } = box.isEmpty() ? new THREE.Box3(new THREE.Vector3(), new THREE.Vector3()) : box;
+  /** Somewhere beside the course on `side` (-1 left, 1 right), `gap` units away from its edge. */
+  const besideX = (side: number, gap: number) => (side < 0 ? min.x - gap : max.x + gap);
+  const alongZ = () => max.z + 8 - rnd() * (max.z - min.z + 16);
   const islandMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true });
   const cloudMaterial = new THREE.MeshStandardMaterial({
     color: DECOR.cloud,
@@ -64,7 +69,7 @@ export const createDecor = (scene: THREE.Scene, seed: number): Decor => {
       const at = new THREE.Vector3((rnd() - 0.5) * r, 1, (rnd() - 0.5) * r);
       local.push({ geometry: new THREE.ConeGeometry(0.5, 1.6, 6), color: DECOR.leaf, at });
     }
-    const origin = new THREE.Vector3(7 + side * (16 + rnd() * 14), -12 + rnd() * 9, 8 - rnd() * 100);
+    const origin = new THREE.Vector3(besideX(side, 9 + rnd() * 14), min.y - 9 + rnd() * 9, alongZ());
     for (const { geometry, color, at, flip } of local) {
       islandParts.push(part(geometry, color, transform(at.add(origin), flip ? Math.PI : 0)));
     }
@@ -81,7 +86,7 @@ export const createDecor = (scene: THREE.Scene, seed: number): Decor => {
     }
     const cloud = new THREE.Mesh(merge(puffs), cloudMaterial);
     const side = i % 2 ? 1 : -1;
-    cloud.position.set(7 + side * (22 + rnd() * 16), -2 + rnd() * 10, 10 - rnd() * 100);
+    cloud.position.set(besideX(side, 15 + rnd() * 16), min.y + 1 + rnd() * 10, alongZ() + 2);
     scene.add(cloud);
     clouds.push(cloud);
   }

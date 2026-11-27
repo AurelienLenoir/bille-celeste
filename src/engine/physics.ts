@@ -45,10 +45,11 @@ export const stepPhysics = (world: PhysicsWorld): void => {
 };
 
 /** Adds the whole static course as one trimesh collider whose internal edges are smoothed out. */
-export const addTrackCollider = (world: PhysicsWorld, { vertices, indices }: TrackMesh): void => {
+export const addTrackCollider = (world: PhysicsWorld, { vertices, indices }: TrackMesh, groups?: number): void => {
   const desc = RAPIER.ColliderDesc.trimesh(vertices, indices, RAPIER.TriMeshFlags.FIX_INTERNAL_EDGES)
     .setFriction(SURFACE.friction)
     .setRestitution(SURFACE.restitution);
+  if (groups !== undefined) desc.setCollisionGroups(groups);
   world.createCollider(desc);
 };
 

@@ -15,7 +15,10 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
   },
-  "include": ["src", "tests", "vite.config.ts", "playwright.config.ts", "eslint.config.js"]
+  "include": ["src", "tests", "tools", "editor", "vite.config.ts", "playwright.config.ts", "eslint.config.js"],
+  "exclude": ["tools/scratch"]
 }
