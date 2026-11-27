@@ -9,6 +9,8 @@ export type GameEvents = {
   fell: { falls: number };
   goalLocked: { missing: number };
   levelWon: { time: number; falls: number };
+  paused: undefined;
+  resumed: undefined;
 };
 
 type Listener<T> = (payload: T) => void;

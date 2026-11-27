@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { topAndSidesBox } from '../../src/game/pieces/box';
 import { ramp } from '../../src/game/pieces/ramp';
 import { slab } from '../../src/game/pieces/slab';
 import { wall } from '../../src/game/pieces/wall';
@@ -39,5 +40,18 @@ describe('ramp', () => {
     expect(topY).toBeCloseTo(-1.5);
     expect(topZ).toBeCloseTo(-40);
     expect(angle).toBeCloseTo(Math.atan2(3, 10));
+  });
+});
+
+describe('topAndSidesBox', () => {
+  it('keeps every triangle in two groups: sides then the +y face', () => {
+    const geometry = topAndSidesBox(2, 0.5, 4);
+    expect(geometry.groups).toEqual([
+      { start: 0, count: 30, materialIndex: 0 },
+      { start: 30, count: 6, materialIndex: 1 },
+    ]);
+    const normals = geometry.getAttribute('normal');
+    const index = geometry.getIndex();
+    for (let i = 30; i < 36; i++) expect(normals.getY(index?.getX(i) ?? 0)).toBe(1);
   });
 });

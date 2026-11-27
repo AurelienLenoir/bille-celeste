@@ -1,7 +1,17 @@
 import { clamp, type Vec2 } from '../math';
+import { applyResponse, invertAxes, type AxisInversion, type ResponseCurve } from './response';
 
-const FULL_TILT_DEG = 20;
-const DEAD_ZONE = 0.06;
+/** Response used for the gyroscope: small dead zone against hand tremor, a gentle expo curve. */
+export const TILT_RESPONSE: ResponseCurve = { deadZone: 0.06, expo: 0.35 };
+/** Time constant of the low-pass filter applied to raw sensor readings, in seconds. */
+const SENSOR_FILTER_SECONDS = 0.05;
+
+export type TiltOptions = AxisInversion & {
+  /** Phone tilt, in degrees from neutral, that gives a full-strength stick. */
+  fullTiltDeg: number;
+};
+
+export const DEFAULT_TILT_OPTIONS: TiltOptions = { fullTiltDeg: 20, invertX: false, invertY: false };
 
 /** Maps device beta/gamma to screen-relative tilt for the current screen rotation. */
 export const orientationToTilt = (beta: number, gamma: number, screenAngle: number): Vec2 => {
@@ -10,13 +20,20 @@ export const orientationToTilt = (beta: number, gamma: number, screenAngle: numb
   return { x: gamma, y: beta };
 };
 
-const deadZone = (v: number) => (Math.abs(v) < DEAD_ZONE ? 0 : v);
+/** Tilt relative to the calibrated neutral pose, as a shaped stick value in -1..1. */
+export const tiltToInput = (tilt: Vec2, neutral: Vec2, options: TiltOptions = DEFAULT_TILT_OPTIONS): Vec2 => {
+  const raw = {
+    x: clamp((tilt.x - neutral.x) / options.fullTiltDeg),
+    y: clamp((neutral.y - tilt.y) / options.fullTiltDeg),
+  };
+  return invertAxes(applyResponse(raw, TILT_RESPONSE), options);
+};
 
-/** Tilt relative to the calibrated neutral pose, as a stick value in -1..1. */
-export const tiltToInput = (tilt: Vec2, neutral: Vec2): Vec2 => ({
-  x: deadZone(clamp((tilt.x - neutral.x) / FULL_TILT_DEG)),
-  y: deadZone(clamp((neutral.y - tilt.y) / FULL_TILT_DEG)),
-});
+/** Exponential low-pass step for readings that arrive at an irregular rate. */
+export const lowPass = (previous: Vec2, next: Vec2, elapsedSeconds: number): Vec2 => {
+  const k = 1 - Math.exp(-Math.max(0, elapsedSeconds) / SENSOR_FILTER_SECONDS);
+  return { x: previous.x + (next.x - previous.x) * k, y: previous.y + (next.y - previous.y) * k };
+};
 
 type PermissionRequester = { requestPermission: () => Promise<PermissionState> };
 
@@ -39,15 +56,29 @@ export type Tilt = {
   read: () => Vec2 | null;
 };
 
-export const createTilt = (): Tilt => {
+/**
+ * Gyroscope input. `options` is read on every call so settings apply immediately.
+ * Turning the phone between portrait and landscape recalibrates on the next reading.
+ */
+export const createTilt = (options: () => TiltOptions = () => DEFAULT_TILT_OPTIONS): Tilt => {
   let current: Vec2 | null = null;
   let neutral: Vec2 | null = null;
   let received = false;
+  let lastAngle = screenAngle();
+  let lastStamp = 0;
 
   const onOrientation = (e: DeviceOrientationEvent) => {
     if (e.beta == null || e.gamma == null) return;
+    const angle = screenAngle();
+    const reading = orientationToTilt(e.beta, e.gamma, angle);
+    if (angle !== lastAngle) {
+      lastAngle = angle;
+      current = null;
+      neutral = null;
+    }
     received = true;
-    current = orientationToTilt(e.beta, e.gamma, screenAngle());
+    current = current ? lowPass(current, reading, (e.timeStamp - lastStamp) / 1000) : reading;
+    lastStamp = e.timeStamp;
     if (!neutral) neutral = current;
   };
 
@@ -74,6 +105,6 @@ export const createTilt = (): Tilt => {
       neutral = null;
     },
     hasReading: () => received,
-    read: () => (current && neutral ? tiltToInput(current, neutral) : null),
+    read: () => (current && neutral ? tiltToInput(current, neutral, options()) : null),
   };
 };

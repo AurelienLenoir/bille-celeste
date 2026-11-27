@@ -23,7 +23,7 @@ test('rolling forward collects the first crystal and reaches checkpoint 1', asyn
   await page.goto('./');
   await page.getByRole('button', { name: 'Jouer au doigt' }).click();
   await expect(page.locator('#start')).toBeHidden();
-  await expect(page.locator('#dock')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible();
 
   await page.keyboard.down('ArrowUp');
   await expect(page.locator('#cr')).toHaveText('1/7', { timeout: 10_000 });
@@ -40,7 +40,57 @@ test('restart resets the counters', async ({ page }) => {
   await page.keyboard.down('ArrowUp');
   await expect(page.locator('#cr')).toHaveText('1/7', { timeout: 10_000 });
   await page.keyboard.up('ArrowUp');
+  await page.getByRole('button', { name: 'Pause' }).click();
   await page.getByRole('button', { name: 'Recommencer' }).click();
+  await expect(page.locator('#pauseMenu')).toBeHidden();
   await expect(page.locator('#cr')).toHaveText('0/7');
   await expect(page.locator('#fl')).toHaveText('0');
+});
+
+test('pause freezes the timer and resume continues it', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Jouer au doigt' }).click();
+  await expect(page.locator('#tm')).not.toHaveText('0:00.0');
+  await page.getByRole('button', { name: 'Pause' }).click();
+  await expect(page.getByRole('heading', { name: 'Pause' })).toBeVisible();
+  const frozen = await page.locator('#tm').textContent();
+  await page.waitForTimeout(600);
+  await expect(page.locator('#tm')).toHaveText(frozen ?? '');
+  await page.getByRole('button', { name: 'Reprendre' }).click();
+  await expect(page.locator('#pauseMenu')).toBeHidden();
+  await expect(page.locator('#tm')).not.toHaveText(frozen ?? '');
+});
+
+test('escape toggles pause, and hiding the page pauses automatically', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Jouer au doigt' }).click();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#pauseMenu')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#pauseMenu')).toBeHidden();
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await expect(page.locator('#pauseMenu')).toBeVisible();
+});
+
+test('settings are saved and survive a reload', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Réglages' }).click();
+  await expect(page.getByRole('heading', { name: 'Réglages' })).toBeVisible();
+  await page.getByLabel('Inverser gauche / droite').check();
+  await page.getByLabel('Sons').uncheck();
+  await page.getByRole('button', { name: 'Retour' }).click();
+  await expect(page.getByRole('heading', { name: 'Bille Céleste' })).toBeVisible();
+
+  await page.reload();
+  await page.getByRole('button', { name: 'Réglages' }).click();
+  await expect(page.getByLabel('Inverser gauche / droite')).toBeChecked();
+  await expect(page.getByLabel('Sons')).not.toBeChecked();
+});
+
+test('debug overlay reports the frame rate', async ({ page }) => {
+  await page.goto('./?debug');
+  await expect(page.locator('#perf')).toContainText('fps', { timeout: 5_000 });
 });

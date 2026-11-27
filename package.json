@@ -17,7 +17,9 @@
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "0.21.0",
-    "three": "0.160.0"
+    "three": "0.160.0",
+    "zod": "4.6.7",
+    "zustand": "5.1.0"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
