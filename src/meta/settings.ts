@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { parseSave, readSave, type Migration, type SaveFormat } from './save';
 
-export const SETTINGS_VERSION = 2;
+export const SETTINGS_VERSION = 3;
 
 export const CONTROL_MODES = ['tilt', 'touch'] as const;
 export type ControlMode = (typeof CONTROL_MODES)[number];
@@ -23,10 +23,12 @@ export const settingsSchema = z.object({
   invertY: z.boolean(),
   haptics: z.boolean(),
   sound: z.boolean(),
-  /** Stored now so the save format does not change when music arrives (phase 5). */
   music: z.boolean(),
   /** Version 2. */
   language: z.enum(LANGUAGES),
+  /** Version 3: sound effect and music volumes, 0 to 1. */
+  sfxVolume: z.number().min(0).max(1),
+  musicVolume: z.number().min(0).max(1),
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
@@ -42,6 +44,8 @@ export const DEFAULT_SETTINGS: Settings = {
   sound: true,
   music: true,
   language: 'auto',
+  sfxVolume: 0.8,
+  musicVolume: 0.5,
 };
 
 const fieldSchemas = settingsSchema.omit({ version: true }).shape;
@@ -61,6 +65,8 @@ const salvage = (raw: Record<string, unknown>): Settings => {
 export const SETTINGS_MIGRATIONS: Record<number, Migration> = {
   /** Version 2 adds the language: players of version 1 keep following their device. */
   1: (v1) => ({ ...v1, language: 'auto' }),
+  /** Version 3 adds the volumes, at their defaults (the on/off switches are kept). */
+  2: (v2) => ({ ...v2, sfxVolume: 0.8, musicVolume: 0.5 }),
 };
 
 const SETTINGS_FORMAT: SaveFormat<Settings> = {

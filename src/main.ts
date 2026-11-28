@@ -1,6 +1,9 @@
 import './ui/style.css';
 import * as THREE from 'three';
+import { AMBIENT_LOOKS, createAmbient, type Ambient } from './art/ambient';
+import { SONGS } from './art/music';
 import { FOG, FOG_THICK } from './art/palette';
+import { createParticles, fitPointScale } from './art/particles';
 import { createSkyTexture } from './art/textures';
 import { createAudio } from './engine/audio';
 import { createFollowCamera } from './engine/camera';
@@ -10,6 +13,7 @@ import { createKeyboard } from './engine/input/keyboard';
 import { createTilt } from './engine/input/tilt';
 import { createJoystick } from './engine/input/touch';
 import { startLoop } from './engine/loop';
+import { createMusicPlayer } from './engine/music';
 import type { Vec2 } from './engine/math';
 import { createFrameStats, createQualityGovernor } from './engine/perf';
 import { initPhysics, type GravityDirection } from './engine/physics';
@@ -17,7 +21,9 @@ import { bindResize, createRenderContext, followSun, lowerQuality } from './engi
 import { createEffectAura } from './game/effectAura';
 import { createEventBus, type GameEvents } from './game/events';
 import { bindHapticFeedback } from './game/hapticFeedback';
+import { bindJuice, createBallTrail } from './game/juice';
 import { createRecorder } from './game/replay';
+import { rollingSound, surfaceUnder } from './game/rolling';
 import { bindSoundEffects } from './game/sfx';
 import { createStage, type Stage } from './game/stage';
 import { pick, t } from './i18n';
@@ -27,7 +33,7 @@ import type { Level } from './levels/schema';
 import { CAMPAIGN, nextLevel, WORLDS, worldOfLevel } from './levels/worlds';
 import { isLevelOpen, isWorldOpen, resumeLevel } from './meta/progress';
 import { createProgressStore, createSettingsStore } from './meta/store';
-import { onBackground } from './platform/lifecycle';
+import { onBackground, onForeground } from './platform/lifecycle';
 import { webStorage } from './platform/storage';
 import { mountUi } from './ui/app';
 import { byId } from './ui/dom';
@@ -75,7 +81,18 @@ const usesTilt = () => settings().controlMode === 'tilt';
 const ui = createUiStore();
 const screen = () => ui.getState().screen.name;
 
-const audio = createAudio(() => settings().sound);
+const audio = createAudio(() => ({
+  sfx: settings().sound ? settings().sfxVolume : 0,
+  music: settings().music ? settings().musicVolume : 0,
+}));
+settingsStore.subscribe(() => audio.refresh());
+const music = createMusicPlayer(audio.context, audio.musicBus, audio.noise);
+const rolling = audio.loop();
+/** Unlocks sound on the first tap and starts the music clock. */
+const unlockAudio = () => {
+  audio.unlock();
+  music.wake();
+};
 const haptics = createHaptics(() => settings().haptics);
 const toast = createToast();
 const tilt = createTilt(() => ({
@@ -118,6 +135,10 @@ events.on('modifierFired', ({ type }) => {
   if (SHAKERS.has(type)) follow.shake(0.22);
 });
 const aura = createEffectAura(scene);
+const particles = createParticles(scene);
+const trail = createBallTrail(particles);
+bindJuice({ events, particles, ball: () => stage?.ball.mesh.position ?? { x: 0, y: 0, z: 0 } });
+let ambient: Ambient | undefined;
 events.on('paused', () => {
   joystick.release();
   ui.getState().go({ name: 'pause' });
@@ -150,6 +171,10 @@ const mount = async (id: string): Promise<Stage | undefined> => {
   if (ticket !== loading) return undefined;
   stage?.dispose();
   stage = createStage(level, { scene, events, text: pick, bot: params.has('bot') });
+  ambient?.dispose();
+  const look = AMBIENT_LOOKS[level.decor.theme];
+  ambient = look ? createAmbient(scene, look, level.decor.seed) : undefined;
+  particles.clear();
   minimap.setLevel(level);
   const { x, y, z } = stage.world.spawn;
   follow.snapTo(x, y, z);
@@ -164,7 +189,7 @@ let firstRun = true;
 /** Starts (or restarts) the run of the loaded level. */
 const begin = () => {
   if (!stage) return;
-  audio.unlock();
+  unlockAudio();
   if (usesTilt()) tilt.resetCalibration();
   stage.session.start();
   ui.getState().go({ name: 'play' });
@@ -180,7 +205,7 @@ const begin = () => {
 };
 
 const play = (id: string) => {
-  audio.unlock();
+  unlockAudio();
   if (stage?.level.id === id) return begin();
   ui.getState().go({ name: 'loading' });
   mount(id)
@@ -198,6 +223,8 @@ const quit = () => {
   ui.getState().go(world ? { name: 'levels', world: world.id } : { name: 'title' });
 };
 
+/** Time between crossing the ring and the results screen. */
+const WIN_SCREEN_DELAY_MS = 900;
 events.on('levelWon', (run) => {
   if (!stage) return;
   const { level } = stage;
@@ -207,20 +234,21 @@ events.on('levelWon', (run) => {
   const outcome = inCampaign ? progressStore.getState().win(level.id, run) : undefined;
   const opened = WORLDS.find((w) => !openBefore.includes(w) && isWorldOpen(progress(), w));
   const next = nextLevel(level.id);
-  ui.getState().go({
-    name: 'win',
-    win: {
-      levelId: level.id,
-      run,
-      crystals: stage.world.crystals.length,
-      parTimeSec: level.parTimeSec,
-      hasGem: !!stage.world.gem,
-      ...(outcome ? { outcome } : {}),
-      ...(next && (unlockAll || isLevelOpen(progress(), next)) ? { next } : {}),
-      ...(opened ? { opened } : {}),
-      campaignDone: inCampaign && !next,
-    },
-  });
+  const win = {
+    levelId: level.id,
+    run,
+    crystals: stage.world.crystals.length,
+    parTimeSec: level.parTimeSec,
+    hasGem: !!stage.world.gem,
+    ...(outcome ? { outcome } : {}),
+    ...(next && (unlockAll || isLevelOpen(progress(), next)) ? { next } : {}),
+    ...(opened ? { opened } : {}),
+    campaignDone: inCampaign && !next,
+  };
+  // The ball rolls on in slow motion through the ring while the confetti flies, then the results.
+  setTimeout(() => {
+    if (stage?.level.id === level.id && stage.session.state() === 'win') ui.getState().go({ name: 'win', win });
+  }, WIN_SCREEN_DELAY_MS);
 });
 
 mountUi(byId('ui'), {
@@ -243,13 +271,44 @@ mountUi(byId('ui'), {
     calibrate: tilt.calibrate,
   },
 });
-onBackground(() => stage?.session.pause());
+onBackground(() => {
+  stage?.session.pause();
+  audio.suspend();
+});
+onForeground(audio.resume);
+// Browsers only allow sound after a tap: the first one anywhere starts the menu music.
+addEventListener('pointerdown', unlockAudio, { once: true });
+addEventListener('keydown', unlockAudio, { once: true });
+
+/** Menus play their own tune; a level plays its world's. */
+const updateMusic = () => {
+  const name = screen();
+  const inLevel = name === 'play' || name === 'pause' || name === 'win' || name === 'loading';
+  music.play(inLevel && stage ? SONGS[stage.level.decor.theme] : SONGS.menu);
+};
+ui.subscribe(updateMusic);
+
+/** Rolling sound from the ball's speed and what it rolls on; silent outside of play. */
+const updateRolling = ({ ball, session, level }: Stage) => {
+  if (session.state() !== 'play') return rolling.set(0, 200);
+  const v = ball.velocity();
+  const sound = rollingSound(
+    Math.hypot(v.x, v.y, v.z),
+    ball.grounded(),
+    surfaceUnder(level.decor.theme, session.status().grip),
+  );
+  rolling.set(sound.gain, sound.frequency, sound.q);
+};
 // Sideways on a phone, the rotate screen covers the game: pause the run underneath it.
 const sideways = matchMedia('(orientation: landscape) and (pointer: coarse) and (max-height: 540px)');
 sideways.addEventListener('change', () => {
   if (sideways.matches) stage?.session.pause();
 });
 await mount(directLevel ?? resumeLevel(progress()));
+// The boot splash fades out once the first level stands behind the title.
+const boot = document.getElementById('boot');
+boot?.classList.add('done');
+setTimeout(() => boot?.remove(), 500);
 
 const frames = createFrameStats();
 const quality = createQualityGovernor();
@@ -284,9 +343,14 @@ startLoop((dt) => {
     decor.update(session.clock(), dt);
     signs.update(ball.mesh.position);
     if (screen() === 'play') updateMinimap(current, dt);
+    updateRolling(current);
+    ambient?.update(ball.mesh.position, session.clock());
+    if (playing) trail(ball.mesh.position, ball.velocity(), dt);
     follow.update(ball.mesh.position, gravity, dt);
     followSun(sun, ball.mesh.position);
   }
+  particles.update(dt);
+  fitPointScale(renderer.domElement.height, follow.camera.fov);
   renderer.render(scene, follow.camera);
   frames.push(dt);
   updatePerf(dt);

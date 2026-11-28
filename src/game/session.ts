@@ -10,7 +10,7 @@ import {
   type PhysicsWorld,
 } from '../engine/physics';
 import { quantizeInput, smoothInput } from '../engine/input';
-import { BALL_RADIUS, NORMAL_GRIP, type Ball } from './ball';
+import { BALL_RADIUS, NORMAL_GRIP, type Ball, type Grip } from './ball';
 import { createEffectTimers, GRAVITY_SCALE, MAGNET_RADIUS, SLOW_MOTION, type ActiveEffect } from './effects';
 import type { EventBus, GameEvents } from './events';
 import { createGroundTrail } from './groundTrail';
@@ -31,6 +31,8 @@ export type RunStatus = {
   /** Acceleration the zones add to the ball (units/s²). */
   push: Point;
   effects: ActiveEffect[];
+  /** Grip of the zone under the ball (rolling sound). */
+  grip: Grip;
 };
 
 export type Session = {
@@ -61,6 +63,9 @@ type SessionDeps = {
 
 /** Crystals pulled by the magnet fly at this speed (units/s). */
 const MAGNET_PULL = 12;
+/** After the goal, the ball rolls on in slow motion for 0.3 s (PLAN.md § 5.4), at this speed. */
+export const WIN_SLOW_MOTION = 0.25;
+const WIN_COAST_STEPS = Math.round(0.3 / PHYSICS_STEP);
 /** The shield puts the ball back this high above the ground it was rolling on. */
 const SHIELD_LIFT = 0.3;
 
@@ -82,7 +87,14 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
   const effects = neutralEffects(NORMAL_GRIP);
   const inside = modifiers.map(() => false);
   let gravity = gravityDirection(smoothed);
-  let status: RunStatus = { fog: 0, invert: false, timeScale: 1, push: { x: 0, y: 0, z: 0 }, effects: [] };
+  let status: RunStatus = {
+    fog: 0,
+    invert: false,
+    timeScale: 1,
+    push: { x: 0, y: 0, z: 0 },
+    effects: [],
+    grip: NORMAL_GRIP,
+  };
 
   let state: SessionState = 'menu';
   let time = 0;
@@ -95,6 +107,8 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
   let gemSinceCheckpoint = false;
   /** The timer waits for the player's first move. */
   let started = false;
+  /** Steps of slow motion left after the win. */
+  let coast = 0;
 
   const runOf = ({ data }: LiveModifier): ModifierRun => ({
     ball,
@@ -123,6 +137,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     sinceCheckpoint = [];
     gemSinceCheckpoint = false;
     started = false;
+    coast = 0;
     crystals.forEach((c) => c.reset());
     checkpoints.forEach((c) => c.reset());
     gem?.reset();
@@ -133,7 +148,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     timers.reset();
     trail.clear();
     resetEffects(effects);
-    status = { fog: 0, invert: false, timeScale: 1, push: { x: 0, y: 0, z: 0 }, effects: [] };
+    status = { fog: 0, invert: false, timeScale: 1, push: { x: 0, y: 0, z: 0 }, effects: [], grip: NORMAL_GRIP };
     respawn();
     events.emit('reset', { total: crystals.length });
   };
@@ -181,6 +196,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     const missing = crystals.length - collected();
     if (!missing) {
       state = 'win';
+      coast = WIN_COAST_STEPS;
       events.emit('levelWon', { time, falls, stars: starsFor(time, falls, world.parTimeSec), gem: !!gem?.taken });
     } else if (clock - lastGoalHint > GOAL_HINT_COOLDOWN) {
       lastGoalHint = clock;
@@ -279,6 +295,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
       timeScale,
       push: { ...effects.push },
       effects: status.effects,
+      grip: effects.grip,
     };
     checkCrystals(p);
     checkCheckpoints(p);
@@ -294,6 +311,13 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     gravity = gravityDirection(smoothed);
     applyGravity(physics, gravity);
     if (state === 'play') play();
+    else if (state === 'win' && coast > 0) {
+      coast--;
+      stepPhysics(physics, WIN_SLOW_MOTION);
+      ball.capture();
+      // Both records equal once the coast is over, so the still ball does not flicker.
+      if (!coast) ball.capture();
+    }
   };
 
   const update = (dt: number, readInput: () => Vec2) => {

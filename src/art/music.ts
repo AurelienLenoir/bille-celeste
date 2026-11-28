@@ -1,0 +1,67 @@
+import type { Song } from '../engine/music';
+
+/** One looping tune per world, plus the menus (PLAN.md § 7). Composed from these settings by `engine/music.ts`. */
+export const SONGS = {
+  menu: {
+    bpm: 84,
+    root: 62,
+    scale: 'lydian',
+    progression: [0, 4, 5, 3],
+    seed: 7,
+    lead: 'bell',
+    density: 3,
+    drums: '',
+    bass: 'x.......',
+    swing: 0,
+  },
+  garden: {
+    bpm: 100,
+    root: 60,
+    scale: 'major',
+    progression: [0, 5, 3, 4, 0, 5, 1, 4],
+    seed: 11,
+    lead: 'bell',
+    density: 5,
+    drums: 'k...h...k.k.h...',
+    bass: 'x...x.x.',
+    swing: 0.12,
+  },
+  sunset: {
+    bpm: 92,
+    root: 57,
+    scale: 'dorian',
+    progression: [0, 3, 6, 4, 0, 3, 5, 4],
+    seed: 23,
+    lead: 'lead',
+    density: 4,
+    drums: 'k..hs..hk.k.s..h',
+    bass: 'x..x..x.',
+    swing: 0.25,
+  },
+  glacier: {
+    bpm: 76,
+    root: 64,
+    scale: 'pentatonic',
+    progression: [0, 3, 1, 4],
+    seed: 5,
+    lead: 'bell',
+    density: 3,
+    drums: 'k.......h.......',
+    bass: 'x.......',
+    swing: 0,
+  },
+  factory: {
+    bpm: 112,
+    root: 55,
+    scale: 'minor',
+    progression: [0, 5, 2, 6, 0, 5, 3, 4],
+    seed: 41,
+    lead: 'lead',
+    density: 6,
+    drums: 'k.h.s.h.k.hks.hh',
+    bass: 'x.xx.xx.',
+    swing: 0,
+  },
+} as const satisfies Record<string, Song>;
+
+export type SongId = keyof typeof SONGS;

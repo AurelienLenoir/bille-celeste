@@ -8,3 +8,10 @@ export const onBackground = (onHide: () => void): void => {
   });
   addEventListener('pagehide', onHide);
 };
+
+/** Calls `onShow` when the game is visible again. */
+export const onForeground = (onShow: () => void): void => {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') onShow();
+  });
+};

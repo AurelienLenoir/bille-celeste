@@ -33,6 +33,66 @@ const transform = (position: THREE.Vector3, rotationX = 0) =>
     new THREE.Vector3(1, 1, 1),
   );
 
+type LocalPart = { geometry: THREE.BufferGeometry; color: number; at: THREE.Vector3; flip?: boolean };
+type Props = (rnd: () => number, radius: number, colors: DecorColors) => LocalPart[];
+
+const spot = (rnd: () => number, r: number, y: number) => new THREE.Vector3((rnd() - 0.5) * r, y, (rnd() - 0.5) * r);
+
+/** Garden: round little trees. */
+const trees: Props = (rnd, r, c) => {
+  const parts: LocalPart[] = [];
+  for (let t = 0; t < 1 + rnd() * 3; t++)
+    parts.push({ geometry: new THREE.ConeGeometry(0.5, 1.6, 6), color: c.leaf, at: spot(rnd, r, 1) });
+  for (let f = 0; f < 3; f++)
+    parts.push({ geometry: new THREE.IcosahedronGeometry(0.16, 0), color: c.cloud, at: spot(rnd, r * 1.2, 0.3) });
+  return parts;
+};
+
+/** Sunset: palm trees, a thin trunk under a flat crown. */
+const palms: Props = (rnd, r, c) => {
+  const parts: LocalPart[] = [];
+  for (let t = 0; t < 1 + rnd() * 2; t++) {
+    const at = spot(rnd, r, 0);
+    const h = 1.6 + rnd() * 1.2;
+    parts.push({ geometry: new THREE.CylinderGeometry(0.1, 0.16, h, 5), color: c.rock, at: at.clone().setY(h / 2) });
+    parts.push({ geometry: new THREE.ConeGeometry(0.9, 0.45, 6), color: c.leaf, at: at.clone().setY(h + 0.1) });
+  }
+  return parts;
+};
+
+/** Glacier: ice spikes and snow caps. */
+const spikes: Props = (rnd, r, c) => {
+  const parts: LocalPart[] = [];
+  for (let t = 0; t < 2 + rnd() * 3; t++) {
+    const h = 1 + rnd() * 2.4;
+    parts.push({ geometry: new THREE.ConeGeometry(0.3 + rnd() * 0.3, h, 4), color: c.leaf, at: spot(rnd, r, h / 2) });
+  }
+  parts.push({ geometry: new THREE.IcosahedronGeometry(r * 0.45, 0), color: c.grass, at: spot(rnd, r * 0.4, 0.2) });
+  return parts;
+};
+
+/** Cloud factory: chimneys and cog wheels. */
+const machines: Props = (rnd, r, c) => {
+  const parts: LocalPart[] = [];
+  const h = 1.5 + rnd() * 2;
+  parts.push({ geometry: new THREE.CylinderGeometry(0.3, 0.38, h, 8), color: c.rock, at: spot(rnd, r * 0.6, h / 2) });
+  const cog = new THREE.CylinderGeometry(0.8, 0.8, 0.25, 12);
+  const teeth = Array.from({ length: 8 }, (_, i) => {
+    const tooth = new THREE.BoxGeometry(0.3, 0.25, 0.3);
+    const a = (i / 8) * Math.PI * 2;
+    tooth.translate(Math.cos(a) * 0.9, 0, Math.sin(a) * 0.9);
+    return tooth.toNonIndexed();
+  });
+  const wheel = mergeGeometries([cog.toNonIndexed(), ...teeth]);
+  if (wheel) {
+    wheel.rotateX(Math.PI / 2);
+    parts.push({ geometry: wheel, color: c.leaf, at: spot(rnd, r * 0.6, 1) });
+  }
+  return parts;
+};
+
+const PROPS: Record<string, Props> = { garden: trees, sunset: palms, glacier: spikes, factory: machines };
+
 /**
  * Floating islands and drifting clouds on both sides of the course (its vertices give the extent). All islands share one mesh
  * and each cloud is one mesh, which keeps the decor to 13 draw calls (PLAN.md § 9).
@@ -42,6 +102,7 @@ export const createDecor = (
   seed: number,
   course: Float32Array,
   colors: DecorColors = DECOR,
+  theme = 'garden',
 ): Decor => {
   const rnd = createRandom(seed);
   const box = new THREE.Box3().setFromArray(course);
@@ -61,7 +122,7 @@ export const createDecor = (
   for (let i = 0; i < ISLANDS; i++) {
     const side = i % 2 ? 1 : -1;
     const r = 1.8 + rnd() * 2.5;
-    const local: { geometry: THREE.BufferGeometry; color: number; at: THREE.Vector3; flip?: boolean }[] = [
+    const local: LocalPart[] = [
       {
         geometry: new THREE.ConeGeometry(r, r * 1.8, 7),
         color: colors.rock,
@@ -70,10 +131,7 @@ export const createDecor = (
       },
       { geometry: new THREE.CylinderGeometry(r, r, 0.35, 7), color: colors.grass, at: new THREE.Vector3() },
     ];
-    for (let t = 0; t < 1 + rnd() * 3; t++) {
-      const at = new THREE.Vector3((rnd() - 0.5) * r, 1, (rnd() - 0.5) * r);
-      local.push({ geometry: new THREE.ConeGeometry(0.5, 1.6, 6), color: colors.leaf, at });
-    }
+    local.push(...(PROPS[theme] ?? trees)(rnd, r, colors));
     const origin = new THREE.Vector3(besideX(side, 9 + rnd() * 14), min.y - 9 + rnd() * 9, alongZ());
     for (const { geometry, color, at, flip } of local) {
       islandParts.push(part(geometry, color, transform(at.add(origin), flip ? Math.PI : 0)));
