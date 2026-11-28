@@ -61,7 +61,12 @@ const App = ({ deps }: { deps: UiDeps }) => {
       case 'win':
         return <Victory deps={deps} win={screen.win} />;
       case 'loading':
-        return <div class="loading">{t().loading}</div>;
+        return (
+          <div class="loading" role="status">
+            <span class="spinner" aria-hidden="true" />
+            {t().loading}
+          </div>
+        );
       case 'play':
         return <PauseButton onClick={actions.pause} />;
     }

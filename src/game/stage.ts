@@ -64,7 +64,13 @@ export const createStage = (level: Level, { scene, events, text, bot }: StageOpt
   const physics: PhysicsWorld = createPhysicsWorld();
   const world = buildLevel({ world: physics, scene: root, materials: createSurfaceMaterials() }, level);
   const ball = createBall(physics, root);
-  const decor = createDecor(root, level.decor.seed, world.track.vertices, THEME_LOOKS[level.decor.theme].decor);
+  const decor = createDecor(
+    root,
+    level.decor.seed,
+    world.track.vertices,
+    THEME_LOOKS[level.decor.theme].decor,
+    level.decor.theme,
+  );
   const signs = createSigns(
     root,
     level.signs.map((s) => ({ position: cellToWorld(s.cell), facing: forwardOf(s.rot), text: text(s.text) })),

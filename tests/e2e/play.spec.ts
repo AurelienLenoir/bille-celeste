@@ -85,17 +85,26 @@ test('settings are saved and survive a reload', async ({ page }) => {
   await page.getByRole('button', { name: 'Réglages' }).click();
   await expect(page.getByRole('heading', { name: 'Réglages' })).toBeVisible();
   await page.getByLabel('Inverser gauche / droite').check();
-  await page.getByLabel('Sons').uncheck();
+  await page.getByLabel('Sons', { exact: true }).uncheck();
   await page.getByRole('button', { name: 'Retour' }).click();
   await expect(page.getByRole('heading', { name: 'Bille Céleste' })).toBeVisible();
 
   await page.reload();
   await page.getByRole('button', { name: 'Réglages' }).click();
   await expect(page.getByLabel('Inverser gauche / droite')).toBeChecked();
-  await expect(page.getByLabel('Sons')).not.toBeChecked();
+  await expect(page.getByLabel('Sons', { exact: true })).not.toBeChecked();
 });
 
 test('debug overlay reports the frame rate', async ({ page }) => {
   await page.goto('./?debug');
   await expect(page.locator('#perf')).toContainText('fps', { timeout: 5_000 });
+});
+
+test('music and sound volumes are in the settings', async ({ page }) => {
+  await page.goto('./?level=poc');
+  await page.getByRole('button', { name: 'Réglages' }).click();
+  await expect(page.getByLabel('Musique', { exact: true })).toBeChecked();
+  await expect(page.locator('input[name=musicVolume]')).toBeVisible();
+  await page.getByLabel('Musique', { exact: true }).uncheck();
+  await expect(page.locator('input[name=musicVolume]')).toHaveCount(0);
 });

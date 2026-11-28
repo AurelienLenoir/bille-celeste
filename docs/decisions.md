@@ -2,6 +2,17 @@
 
 Journal des choix structurants (le plus récent en haut).
 
+## 2026-11-28 — Phase 5 : habillage
+
+- **Musique générée par le code, pas de banque libre de droits.** Le plan prévoyait de choisir des pistes avec l'utilisateur ; pour livrer la phase en autonomie et rester dans la règle « tous les assets sont générés », chaque monde a une boucle composée par `engine/music.ts` à partir de quelques réglages (`art/music.ts` : tempo, gamme, grille d'accords, graine de la mélodie, rythme de basse et de batterie). La mélodie est tirée de la graine sur les notes de l'accord, donc identique à chaque boucle. Une piste « menu » plus calme joue hors des niveaux, avec un fondu enchaîné de 1,2 s. Remplacer par de vraies pistes reste possible plus tard (un `.ogg` par monde sur le bus musique).
+- **Deux bus audio** (effets, musique) avec un volume chacun. Réglages **version 3** : `sfxVolume` (0,8) et `musicVolume` (0,5), migration testée depuis la version 2 ; l'interrupteur Musique apparaît enfin dans les réglages. Le son est coupé quand l'app passe en arrière-plan.
+- **Son de roulement** : un bruit filtré en continu dont le volume et la brillance suivent la vitesse ; le timbre dépend de la surface (bois dans les mondes 1 et 2, glace dans le monde 3 et sur les zones de glace, métal dans le monde 4, sable sur le sable). Silencieux en l'air.
+- **Particules** : un seul `THREE.Points` (512 particules recyclées, shader de disques doux) pour la collecte des cristaux, les checkpoints, la gemme, le bouclier, la réapparition, les confettis de victoire et la traînée de la bille au-delà de 7,5 unités/s. Un second `Points` par niveau donne l'ambiance du monde : pollen, pétales, neige, étoiles. Soit 2 draw calls de plus.
+- **Décor par monde** : petits arbres et fleurs (jardins), palmiers (coucher de soleil), pics de glace et blocs de neige (glacier), cheminées et roues dentées (usine). Toujours fusionnés dans le seul maillage des îles : aucun draw call de plus.
+- **Ralenti à l'arrivée** : après l'anneau, la physique continue 0,3 s à vitesse × 0,25 (dans la session, à pas fixe, donc déterministe ; le chrono est déjà arrêté), puis l'écran de victoire arrive 0,9 s après le passage, le temps des confettis.
+- **Chargement et transitions** : écran de démarrage (bille qui roule) jusqu'au premier niveau, écran de chargement plein ciel entre les niveaux, fondu et montée des cartes à chaque écran (désactivés si l'appareil demande moins d'animations).
+- **Budget** : 9 à 30 draw calls mesurés sur les niveaux des 4 mondes (vue 375×812), toujours sous 80. Physique, bot et replays inchangés.
+
 ## 2026-11-27 — Phase 4 : retours du premier test sur téléphone
 
 - **Une baisse de qualité qui n'aide pas est annulée.** Mesure dans le navigateur (vue 375×812, même niveau `poc`) : la version actuelle tourne aussi vite que celle de la phase 3 (33 contre 33 fps en rendu logiciel, mêmes draw calls), et les niveaux de la campagne coûtent autant ou moins que `sandbox`. Le moteur n'a donc pas ralenti. En revanche, un iPhone en mode économie d'énergie bride la page à 30 fps. Le régulateur prenait ça pour de la lenteur et baissait la résolution pour rien. Désormais, chaque baisse est essayée 2 s. Si elle n'apporte pas au moins 10 % d'images en plus, le ratio d'origine revient et la qualité ne bouge plus de la partie.

@@ -3,8 +3,14 @@ import { TILT_RANGE_DEG, TOUCH_SENSITIVITY, type LanguageSetting, type Settings 
 import type { SettingsStore } from '../../meta/store';
 import { useStore } from '../hooks';
 
-type BooleanKey = 'invertX' | 'invertY' | 'haptics' | 'sound';
-const TOGGLES: BooleanKey[] = ['invertX', 'invertY', 'haptics', 'sound'];
+type BooleanKey = 'invertX' | 'invertY' | 'haptics' | 'sound' | 'music';
+const TOGGLES: BooleanKey[] = ['invertX', 'invertY', 'haptics', 'sound', 'music'];
+type VolumeKey = 'sfxVolume' | 'musicVolume';
+/** Each volume slider shows only while its sound is on. */
+const VOLUMES: { key: VolumeKey; when: BooleanKey }[] = [
+  { key: 'sfxVolume', when: 'sound' },
+  { key: 'musicVolume', when: 'music' },
+];
 
 const formatSensitivity = (value: number) => `×${value.toFixed(1).replace('.', t().lang === 'fr' ? ',' : '.')}`;
 
@@ -91,6 +97,22 @@ export const SettingsCard = ({ store, onBack }: { store: SettingsStore; onBack: 
               name={key}
               checked={s[key]}
               onInput={(e) => update({ [key]: e.currentTarget.checked })}
+            />
+          </label>
+        ))}
+        {VOLUMES.filter((v) => s[v.when]).map(({ key }) => (
+          <label class="row slider" key={key}>
+            <span>
+              {text[key]} <output>{Math.round(s[key] * 100)} %</output>
+            </span>
+            <input
+              type="range"
+              name={key}
+              min="0"
+              max="1"
+              step="0.05"
+              value={s[key]}
+              onInput={(e) => update({ [key]: Number(e.currentTarget.value) })}
             />
           </label>
         ))}
