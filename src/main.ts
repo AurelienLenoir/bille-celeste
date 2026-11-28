@@ -4,6 +4,7 @@ import { AMBIENT_LOOKS, createAmbient, type Ambient } from './art/ambient';
 import { SONGS } from './art/music';
 import { FOG, FOG_THICK } from './art/palette';
 import { createParticles, fitPointScale } from './art/particles';
+import { createSkinMaterial } from './art/skinMaterial';
 import { createSkyTexture } from './art/textures';
 import { createAudio } from './engine/audio';
 import { createFollowCamera } from './engine/camera';
@@ -32,7 +33,11 @@ import { loadLevel } from './levels/loader';
 import type { Level } from './levels/schema';
 import { CAMPAIGN, nextLevel, WORLDS, worldOfLevel } from './levels/worlds';
 import { isLevelOpen, isWorldOpen, resumeLevel } from './meta/progress';
-import { createProgressStore, createSettingsStore } from './meta/store';
+import { mayShowInterstitial } from './meta/adPolicy';
+import { skinById } from './meta/skins';
+import { createProgressStore, createSettingsStore, createWalletStore } from './meta/store';
+import { createAds } from './platform/ads';
+import { createPurchases, PACK_FEATHERS } from './platform/purchases';
 import { nativeVibrator } from './platform/haptics';
 import { onBackButton, onBackground, onForeground } from './platform/lifecycle';
 import { hideSplash, keepScreenOn, setUpNativeShell } from './platform/shell';
@@ -76,7 +81,12 @@ bindResize(renderer, follow.camera);
 
 await initPhysics();
 const events = createEventBus<GameEvents>();
-const [settingsStore, progressStore] = await Promise.all([createSettingsStore(storage), createProgressStore(storage)]);
+const [settingsStore, progressStore, walletStore] = await Promise.all([
+  createSettingsStore(storage),
+  createProgressStore(storage),
+  createWalletStore(storage),
+]);
+const wallet = () => walletStore.getState().wallet;
 const settings = () => settingsStore.getState().settings;
 const progress = () => progressStore.getState().progress;
 const usesTilt = () => settings().controlMode === 'tilt';
@@ -93,6 +103,36 @@ const audio = createAudio(() => ({
 settingsStore.subscribe(() => audio.refresh());
 const music = createMusicPlayer(audio.context, audio.musicBus, audio.noise);
 const rolling = audio.loop();
+
+const ads = createAds();
+const purchases = createPurchases();
+void purchases.ownsNoAds().then((owned) => owned && walletStore.getState().setNoAds(true));
+/** Rewarded ads are free once "no ads" is bought (PLAN.md § 10.3). */
+const rewards = () => (wallet().noAds ? 'free' : ads.available() ? 'ad' : 'none');
+/** The run stands still while an ad covers the game. */
+let holdRun = false;
+const duringAd = async <T>(show: () => Promise<T>): Promise<T> => {
+  holdRun = true;
+  audio.suspend();
+  try {
+    return await show();
+  } finally {
+    holdRun = false;
+    audio.resume();
+  }
+};
+const earnReward = async (): Promise<boolean> => {
+  if (wallet().noAds) return true;
+  if (!ads.available()) return false;
+  return duringAd(ads.rewarded);
+};
+/** Between two runs, after a win: now and then an interstitial (never in the first levels). */
+const maybeInterstitial = async () => {
+  if (screen() !== 'win' || !stage || !ads.available()) return;
+  if (!mayShowInterstitial(stage.level.id, wallet().winsSinceAd, wallet().noAds)) return;
+  walletStore.getState().adShown();
+  await duringAd(ads.interstitial);
+};
 /** Unlocks sound on the first tap and starts the music clock. */
 const unlockAudio = () => {
   audio.unlock();
@@ -135,13 +175,47 @@ bindSoundEffects(events, audio);
 bindHapticFeedback(events, haptics);
 bindHud(events, toast);
 events.on('respawned', ({ x, y, z }) => follow.snapTo(x, y, z));
+/** "Continue here" is offered for a few seconds after a fall, once per level. */
+const REVIVE_OFFER_MS = 4500;
+let revivedThisLevel = false;
+let reviveTimer: ReturnType<typeof setTimeout> | undefined;
+const offerRevive = (on: boolean) => {
+  clearTimeout(reviveTimer);
+  ui.getState().offerRevive(on);
+  if (on) reviveTimer = setTimeout(() => ui.getState().offerRevive(false), REVIVE_OFFER_MS);
+};
+events.on('fell', () => {
+  if (!revivedThisLevel && stage?.session.canRevive() && rewards() !== 'none') offerRevive(true);
+});
+events.on('checkpointReached', () => offerRevive(false));
+events.on('reset', () => {
+  revivedThisLevel = false;
+  offerRevive(false);
+});
+const revive = async () => {
+  offerRevive(false);
+  if (revivedThisLevel || !stage?.session.canRevive()) return;
+  revivedThisLevel = true;
+  if (await earnReward()) stage.session.revive();
+};
+// A new skin rolls at once, even on the level waiting behind the menus.
+walletStore.subscribe(({ wallet: next }, { wallet: before }) => {
+  if (next.equipped === before.equipped || !stage) return;
+  const old = stage.ball.mesh.material;
+  stage.ball.mesh.material = skinMaterial();
+  if (old instanceof THREE.MeshPhysicalMaterial) {
+    old.map?.dispose();
+    old.dispose();
+  }
+});
 const SHAKERS = new Set(['bumper', 'pusher', 'sweeper']);
 events.on('modifierFired', ({ type }) => {
   if (SHAKERS.has(type)) follow.shake(0.22);
 });
 const aura = createEffectAura(scene);
 const particles = createParticles(scene);
-const trail = createBallTrail(particles);
+const trail = createBallTrail(particles, () => parseInt(skinById(wallet().equipped).trail.slice(1), 16));
+const skinMaterial = () => createSkinMaterial(skinById(wallet().equipped).look);
 bindJuice({ events, particles, ball: () => stage?.ball.mesh.position ?? { x: 0, y: 0, z: 0 } });
 let ambient: Ambient | undefined;
 events.on('paused', () => {
@@ -179,7 +253,7 @@ const mount = async (id: string): Promise<Stage | undefined> => {
   if (level.signs.length) await document.fonts.ready;
   if (ticket !== loading) return undefined;
   stage?.dispose();
-  stage = createStage(level, { scene, events, text: pick, bot: params.has('bot') });
+  stage = createStage(level, { scene, events, text: pick, bot: params.has('bot'), ballMaterial: skinMaterial() });
   ambient?.dispose();
   const look = AMBIENT_LOOKS[level.decor.theme];
   ambient = look ? createAmbient(scene, look, level.decor.seed) : undefined;
@@ -250,6 +324,7 @@ events.on('levelWon', (run) => {
   const inCampaign = CAMPAIGN.includes(level.id);
   const openBefore = WORLDS.filter((w) => isWorldOpen(progress(), w));
   const outcome = inCampaign ? progressStore.getState().win(level.id, run) : undefined;
+  const earnings = inCampaign ? walletStore.getState().payWin(level.id, run, outcome) : undefined;
   const opened = WORLDS.find((w) => !openBefore.includes(w) && isWorldOpen(progress(), w));
   const next = nextLevel(level.id);
   const win = {
@@ -262,6 +337,7 @@ events.on('levelWon', (run) => {
     ...(next && (unlockAll || isLevelOpen(progress(), next)) ? { next } : {}),
     ...(opened ? { opened } : {}),
     campaignDone: inCampaign && !next,
+    ...(earnings ? { earnings } : {}),
   };
   // The ball rolls on in slow motion through the ring while the confetti flies, then the results.
   setTimeout(() => {
@@ -275,14 +351,42 @@ mountUi(byId('ui'), {
   progress: progressStore,
   toast,
   unlockAll,
+  wallet: walletStore,
+  rewards,
+  shop: {
+    available: purchases.available,
+    offers: async () =>
+      (await purchases.offers()).map((o) => ({
+        ...o,
+        ...(PACK_FEATHERS[o.key] ? { feathers: PACK_FEATHERS[o.key] } : {}),
+      })),
+    buy: async (key) => {
+      const outcome = await purchases.buy(key);
+      if (outcome !== 'bought') return outcome;
+      if (key === 'noAds') walletStore.getState().setNoAds(true);
+      else walletStore.getState().addFeathers(PACK_FEATHERS[key] ?? 0);
+      return outcome;
+    },
+    restore: async () => {
+      const owned = await purchases.restore();
+      if (owned) walletStore.getState().setNoAds(true);
+      return owned;
+    },
+  },
   telemetryAvailable: telemetry.available,
   ...(directLevel ? { directLevel } : {}),
   actions: {
     chooseControl: (controlMode) => settingsStore.getState().update({ controlMode }),
     enableTilt,
-    play,
+    play: (id) => void maybeInterstitial().then(() => play(id)),
     showBackdrop,
-    restart: begin,
+    restart: () => void maybeInterstitial().then(begin),
+    revive: () => void revive(),
+    doubleFeathers: async (amount) => {
+      if (!(await earnReward())) return false;
+      walletStore.getState().addFeathers(amount);
+      return true;
+    },
     pause: () => stage?.session.pause(),
     resume: () => stage?.session.resume(),
     quit,
@@ -302,6 +406,8 @@ addEventListener('keydown', unlockAudio, { once: true });
 /** The screen sets the music (menus have their own tune, a level its world's) and keeps the phone awake during a run. */
 const followScreen = () => {
   keepScreenOn(screen() === 'play');
+  // Ads ask for their consent once the player reaches the menus, not on the very first screen.
+  if (screen() === 'map' && !wallet().noAds) void ads.start();
   const name = screen();
   const inLevel = name === 'play' || name === 'pause' || name === 'win' || name === 'loading';
   music.play(inLevel && stage ? SONGS[stage.level.decor.theme] : SONGS.menu);
@@ -366,7 +472,7 @@ startLoop((dt) => {
   const current = stage;
   if (current) {
     const { session, ball, decor, signs } = current;
-    gravity = session.update(dt, readInput);
+    gravity = session.update(holdRun ? 0 : dt, readInput);
     const playing = session.state() === 'play';
     const status = session.status();
     updateFog(playing ? status.fog : 0, dt);

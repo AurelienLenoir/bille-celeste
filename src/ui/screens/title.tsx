@@ -31,9 +31,14 @@ export const TitleScreen = ({ deps }: { deps: UiDeps }) => {
         >
           {text.playTouch}
         </button>
-        <button class="link" onClick={() => ui.getState().openSettings(true)}>
-          {text.settings}
-        </button>
+        <div class="links">
+          <button class="link" onClick={() => ui.getState().go({ name: 'shop', back: 'title' })}>
+            {t().shop.open}
+          </button>
+          <button class="link" onClick={() => ui.getState().openSettings(true)}>
+            {text.settings}
+          </button>
+        </div>
         <p class="small">{text.keys}</p>
       </div>
     </div>

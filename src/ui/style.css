@@ -727,3 +727,190 @@ button.back {
     transition: none;
   }
 }
+
+/* Phase 9: feathers, shop, rewarded ads. */
+.feather-icon {
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: -0.2em;
+  margin-right: 3px;
+}
+.feathers {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.links {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+button.shop-link {
+  width: min(100%, 420px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px 0 4px;
+  background: linear-gradient(90deg, #fff8dc, #fff);
+}
+button.shop-link .feathers {
+  background: none;
+  padding: 0 8px;
+}
+#shop {
+  overflow-y: auto;
+}
+#shop > * {
+  width: min(100%, 420px);
+}
+#shop h2,
+#shop h3 {
+  margin: 4px 0 0;
+  text-align: center;
+}
+.daily {
+  display: grid;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 18px;
+  padding: 10px 14px;
+}
+.daily .reward {
+  color: #b7791f;
+  font-weight: 600;
+}
+.showcase {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 22px;
+  padding: 10px 14px;
+}
+.skin-preview {
+  width: 130px;
+  height: 130px;
+  flex: none;
+}
+.showcase-info {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+}
+.showcase-info strong {
+  font-size: 20px;
+}
+.rarity {
+  font-weight: 600;
+}
+.rarity.common {
+  color: #5a7090;
+}
+.rarity.rare {
+  color: #2b7fd0;
+}
+.rarity.epic {
+  color: #8a4fd8;
+}
+.rarity.legendary {
+  color: #d08a00;
+}
+.skins {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+button.skin {
+  width: 100%;
+  min-height: 0;
+  padding: 8px 2px 6px;
+  border-radius: 16px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+button.skin small {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+button.skin.selected {
+  outline: 3px solid var(--pink);
+}
+button.skin.legendary {
+  background: linear-gradient(160deg, #fff7d6, #fff);
+}
+button.skin.epic {
+  background: linear-gradient(160deg, #f1e6ff, #fff);
+}
+.chip {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-shadow: inset -4px -5px 8px rgba(0, 0, 0, 0.18);
+}
+.purchases {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 12px;
+}
+button.offer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border-radius: 18px;
+  padding: 8px 14px;
+  text-align: left;
+}
+button.offer small {
+  display: block;
+  font-weight: 400;
+  font-size: 12px;
+}
+.hint {
+  text-align: center;
+  color: #33476b;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
+  padding: 8px 12px;
+}
+.earned {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin: 8px 0;
+  font-weight: 600;
+  color: #b7791f;
+}
+button.small-btn {
+  width: auto;
+  min-height: 40px;
+  font-size: 15px;
+  margin-top: 0;
+}
+button.continue-here {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 28px);
+  transform: translateX(-50%);
+  background: #ffcf4a;
+  color: #4a3200;
+  animation: pop-in 0.3s ease-out;
+  z-index: 5;
+}
+.privacy-link {
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+  color: var(--blue);
+}

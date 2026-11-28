@@ -40,4 +40,28 @@ describe('session', () => {
     expect(counts).toEqual(['1/3']);
     run.dispose();
   });
+
+  it('"continue here" puts the ball back where it fell, with the crystals the fall took', () => {
+    const run = startHeadless(shippedLevel('w1-01'));
+    run.session.start();
+    const goTo = (cell: [number, number, number], steps = 3) => {
+      const [x, y, z] = cellToWorld(cell);
+      run.ball.placeAt(x, y + 0.45, z);
+      for (let i = 0; i < steps; i++) run.step(STILL);
+    };
+    goTo([0, 0, -9]); // checkpoint
+    goTo([3, 0, -12], 150); // crystal after it, then rolls on the ground for a while
+    expect(run.session.canRevive()).toBe(false);
+    run.ball.placeAt(0, -20, -18);
+    for (let i = 0; i < 3; i++) run.step(STILL);
+    expect(run.world.crystals.filter((c) => c.taken)).toHaveLength(0);
+    expect(run.session.canRevive()).toBe(true);
+    expect(run.session.revive()).toBe(true);
+    expect(run.world.crystals.filter((c) => c.taken)).toHaveLength(1);
+    const [x, , z] = cellToWorld([3, 0, -12]);
+    const p = run.ball.position();
+    expect(Math.hypot(p.x - x, p.z - z)).toBeLessThan(2);
+    expect(run.session.canRevive()).toBe(false);
+    run.dispose();
+  });
 });

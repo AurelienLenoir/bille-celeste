@@ -80,7 +80,7 @@ export const trailCount = (speed: number, dt: number, debt: number): { count: nu
 };
 
 /** Leaves a speck trail behind a fast ball. Call once per rendered frame. */
-export const createBallTrail = (particles: Particles) => {
+export const createBallTrail = (particles: Particles, color: () => number = () => TRAIL_COLOR) => {
   let debt = 0;
   return (at: Point, velocity: Point, dt: number) => {
     const speed = Math.hypot(velocity.x, velocity.y, velocity.z);
@@ -91,7 +91,7 @@ export const createBallTrail = (particles: Particles) => {
       particles.emit(
         { x: at.x + jitter(), y: at.y + jitter(), z: at.z + jitter() },
         { x: -velocity.x * 0.05, y: 0.2, z: -velocity.z * 0.05 },
-        TRAIL_COLOR,
+        color(),
         0.45,
         0.2,
       );

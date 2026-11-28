@@ -7,7 +7,7 @@ const LOOK_BACK = 0.5;
 
 export type GroundTrail = {
   /** Called every step: remembers where the ball was while it touched the ground. */
-  record: (p: Point, grounded: boolean, dt: number) => void;
+  record: (p: Point, grounded: () => boolean, dt: number) => void;
   /** A recent place where the ball was safely on the ground, if any. */
   safePoint: () => Point | undefined;
   clear: () => void;
@@ -20,7 +20,8 @@ export const createGroundTrail = (): GroundTrail => {
   return {
     record: (p, grounded, dt) => {
       since += dt;
-      if (!grounded || since < SAMPLE_EVERY) return;
+      // The ground check (a ray cast) only runs when a sample is due.
+      if (since < SAMPLE_EVERY || !grounded()) return;
       since = 0;
       samples.push({ x: p.x, y: p.y, z: p.z });
       if (samples.length > KEEP) samples.shift();
