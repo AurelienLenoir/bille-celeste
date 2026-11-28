@@ -36,6 +36,8 @@ test('the shop sells a skin for feathers and keeps it after a reload', async ({ 
 });
 
 test('a first win pays feathers', async ({ page }) => {
+  // The autopilot plays the whole level: longer than the default 30 s on a slow CI machine.
+  test.setTimeout(120_000);
   await page.goto('./?level=w1-01&bot');
   await page.getByRole('button', { name: 'Jouer au doigt' }).click();
   await expect(page.locator('#win')).toBeVisible({ timeout: 90_000 });
