@@ -14,10 +14,14 @@ const PATTERNS: Record<HapticPattern, number | number[]> = {
 export type Haptics = (pattern: HapticPattern) => void;
 
 /**
- * Vibrations through the Web Vibration API (Android browsers; iOS Safari has none).
- * Native haptics replace it in phase 6.
+ * Vibrations through `native` when the app provides one (platform/haptics.ts), otherwise the Web
+ * Vibration API (Android browsers; iOS Safari has none).
  */
-export const createHaptics = (enabled: () => boolean): Haptics => {
+export const createHaptics = (enabled: () => boolean, native?: Haptics): Haptics => {
+  if (native)
+    return (pattern) => {
+      if (enabled()) native(pattern);
+    };
   const vibrate = typeof navigator.vibrate === 'function' ? navigator.vibrate.bind(navigator) : null;
   return (pattern) => {
     if (!vibrate || !enabled()) return;

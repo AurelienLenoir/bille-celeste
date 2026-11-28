@@ -33,8 +33,11 @@ import type { Level } from './levels/schema';
 import { CAMPAIGN, nextLevel, WORLDS, worldOfLevel } from './levels/worlds';
 import { isLevelOpen, isWorldOpen, resumeLevel } from './meta/progress';
 import { createProgressStore, createSettingsStore } from './meta/store';
-import { onBackground, onForeground } from './platform/lifecycle';
-import { webStorage } from './platform/storage';
+import { nativeVibrator } from './platform/haptics';
+import { onBackButton, onBackground, onForeground } from './platform/lifecycle';
+import { hideSplash, keepScreenOn, setUpNativeShell } from './platform/shell';
+import { createTelemetry, telemetryConfigFromEnv } from './platform/telemetry';
+import { appStorage } from './platform/storage';
 import { mountUi } from './ui/app';
 import { byId } from './ui/dom';
 import { downloadJson } from './ui/download';
@@ -47,6 +50,8 @@ import { createToast } from './ui/toast';
 // Tells the inline watchdog in index.html that the bundle loaded.
 Object.assign(window, { __ok: true });
 
+setUpNativeShell();
+const storage = appStorage();
 const params = new URLSearchParams(location.search);
 /** `?level=id` plays one level straight from the title (campaign, sandbox, editor…). */
 const directLevel = params.get('level') ?? undefined;
@@ -55,7 +60,7 @@ const unlockAll = params.has('unlock');
 
 const fetchAnyLevel = async (id: string): Promise<Level> => {
   if (id !== 'editor') return fetchLevel(id);
-  const saved = await webStorage.get(EDITOR_LEVEL_KEY);
+  const saved = await storage.get(EDITOR_LEVEL_KEY);
   return loadLevel(JSON.parse(saved ?? 'null'));
 };
 
@@ -71,13 +76,13 @@ bindResize(renderer, follow.camera);
 
 await initPhysics();
 const events = createEventBus<GameEvents>();
-const [settingsStore, progressStore] = await Promise.all([
-  createSettingsStore(webStorage),
-  createProgressStore(webStorage),
-]);
+const [settingsStore, progressStore] = await Promise.all([createSettingsStore(storage), createProgressStore(storage)]);
 const settings = () => settingsStore.getState().settings;
 const progress = () => progressStore.getState().progress;
 const usesTilt = () => settings().controlMode === 'tilt';
+const telemetry = createTelemetry(telemetryConfigFromEnv(), () => settings().telemetry === 'yes', storage);
+telemetry.startCrashReports();
+settingsStore.subscribe(() => telemetry.startCrashReports());
 const ui = createUiStore();
 const screen = () => ui.getState().screen.name;
 
@@ -93,7 +98,7 @@ const unlockAudio = () => {
   audio.unlock();
   music.wake();
 };
-const haptics = createHaptics(() => settings().haptics);
+const haptics = createHaptics(() => settings().haptics, nativeVibrator());
 const toast = createToast();
 const tilt = createTilt(() => ({
   fullTiltDeg: settings().tiltRangeDeg,
@@ -145,6 +150,10 @@ events.on('paused', () => {
 });
 events.on('resumed', () => ui.getState().go({ name: 'play' }));
 events.on('reset', recorder.clear);
+/** Falls of the run in progress, for the statistics of an abandoned level. */
+let fallsSoFar = 0;
+events.on('reset', () => (fallsSoFar = 0));
+events.on('fell', ({ falls }) => (fallsSoFar = falls));
 
 const minimap = createMinimap(byId<HTMLCanvasElement>('minimap'));
 /** Redraws the minimap about 20 times a second: it does not need every frame. */
@@ -192,6 +201,7 @@ const begin = () => {
   unlockAudio();
   if (usesTilt()) tilt.resetCalibration();
   stage.session.start();
+  telemetry.track('level_start', { level: stage.level.id });
   ui.getState().go({ name: 'play' });
   if (!firstRun) return;
   firstRun = false;
@@ -218,6 +228,7 @@ const play = (id: string) => {
 
 const quit = () => {
   if (!stage) return;
+  if (stage.session.state() !== 'win') telemetry.track('level_quit', { level: stage.level.id, falls: fallsSoFar });
   stage.session.stop();
   const world = worldOfLevel(stage.level.id);
   ui.getState().go(world ? { name: 'levels', world: world.id } : { name: 'title' });
@@ -228,6 +239,13 @@ const WIN_SCREEN_DELAY_MS = 900;
 events.on('levelWon', (run) => {
   if (!stage) return;
   const { level } = stage;
+  telemetry.track('level_win', {
+    level: level.id,
+    time: run.time,
+    falls: run.falls,
+    stars: run.stars.count,
+    gem: run.gem,
+  });
   if (params.has('record')) downloadJson(`replay-${level.id}.json`, recorder.finish(level.id, run));
   const inCampaign = CAMPAIGN.includes(level.id);
   const openBefore = WORLDS.filter((w) => isWorldOpen(progress(), w));
@@ -257,6 +275,7 @@ mountUi(byId('ui'), {
   progress: progressStore,
   toast,
   unlockAll,
+  telemetryAvailable: telemetry.available,
   ...(directLevel ? { directLevel } : {}),
   actions: {
     chooseControl: (controlMode) => settingsStore.getState().update({ controlMode }),
@@ -280,13 +299,14 @@ onForeground(audio.resume);
 addEventListener('pointerdown', unlockAudio, { once: true });
 addEventListener('keydown', unlockAudio, { once: true });
 
-/** Menus play their own tune; a level plays its world's. */
-const updateMusic = () => {
+/** The screen sets the music (menus have their own tune, a level its world's) and keeps the phone awake during a run. */
+const followScreen = () => {
+  keepScreenOn(screen() === 'play');
   const name = screen();
   const inLevel = name === 'play' || name === 'pause' || name === 'win' || name === 'loading';
   music.play(inLevel && stage ? SONGS[stage.level.decor.theme] : SONGS.menu);
 };
-ui.subscribe(updateMusic);
+ui.subscribe(followScreen);
 
 /** Rolling sound from the ball's speed and what it rolls on; silent outside of play. */
 const updateRolling = ({ ball, session, level }: Stage) => {
@@ -309,6 +329,17 @@ await mount(directLevel ?? resumeLevel(progress()));
 const boot = document.getElementById('boot');
 boot?.classList.add('done');
 setTimeout(() => boot?.remove(), 500);
+hideSplash();
+// Android back: pause a run, resume from the pause menu, otherwise go one menu back.
+onBackButton(() => {
+  const now = ui.getState();
+  if (now.settings) return now.openSettings(false);
+  const name = now.screen.name;
+  if (name === 'play') stage?.session.pause();
+  else if (name === 'pause') stage?.session.resume();
+  else if (name === 'levels') now.go({ name: 'map' });
+  else if (name === 'map' || name === 'win') now.go({ name: 'title' });
+});
 
 const frames = createFrameStats();
 const quality = createQualityGovernor();

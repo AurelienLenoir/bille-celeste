@@ -43,7 +43,16 @@ const Segmented = <T extends string>(props: {
 );
 
 /** Settings card: every change is applied and saved at once. */
-export const SettingsCard = ({ store, onBack }: { store: SettingsStore; onBack: () => void }) => {
+export const SettingsCard = ({
+  store,
+  onBack,
+  telemetry = false,
+}: {
+  store: SettingsStore;
+  onBack: () => void;
+  /** Shows the statistics switch (only in builds that can send any). */
+  telemetry?: boolean;
+}) => {
   const s: Settings = useStore(store, (state) => state.settings);
   const update = store.getState().update;
   const text = t().settings;
@@ -116,6 +125,17 @@ export const SettingsCard = ({ store, onBack }: { store: SettingsStore; onBack: 
             />
           </label>
         ))}
+        {telemetry && (
+          <label class="row toggle">
+            <span>{text.telemetry}</span>
+            <input
+              type="checkbox"
+              name="telemetry"
+              checked={s.telemetry === 'yes'}
+              onInput={(e) => update({ telemetry: e.currentTarget.checked ? 'yes' : 'no' })}
+            />
+          </label>
+        )}
         <Segmented<LanguageSetting>
           name="language"
           legend={text.language}
