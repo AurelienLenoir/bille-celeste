@@ -22,6 +22,11 @@ export default defineConfig({
             // Rapier ships its WebAssembly inlined as base64 (~4 MB, ~1.2 MB gzipped). It gets its own
             // chunk so it caches across game updates; its size is tracked in docs/decisions.md.
             { name: 'rapier', test: /rapier3d-compat/ },
+            // Capacitor's core is used at start-up: it must not end up in an on-demand chunk below.
+            { name: 'vendor', test: /@capacitor[\\/]core|@webview-native-ui/ },
+            // SDKs loaded on demand (crash reports, ads, purchases) stay out of the start-up bundle.
+            { name: 'sentry', test: /@sentry/ },
+            { name: 'monetization', test: /@capacitor-community[\\/]admob|@revenuecat/ },
             // Libraries shared by the game and the editor (three.js, Zod, Zustand).
             { name: 'vendor', test: /node_modules/ },
           ],

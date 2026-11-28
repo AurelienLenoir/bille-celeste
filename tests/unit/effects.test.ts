@@ -34,8 +34,8 @@ describe('ground trail', () => {
   it('remembers where the ball rolled half a second before it left the ground', () => {
     const trail = createGroundTrail();
     expect(trail.safePoint()).toBeUndefined();
-    for (let i = 0; i <= 20; i++) trail.record({ x: i, y: 0, z: 0 }, true, 0.1);
-    trail.record({ x: 50, y: -3, z: 0 }, false, 0.1);
+    for (let i = 0; i <= 20; i++) trail.record({ x: i, y: 0, z: 0 }, () => true, 0.1);
+    trail.record({ x: 50, y: -3, z: 0 }, () => false, 0.1);
     expect(trail.safePoint()).toEqual({ x: 15, y: 0, z: 0 });
   });
 });

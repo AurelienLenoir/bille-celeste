@@ -3,6 +3,32 @@ import { worldOfLevel } from '../../levels/worlds';
 import type { UiDeps } from '../actions';
 import { formatTime, formatTimeShort } from '../format';
 import type { WinView } from '../state';
+import { useState } from 'preact/hooks';
+import { FeatherIcon } from './feathers';
+
+/** Feathers this win paid, and the offer to double them with a rewarded ad. */
+const Earned = ({ deps, amount }: { deps: UiDeps; amount: number }) => {
+  const [doubled, setDoubled] = useState(false);
+  const rewards = deps.rewards();
+  return (
+    <div class="earned">
+      <span id="wFeathers">
+        <FeatherIcon /> {t().earned(doubled ? amount * 2 : amount)}
+      </span>
+      {rewards !== 'none' && !doubled && (
+        <button
+          class="alt small-btn"
+          onClick={async () => {
+            if (await deps.actions.doubleFeathers(amount)) setDoubled(true);
+            else deps.toast(t().ads.unavailable, 1800);
+          }}
+        >
+          ×2 {t().ads.doubleFeathers} <small>{rewards === 'free' ? t().ads.free : t().ads.watch}</small>
+        </button>
+      )}
+    </div>
+  );
+};
 
 /** Victory card: stars, time, falls, crystals, record, gem, and where to go next. */
 export const Victory = ({ deps, win }: { deps: UiDeps; win: WinView }) => {
@@ -45,6 +71,7 @@ export const Victory = ({ deps, win }: { deps: UiDeps; win: WinView }) => {
             {outcome.newRecord ? text.newRecord : text.record(formatTime(outcome.previousBest ?? run.time))}
           </p>
         )}
+        {win.earnings && win.earnings.total > 0 && <Earned deps={deps} amount={win.earnings.total} />}
         <p class="small gem">{run.gem ? t().gemFound : win.hasGem ? t().gemMissed : ''}</p>
         {win.opened && <p class="unlocked">{text.worldOpened(pick(win.opened.name))}</p>}
         {win.campaignDone && <p class="unlocked">{text.campaignDone}</p>}

@@ -35,6 +35,8 @@ type StageOptions = {
   text: (text: Level['name']) => string;
   /** Lets the autopilot play (`?bot`). */
   bot: boolean;
+  /** The ball's look (the equipped skin); the classic ball otherwise. */
+  ballMaterial?: THREE.Material;
 };
 
 const disposeTree = (root: THREE.Object3D) =>
@@ -57,13 +59,13 @@ const applyTheme = (scene: THREE.Scene, level: Level) => {
 };
 
 /** Builds a level, its ball, decor and signs under one group, and the session that plays it. */
-export const createStage = (level: Level, { scene, events, text, bot }: StageOptions): Stage => {
+export const createStage = (level: Level, { scene, events, text, bot, ballMaterial }: StageOptions): Stage => {
   const root = new THREE.Group();
   scene.add(root);
   applyTheme(scene, level);
   const physics: PhysicsWorld = createPhysicsWorld();
   const world = buildLevel({ world: physics, scene: root, materials: createSurfaceMaterials() }, level);
-  const ball = createBall(physics, root);
+  const ball = createBall(physics, root, ballMaterial);
   const decor = createDecor(
     root,
     level.decor.seed,

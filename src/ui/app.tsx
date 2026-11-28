@@ -6,6 +6,7 @@ import { labelHud } from './hud/hud';
 import { useStore } from './hooks';
 import { LevelSelect } from './screens/levelSelect';
 import { PauseMenu } from './screens/pause';
+import { Shop } from './screens/shop';
 import { SettingsCard } from './screens/settings';
 import { TitleScreen } from './screens/title';
 import { Victory } from './screens/victory';
@@ -39,6 +40,18 @@ const ConsentCard = ({ deps }: { deps: UiDeps }) => {
         </button>
       </div>
     </div>
+  );
+};
+
+/** After a fall, for a few seconds: watch an ad to start again where the ball fell (once per level). */
+const ContinueHere = ({ deps }: { deps: UiDeps }) => {
+  const offer = useStore(deps.ui, (s) => s.reviveOffer);
+  const rewards = deps.rewards();
+  if (!offer || rewards === 'none') return null;
+  return (
+    <button class="continue-here" id="continueHere" onClick={deps.actions.revive}>
+      ▶ {t().ads.continueHere} <small>{rewards === 'free' ? t().ads.free : t().ads.watch}</small>
+    </button>
   );
 };
 
@@ -89,7 +102,14 @@ const App = ({ deps }: { deps: UiDeps }) => {
           </div>
         );
       case 'play':
-        return <PauseButton onClick={actions.pause} />;
+        return (
+          <>
+            <PauseButton onClick={actions.pause} />
+            <ContinueHere deps={deps} />
+          </>
+        );
+      case 'shop':
+        return <Shop deps={deps} back={screen.back} />;
     }
   })();
 

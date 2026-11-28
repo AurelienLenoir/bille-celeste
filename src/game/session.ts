@@ -52,6 +52,13 @@ export type Session = {
    */
   update: (dt: number, readInput: () => Vec2) => GravityDirection;
   status: () => RunStatus;
+  /** Since the last fall, can the ball be put back where it fell instead of at the checkpoint? */
+  canRevive: () => boolean;
+  /**
+   * Puts the ball back on the ground just before its last fall, with the crystals that fall put
+   * back (the "continue here" reward, PLAN.md § 10.3). The fall still counts.
+   */
+  revive: () => boolean;
 };
 
 type SessionDeps = {
@@ -107,6 +114,8 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
   let gemSinceCheckpoint = false;
   /** The timer waits for the player's first move. */
   let started = false;
+  /** Where and with what the last fall can be undone. */
+  let revivable: { point: Point; crystals: Crystal[]; gem: boolean } | undefined;
   /** Steps of slow motion left after the win. */
   let coast = 0;
 
@@ -138,6 +147,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     gemSinceCheckpoint = false;
     started = false;
     coast = 0;
+    revivable = undefined;
     crystals.forEach((c) => c.reset());
     checkpoints.forEach((c) => c.reset());
     gem?.reset();
@@ -185,6 +195,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
       if (checkpoint.active || !reachesCheckpoint(p, checkpoint, BALL_RADIUS)) continue;
       checkpoint.activate();
       spawn = checkpoint;
+      revivable = undefined;
       sinceCheckpoint = [];
       gemSinceCheckpoint = false;
       events.emit('checkpointReached');
@@ -224,6 +235,8 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
       return;
     }
     falls++;
+    revivable = safe ? { point: safe, crystals: [...sinceCheckpoint], gem: gemSinceCheckpoint } : undefined;
+    trail.clear();
     events.emit('fell', { falls });
     putBackSinceCheckpoint();
     respawn();
@@ -288,7 +301,7 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     ball.capture();
     if (modifiers.length) updateTriggers();
     const p = ball.position();
-    if (timers.has('shield')) trail.record(p, ball.grounded(), PHYSICS_STEP);
+    trail.record(p, ball.grounded, PHYSICS_STEP);
     status = {
       fog: effects.fog,
       invert: effects.invert,
@@ -361,5 +374,22 @@ export const createSession = ({ physics, world, ball, events }: SessionDeps): Se
     },
     update,
     status: () => status,
+    canRevive: () => !!revivable,
+    revive: () => {
+      if (!revivable || (state !== 'play' && state !== 'paused')) return false;
+      const { point, crystals: back, gem: gemBack } = revivable;
+      revivable = undefined;
+      back.forEach((c) => c.collect());
+      sinceCheckpoint = back;
+      if (gemBack) gem?.collect();
+      gemSinceCheckpoint = gemBack;
+      if (back.length) {
+        events.emit('crystalCollected', { collected: collected(), total: crystals.length });
+        if (allCollected()) goal.open();
+      }
+      trail.clear();
+      respawnAt(point, SHIELD_LIFT);
+      return true;
+    },
   };
 };

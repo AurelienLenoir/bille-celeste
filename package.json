@@ -18,9 +18,12 @@
     "level:bot": "tsx tools/level-bot.ts",
     "level:gen": "tsx tools/level-gen.ts",
     "art:icons": "tsx tools/make-icons.ts && capacitor-assets generate --ios --android --iconBackgroundColor '#6fbcff' --splashBackgroundColor '#6fbcff' --splashBackgroundColorDark '#6fbcff'",
-    "native:sync": "npm run build && cap sync"
+    "native:sync": "npm run build && cap sync",
+    "beta:funnel": "tsx tools/beta-funnel.ts",
+    "store:shots": "tsx tools/store-shots.ts"
   },
   "dependencies": {
+    "@capacitor-community/admob": "8.5.0",
     "@capacitor-community/keep-awake": "8.0.1",
     "@capacitor/android": "8.6.3",
     "@capacitor/app": "8.1.2",
@@ -32,6 +35,7 @@
     "@capacitor/splash-screen": "8.0.2",
     "@capacitor/status-bar": "8.0.4",
     "@dimforge/rapier3d-compat": "0.21.0",
+    "@revenuecat/purchases-capacitor": "15.0.0",
     "@sentry/browser": "11.20.0",
     "preact": "11.2.0",
     "three": "0.160.0",

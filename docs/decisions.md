@@ -2,6 +2,29 @@
 
 Journal des choix structurants (le plus récent en haut).
 
+## 2026-11-28 — Phases 7 et 8 : préparation de la bêta et de la sortie
+
+- **Ce qui peut se faire sans comptes ni appareils est fait ; les phases restent décochées** tant que leurs critères (testeurs réels, app acceptée sur les stores) ne sont pas remplis.
+- **Entonnoir de la bêta** : `npm run beta:funnel -- export.json` lit un export PostHog et donne, par niveau, joueurs, finisseurs, abandons, chutes, temps médian, et la part de joueurs qui terminent le monde 1 (critère des 80 %). Logique dans `src/meta/funnel.ts`, testée.
+- **Captures des stores générées par le jeu** (`npm run store:shots`) : le pilote automatique joue un niveau de chaque monde, plus l'écran titre et la boutique, en français et en anglais, aux tailles iPhone 6,9" et Android. Les images ne sont pas versionnées (`store/` est ignoré).
+- **App iPhone seulement** (`TARGETED_DEVICE_FAMILY = 1`) : le jeu est pensé pour le portrait d'un téléphone, et cela évite de devoir fournir des captures iPad.
+- **Politique de confidentialité** FR/EN dans `public/privacy.html`, publiée par GitHub Pages avec le jeu, et liée depuis les Réglages. Contact : les tickets GitHub du dépôt (pas d'adresse e-mail publiée sans l'accord du propriétaire).
+- **Fiches FR/EN, catégories, questionnaires d'âge et de confidentialité** prêts à coller : `docs/store/listing.md`. Guide de bêta : `docs/beta.md`.
+- **Chunks** : Sentry et les SDK de pub/achat sont dans des chunks à part (Sentry n'est chargé qu'après consentement ; le chunk pub/achat, 43 ko, est encore préchargé par Vite à cause d'un petit utilitaire partagé, sans effet visible). Le chunk `vendor` repasse de 760 à 616 ko.
+
+## 2026-11-28 — Phase 9 : skins, boutique, pubs, achats
+
+- **Faite avant les phases 7 et 8**, à la demande de l'utilisateur de tout terminer dans la journée : ces deux phases dépendent surtout de comptes et d'appareils réels, la phase 9 est du code. Le plan la plaçait « après la v1 » ; tout est en place mais inactif tant que les comptes AdMob et RevenueCat ne sont pas branchés (voir `docs/monetization.md`).
+- **Portefeuille à part** (`bille-celeste.wallet`, version 1) plutôt qu'une version 2 de la progression : plumes, skins possédés et équipé, gemmes déjà payées, « sans pub », compteur de victoires pour les interstitielles, défi du jour. Validé par Zod et réparé champ par champ.
+- **Plumes** : +10 par nouvelle étoile, +25 par première gemme, +30 par défi du jour. Pas de plumes pour une victoire répétée, pour que le compteur ait du sens. Une partie complète des 20 niveaux à 3 étoiles et gemmes rapporte environ 1 100 plumes, de quoi acheter une bonne partie des 11 skins payants (60 à 900).
+- **Défi du jour** : tiré de la date (même défi pour tous), 4 types simples.
+- **Skins** : 12 billes en données Zod (motif procédural sur canvas, matériau, brillance, couleur de traînée). Aperçu 3D qui tourne dans la boutique, sur son propre petit canvas WebGL libéré à la fermeture.
+- **« Continuer ici »** : la session garde le dernier point sûr au sol (le même historique que la bulle-bouclier, désormais toujours enregistré, le test du sol ne tourne qu'à chaque échantillon) et les cristaux que la chute a remis en place. Après la pub, la bille repart là, avec ces cristaux. **La chute compte toujours** : une pub ne peut pas acheter l'étoile « sans chute ».
+- **Pendant une pub, la partie est figée** (pas de physique, son suspendu), même si l'OS ne met pas l'app en arrière-plan.
+- **Achats via RevenueCat** (un seul SDK, reçus vérifiés) : « Sans pub » + deux packs de plumes. Les plumes achetées sont créditées en local (pas de serveur de jeu).
+- **AdMob** : identifiants d'app de test de Google dans `Info.plist` et `AndroidManifest.xml` (obligatoires pour que l'app démarre avec le SDK), blocs de test tant que les vrais ne sont pas fournis. Public 13+ et contenu « tout public » (décision § 10.5 proposée, à confirmer).
+- **Les SDK de pub et d'achat sont chargés à la demande** (`import()` dans `platform/`) : rien de plus à télécharger pour la version web, où ils ne servent pas.
+
 ## 2026-11-28 — Phase 6 : applications natives
 
 - **Capacitor 8** (iOS en Swift Package Manager, sans CocoaPods). Projets `ios/` et `android/` versionnés, identifiant `com.aurelienlenoir.billeceleste` (à confirmer avant le premier envoi sur un store, il est définitif ensuite).

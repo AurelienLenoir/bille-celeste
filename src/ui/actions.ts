@@ -1,5 +1,5 @@
 import type { ControlMode } from '../meta/settings';
-import type { ProgressStore, SettingsStore } from '../meta/store';
+import type { ProgressStore, SettingsStore, WalletStore } from '../meta/store';
 import type { Toast } from './toast';
 import type { UiStore } from './state';
 
@@ -19,6 +19,22 @@ export type GameActions = {
   quit: () => void;
   usesTilt: () => boolean;
   calibrate: () => boolean;
+  /** "Continue here" after a fall: shows a rewarded ad (free with "no ads"), then puts the ball back. */
+  revive: () => void;
+  /** Doubles the feathers of the last win after a rewarded ad. Resolves whether it worked. */
+  doubleFeathers: (amount: number) => Promise<boolean>;
+};
+
+/** Store products as the shop shows them. */
+export type ShopOffer = { key: 'noAds' | 'feathersSmall' | 'feathersLarge'; price: string; feathers?: number };
+
+/** In-app purchases (phase 9); unavailable in a browser or a build without store keys. */
+export type ShopApi = {
+  available: () => boolean;
+  offers: () => Promise<ShopOffer[]>;
+  /** Buys and applies a product; resolves the message to show. */
+  buy: (key: ShopOffer['key']) => Promise<'bought' | 'cancelled' | 'failed'>;
+  restore: () => Promise<boolean>;
 };
 
 export type UiDeps = {
@@ -26,6 +42,10 @@ export type UiDeps = {
   settings: SettingsStore;
   progress: ProgressStore;
   actions: GameActions;
+  wallet: WalletStore;
+  shop: ShopApi;
+  /** Can rewarded ads show (native app with ads), or are they free ("no ads" bought)? */
+  rewards: () => 'ad' | 'free' | 'none';
   toast: Toast;
   /** `?unlock`: every world and level is open (testing). */
   unlockAll: boolean;

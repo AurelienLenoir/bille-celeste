@@ -14,6 +14,9 @@ const VOLUMES: { key: VolumeKey; when: BooleanKey }[] = [
 
 const formatSensitivity = (value: number) => `×${value.toFixed(1).replace('.', t().lang === 'fr' ? ',' : '.')}`;
 
+/** Hosted on GitHub Pages with the game (public/privacy.html). */
+const PRIVACY_URL = 'https://aurelienlenoir.github.io/bille-celeste/privacy.html';
+
 type Option<T extends string> = { value: T; label: string };
 
 const Segmented = <T extends string>(props: {
@@ -147,6 +150,9 @@ export const SettingsCard = ({
           ]}
           onChange={(language) => update({ language })}
         />
+        <a class="privacy-link" href={PRIVACY_URL} target="_blank" rel="noopener">
+          {text.privacy}
+        </a>
         <button class="main" type="button" onClick={onBack}>
           {text.back}
         </button>
