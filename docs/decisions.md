@@ -2,6 +2,19 @@
 
 Journal des choix structurants (le plus récent en haut).
 
+## 2026-11-28 — Phase 6 : applications natives
+
+- **Capacitor 8** (iOS en Swift Package Manager, sans CocoaPods). Projets `ios/` et `android/` versionnés, identifiant `com.aurelienlenoir.billeceleste` (à confirmer avant le premier envoi sur un store, il est définitif ensuite).
+- **Gyroscope** : on garde l'API web `deviceorientation`. `@capacitor/motion` ne fait que l'envelopper (pas de capteur natif derrière), l'ajouter n'apporterait qu'une dépendance. La demande d'autorisation iOS existe déjà (au toucher de « Jouer en inclinant »).
+- **Vibrations natives** (`@capacitor/haptics`) : mêmes motifs que la version web, traduits en impacts légers / moyens / forts et notifications succès / alerte du Taptic Engine. `engine/haptics.ts` reçoit le vibreur natif en paramètre : le moteur n'importe toujours pas Capacitor.
+- **Sauvegarde native** (`@capacitor/preferences`) dans les apps, `localStorage` dans le navigateur, derrière la même interface.
+- **Pause** sur `appStateChange` en plus de `visibilitychange`, son suspendu en arrière-plan. **Bouton retour Android** : pause, reprise, puis retour au menu précédent (au lieu de fermer l'app).
+- **Portrait verrouillé** à trois endroits : `Info.plist`, `AndroidManifest.xml` et le plugin d'orientation. Barre d'état masquée, écran maintenu allumé pendant une partie seulement, écran de démarrage natif masqué quand le premier niveau est prêt.
+- **Icône et splash générés par le code** (`tools/art/draw-icon.js` dessiné dans Chromium par `tools/make-icons.ts`), puis déclinés par `@capacitor/assets`.
+- **Statistiques et crashs avec consentement** : réglages **version 4** (`telemetry`: `ask` / `yes` / `no`, migration testée). PostHog par son API HTTP (pas de SDK, 3 événements : début, victoire, abandon, avec temps et chutes), Sentry chargé à la demande seulement après accord. Sans clés dans le build, rien n'est proposé ni envoyé : c'est le cas aujourd'hui, les comptes restent à créer.
+- **Manifeste de confidentialité iOS** (`PrivacyInfo.xcprivacy`) : pas de pistage, données de plantage et d'usage non liées à la personne, UserDefaults (raison CA92.1).
+- **CI native** : un job Android compile l'APK de debug et le garde 14 jours en artefact ; un job macOS compile l'app iOS pour le simulateur sans signature.
+
 ## 2026-11-28 — Phase 5 : habillage
 
 - **Musique générée par le code, pas de banque libre de droits.** Le plan prévoyait de choisir des pistes avec l'utilisateur ; pour livrer la phase en autonomie et rester dans la règle « tous les assets sont générés », chaque monde a une boucle composée par `engine/music.ts` à partir de quelques réglages (`art/music.ts` : tempo, gamme, grille d'accords, graine de la mélodie, rythme de basse et de batterie). La mélodie est tirée de la graine sur les notes de l'accord, donc identique à chaque boucle. Une piste « menu » plus calme joue hors des niveaux, avec un fondu enchaîné de 1,2 s. Remplacer par de vraies pistes reste possible plus tard (un `.ogg` par monde sur le bus musique).

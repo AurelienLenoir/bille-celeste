@@ -8,7 +8,7 @@ const restrict = (patterns, message) => ({
 });
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'playwright-report', 'test-results'] },
+  { ignores: ['dist', 'node_modules', 'playwright-report', 'test-results', 'ios', 'android', 'assets'] },
   js.configs.recommended,
   ...tseslint.configs.strict,
   prettier,

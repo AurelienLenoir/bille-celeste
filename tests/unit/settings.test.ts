@@ -51,7 +51,14 @@ describe('settings migration', () => {
       sound: true,
       music: false,
     };
-    expect(migrateSettings(v1)).toEqual({ ...v1, version: 3, language: 'auto', sfxVolume: 0.8, musicVolume: 0.5 });
+    expect(migrateSettings(v1)).toEqual({
+      ...v1,
+      version: SETTINGS_VERSION,
+      language: 'auto',
+      sfxVolume: 0.8,
+      musicVolume: 0.5,
+      telemetry: 'ask',
+    });
     expect(parseStoredSettings(JSON.stringify(v1)).language).toBe('auto');
   });
   it('migrates a version-2 save to version 3 with default volumes, keeping the switches', () => {
@@ -62,6 +69,11 @@ describe('settings migration', () => {
     delete v2.sfxVolume;
     delete v2.musicVolume;
     expect(migrateSettings(v2)).toEqual({ ...DEFAULT_SETTINGS, sound: false, music: false, language: 'en' });
+  });
+  it('migrates a version-3 save to version 4: statistics are asked for, never assumed', () => {
+    const v3 = { ...DEFAULT_SETTINGS, version: 3, musicVolume: 0.2 } as Record<string, unknown>;
+    delete v3.telemetry;
+    expect(migrateSettings(v3)).toEqual({ ...DEFAULT_SETTINGS, musicVolume: 0.2, telemetry: 'ask' });
   });
   it('drops a volume out of range back to its default', () => {
     expect(migrateSettings({ ...DEFAULT_SETTINGS, musicVolume: 3 }).musicVolume).toBe(DEFAULT_SETTINGS.musicVolume);

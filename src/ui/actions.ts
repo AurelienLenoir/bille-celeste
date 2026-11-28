@@ -29,6 +29,8 @@ export type UiDeps = {
   toast: Toast;
   /** `?unlock`: every world and level is open (testing). */
   unlockAll: boolean;
+  /** This build can send anonymous statistics or crash reports (asks for consent). */
+  telemetryAvailable: boolean;
   /** `?level=id`: the title goes straight to that level. */
   directLevel?: string;
 };

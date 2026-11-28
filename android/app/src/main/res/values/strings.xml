@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Bille Céleste</string>
+    <string name="title_activity_main">Bille Céleste</string>
+    <string name="package_name">com.aurelienlenoir.billeceleste</string>
+    <string name="custom_url_scheme">com.aurelienlenoir.billeceleste</string>
+</resources>

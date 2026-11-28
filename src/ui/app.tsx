@@ -22,11 +22,32 @@ const PauseButton = ({ onClick }: { onClick: () => void }) => (
   </button>
 );
 
+/** Asked once, before anything is sent (phase 6): statistics and crash reports are opt-in. */
+const ConsentCard = ({ deps }: { deps: UiDeps }) => {
+  const text = t().consent;
+  const answer = (telemetry: 'yes' | 'no') => deps.settings.getState().update({ telemetry });
+  return (
+    <div class="overlay" id="consent">
+      <div class="card">
+        <h2>{text.title}</h2>
+        <p>{text.body}</p>
+        <button class="main" onClick={() => answer('yes')}>
+          {text.yes}
+        </button>
+        <button class="alt" onClick={() => answer('no')}>
+          {text.no}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const App = ({ deps }: { deps: UiDeps }) => {
   const { ui, actions } = deps;
   const screen = useStore(ui, (s) => s.screen);
   const settingsOpen = useStore(ui, (s) => s.settings);
   const languageSetting = useStore(deps.settings, (s) => s.settings.language);
+  const consent = useStore(deps.settings, (s) => s.settings.telemetry);
   const language = resolveLanguage(languageSetting, navigator.language);
   setLanguage(language);
 
@@ -51,7 +72,7 @@ const App = ({ deps }: { deps: UiDeps }) => {
   const current = (() => {
     switch (screen.name) {
       case 'title':
-        return <TitleScreen deps={deps} />;
+        return deps.telemetryAvailable && consent === 'ask' ? <ConsentCard deps={deps} /> : <TitleScreen deps={deps} />;
       case 'map':
         return <WorldMap deps={deps} />;
       case 'levels':
@@ -79,7 +100,13 @@ const App = ({ deps }: { deps: UiDeps }) => {
         <span class="phone" />
         <p>{t().rotate}</p>
       </div>
-      {settingsOpen && <SettingsCard store={deps.settings} onBack={() => ui.getState().openSettings(false)} />}
+      {settingsOpen && (
+        <SettingsCard
+          store={deps.settings}
+          onBack={() => ui.getState().openSettings(false)}
+          telemetry={deps.telemetryAvailable}
+        />
+      )}
     </>
   );
 };

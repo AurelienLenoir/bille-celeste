@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { parseSave, readSave, type Migration, type SaveFormat } from './save';
 
-export const SETTINGS_VERSION = 3;
+export const SETTINGS_VERSION = 4;
 
 export const CONTROL_MODES = ['tilt', 'touch'] as const;
 export type ControlMode = (typeof CONTROL_MODES)[number];
@@ -9,6 +9,10 @@ export type ControlMode = (typeof CONTROL_MODES)[number];
 /** `auto` follows the device language (French if it is French, English otherwise). */
 export const LANGUAGES = ['auto', 'fr', 'en'] as const;
 export type LanguageSetting = (typeof LANGUAGES)[number];
+
+/** Anonymous statistics and crash reports: `ask` until the player answers (phase 6). */
+export const TELEMETRY_CHOICES = ['ask', 'yes', 'no'] as const;
+export type TelemetryChoice = (typeof TELEMETRY_CHOICES)[number];
 
 export const TILT_RANGE_DEG = { min: 10, max: 35 } as const;
 export const TOUCH_SENSITIVITY = { min: 0.5, max: 2 } as const;
@@ -29,6 +33,8 @@ export const settingsSchema = z.object({
   /** Version 3: sound effect and music volumes, 0 to 1. */
   sfxVolume: z.number().min(0).max(1),
   musicVolume: z.number().min(0).max(1),
+  /** Version 4. */
+  telemetry: z.enum(TELEMETRY_CHOICES),
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
@@ -46,6 +52,7 @@ export const DEFAULT_SETTINGS: Settings = {
   language: 'auto',
   sfxVolume: 0.8,
   musicVolume: 0.5,
+  telemetry: 'ask',
 };
 
 const fieldSchemas = settingsSchema.omit({ version: true }).shape;
@@ -67,6 +74,8 @@ export const SETTINGS_MIGRATIONS: Record<number, Migration> = {
   1: (v1) => ({ ...v1, language: 'auto' }),
   /** Version 3 adds the volumes, at their defaults (the on/off switches are kept). */
   2: (v2) => ({ ...v2, sfxVolume: 0.8, musicVolume: 0.5 }),
+  /** Version 4 adds the statistics consent: nobody has answered yet. */
+  3: (v3) => ({ ...v3, telemetry: 'ask' }),
 };
 
 const SETTINGS_FORMAT: SaveFormat<Settings> = {

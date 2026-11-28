@@ -1,0 +1,57 @@
+name: Native builds
+
+# Checks that the iOS and Android projects still compile, and keeps an installable Android
+# debug APK as an artifact (unsigned for the stores: release signing needs the owner's keys).
+on:
+  push:
+    branches: [master]
+  pull_request:
+    paths:
+      ['android/**', 'ios/**', 'capacitor.config.ts', 'package.json', 'src/platform/**', '.github/workflows/native.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npm run native:sync
+      - run: ./gradlew assembleDebug --no-daemon
+        working-directory: android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bille-celeste-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
+
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run native:sync
+      - run: >
+          xcodebuild -project App.xcodeproj -scheme App -configuration Debug
+          -sdk iphonesimulator -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO build
+        working-directory: ios/App
